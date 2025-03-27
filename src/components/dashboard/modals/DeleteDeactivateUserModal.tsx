@@ -10,7 +10,7 @@ interface DeleteDeactivateUserModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  usersToDelete: string[];
+  usersToDelete?: string[];
   isDeactivate?: boolean;
 }
 
@@ -40,7 +40,7 @@ export default function DeleteDeactivateUserModal({
         </Box>
         <Typography level="body-md" sx={{ mt: 2, color: "#636B74" }}>
           <Typography component="span" sx={{ color: 'var(--joy-palette-text-primary)' }}>
-            {usersToDelete.join(", ")}
+            {usersToDelete?.join(", ")}
           </Typography>{" "}
           {isDeactivate
             ? "will lose access to their accounts but their data will remain. You can reactivate them later"

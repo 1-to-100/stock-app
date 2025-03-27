@@ -20,11 +20,15 @@ import { DotsThreeVertical as DotsThreeVertical } from "@phosphor-icons/react/di
 import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
 import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
+import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
-import UserDetailsPopover from '@/components/dashboard/smart-home/user-details-popover';
+import UserDetailsPopover from "@/components/dashboard/smart-home/user-details-popover";
+import { useState, useCallback } from "react";
+import AddEditUser from "@/components/dashboard/modals/AddEditUser";
+import Pagination from "@/components/dashboard/layout/pagination";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -33,12 +37,14 @@ const metadata = {
 interface User {
   id: number;
   name: string;
-  email: string;
+  email: string | string[];
   customer: string;
   role: string;
   persona: string;
   status: string;
   initials?: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
 }
 
 const initialUsers: User[] = [
@@ -50,6 +56,23 @@ const initialUsers: User[] = [
     role: "Customer admin",
     persona: "Education",
     status: "suspended",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Mac OS 10.15.7",
+        locationTime: "California, USA • May 08 10:40AM",
+      },
+      {
+        id: 1,
+        browserOs: "Firefox, Windows 10",
+        locationTime: "Nevada, USA • May 09 2:15PM",
+      },
+      {
+        id: 2,
+        browserOs: "Chrome, Mac OS 10.15.7",
+        locationTime: "California, USA • May 08 10:40AM",
+      },
+    ],
   },
   {
     id: 2,
@@ -59,6 +82,23 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Titles",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Firefox, Windows 11",
+        locationTime: "New York, USA • June 15 3:25PM",
+      },
+      {
+        id: 1,
+        browserOs: "Safari, iOS 16.0",
+        locationTime: "Boston, USA • June 16 9:30AM",
+      },
+      {
+        id: 2,
+        browserOs: "Chrome, Android 12",
+        locationTime: "Chicago, USA • June 17 11:45AM",
+      },
+    ],
   },
   {
     id: 3,
@@ -68,6 +108,18 @@ const initialUsers: User[] = [
     role: "Customer admin",
     persona: "Experience",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Safari, iOS 16.2",
+        locationTime: "London, UK • July 20 8:15AM",
+      },
+      {
+        id: 1,
+        browserOs: "Edge, Windows 11",
+        locationTime: "Manchester, UK • July 21 3:00PM",
+      },
+    ],
   },
   {
     id: 4,
@@ -77,6 +129,18 @@ const initialUsers: User[] = [
     role: "Customer admin",
     persona: "Responsibilities",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Edge, Windows 10",
+        locationTime: "Tokyo, Japan • August 10 11:30PM",
+      },
+      {
+        id: 1,
+        browserOs: "Chrome, Mac OS 12.0",
+        locationTime: "Osaka, Japan • August 11 10:00AM",
+      },
+    ],
   },
   {
     id: 5,
@@ -87,6 +151,23 @@ const initialUsers: User[] = [
     persona: "Customer admin",
     status: "active",
     initials: "JG",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Linux Ubuntu 20.04",
+        locationTime: "Sydney, Australia • September 05 6:45AM",
+      },
+      {
+        id: 1,
+        browserOs: "Firefox, Windows 10",
+        locationTime: "Melbourne, Australia • September 06 1:20PM",
+      },
+      {
+        id: 2,
+        browserOs: "Safari, iOS 15.5",
+        locationTime: "Brisbane, Australia • September 07 4:30PM",
+      },
+    ],
   },
   {
     id: 6,
@@ -96,6 +177,18 @@ const initialUsers: User[] = [
     role: "User",
     persona: "User",
     status: "inactive",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Opera, Mac OS 11.0",
+        locationTime: "Berlin, Germany • October 12 2:10PM",
+      },
+      {
+        id: 1,
+        browserOs: "Chrome, Android 13",
+        locationTime: "Munich, Germany • October 13 9:45AM",
+      },
+    ],
   },
   {
     id: 7,
@@ -105,6 +198,18 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Education",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Windows 10",
+        locationTime: "Paris, France • November 18 9:50AM",
+      },
+      {
+        id: 1,
+        browserOs: "Safari, Mac OS 12.1",
+        locationTime: "Lyon, France • November 19 3:15PM",
+      },
+    ],
   },
   {
     id: 8,
@@ -114,6 +219,23 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Education",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Safari, Mac OS 12.1",
+        locationTime: "Toronto, Canada • December 01 4:20PM",
+      },
+      {
+        id: 1,
+        browserOs: "Firefox, Windows 11",
+        locationTime: "Vancouver, Canada • December 02 11:00AM",
+      },
+      {
+        id: 2,
+        browserOs: "Edge, Windows 10",
+        locationTime: "Montreal, Canada • December 03 2:30PM",
+      },
+    ],
   },
   {
     id: 9,
@@ -123,6 +245,18 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Education",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Firefox, Linux Mint 21",
+        locationTime: "Stockholm, Sweden • January 10 11:15AM",
+      },
+      {
+        id: 1,
+        browserOs: "Chrome, Android 13",
+        locationTime: "Gothenburg, Sweden • January 11 5:00PM",
+      },
+    ],
   },
   {
     id: 10,
@@ -132,6 +266,18 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Experience",
     status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Android 13",
+        locationTime: "Mumbai, India • February 25 7:30PM",
+      },
+      {
+        id: 1,
+        browserOs: "Safari, iOS 16.1",
+        locationTime: "Delhi, India • February 26 10:15AM",
+      },
+    ],
   },
   {
     id: 11,
@@ -141,6 +287,23 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Experience",
     status: "inactive",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Edge, Windows 11",
+        locationTime: "São Paulo, Brazil • March 03 1:45PM",
+      },
+      {
+        id: 1,
+        browserOs: "Chrome, Mac OS 13.0",
+        locationTime: "Rio de Janeiro, Brazil • March 04 9:20AM",
+      },
+      {
+        id: 2,
+        browserOs: "Firefox, Windows 10",
+        locationTime: "Salvador, Brazil • March 05 3:50PM",
+      },
+    ],
   },
   {
     id: 12,
@@ -151,6 +314,18 @@ const initialUsers: User[] = [
     persona: "Titles",
     status: "inactive",
     initials: "JG",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Safari, iOS 15.6",
+        locationTime: "Cape Town, South Africa • April 15 9:10AM",
+      },
+      {
+        id: 1,
+        browserOs: "Chrome, Windows 11",
+        locationTime: "Johannesburg, South Africa • April 16 2:25PM",
+      },
+    ],
   },
   {
     id: 13,
@@ -160,6 +335,18 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Titles",
     status: "inactive",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Mac OS 13.0",
+        locationTime: "Moscow, Russia • May 22 5:55PM",
+      },
+      {
+        id: 1,
+        browserOs: "Firefox, Linux Ubuntu 22.04",
+        locationTime: "St. Petersburg, Russia • May 23 11:30AM",
+      },
+    ],
   },
   {
     id: 14,
@@ -170,22 +357,72 @@ const initialUsers: User[] = [
     persona: "Education",
     status: "inactive",
     initials: "JG",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Firefox, Windows 10",
+        locationTime: "Beijing, China • June 30 3:20AM",
+      },
+      {
+        id: 1,
+        browserOs: "Safari, iOS 16.2",
+        locationTime: "Shanghai, China • July 01 9:45AM",
+      },
+      {
+        id: 2,
+        browserOs: "Chrome, Android 12",
+        locationTime: "Guangzhou, China • July 02 1:15PM",
+      },
+    ],
+  },
+  {
+    id: 15,
+    name: "Leslie Alexander",
+    email: "leslie.alex@gmail.com",
+    customer: "MarketPulse",
+    role: "Customer admin",
+    persona: "Responsibilities",
+    status: "active",
+    activity: [
+      {
+        id: 0,
+        browserOs: "Chrome, Ubuntu 22.04",
+        locationTime: "Dubai, UAE • July 12 12:00PM",
+      },
+      {
+        id: 1,
+        browserOs: "Edge, Windows 11",
+        locationTime: "Abu Dhabi, UAE • July 13 4:30PM",
+      },
+    ],
   },
 ];
 
 export default function Page(): React.JSX.Element {
-  const [users, setUsers] = React.useState<User[]>(initialUsers);
-  const [selectedRows, setSelectedRows] = React.useState<number[]>([]);
-  const [hoveredRow, setHoveredRow] = React.useState<number | null>(null);
-  const [copiedEmail, setCopiedEmail] = React.useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [menuRowIndex, setMenuRowIndex] = React.useState<number | null>(null);
-  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
-  const [openDeactivateModal, setOpenDeactivateModal] = React.useState(false);
-  const [rowsToDelete, setRowsToDelete] = React.useState<number[]>([]);
-  const [isDeactivating, setIsDeactivating] = React.useState(false);
-  const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<null | HTMLElement>(null); // For popover
-  const [selectedUser, setSelectedUser] = React.useState<User | null>(null); // For selected user
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
+  const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openAddUserModal, setOpenAddUserModal] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const rowsPerPage = 5;
+  const totalPages = Math.ceil(users.length / rowsPerPage);
+ 
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -225,7 +462,7 @@ export default function Page(): React.JSX.Element {
     }
   };
 
-  const handleDeleteRow = React.useCallback((userId: number) => {
+  const handleDeleteRow = useCallback((userId: number) => {
     setRowsToDelete([userId]);
     setOpenDeleteModal(true);
   }, []);
@@ -252,6 +489,10 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
     setRowsToDelete([]);
     setOpenDeleteModal(false);
+    const newTotalPages = Math.ceil((users.length - rowsToDelete.length) / rowsPerPage);
+    if (currentPage > newTotalPages) {
+      setCurrentPage(newTotalPages || 1);
+    }
   };
 
   const confirmDeactivate = () => {
@@ -286,11 +527,15 @@ export default function Page(): React.JSX.Element {
     setMenuRowIndex(null);
   };
 
-  const handleOpenDetail = (event: React.MouseEvent<HTMLElement>, userId: number) => {
+  const handleOpenDetail = (
+    event: React.MouseEvent<HTMLElement>,
+    userId: number
+  ) => {
+    event.preventDefault();
     const user = users.find((u) => u.id === userId);
     if (user) {
       setSelectedUser(user);
-      setPopoverAnchorEl(event.currentTarget); // Use the triggering element
+      setPopoverAnchorEl(event.currentTarget);
     }
     handleMenuClose();
   };
@@ -301,8 +546,38 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleEdit = (userId: number) => {
-    console.log(`Edit user ${userId}`);
+    const user = users.find((u) => u.id === userId);
+    if (user) {
+      setUserToEdit(user);
+      setOpenEditModal(true);
+    }
     handleMenuClose();
+  };
+
+  const handleAddUser = () => {
+    setOpenAddUserModal(true);
+    handleMenuClose();
+  };
+
+  const handleSaveUser = (updatedUser: User) => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
+  };
+
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setUserToEdit(undefined);
+  };
+
+  const handleCloseAddUserModal = () => {
+    setOpenAddUserModal(false);
+    setUserToEdit(undefined);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedRows([]);
   };
 
   const usersToDelete = rowsToDelete
@@ -390,6 +665,7 @@ export default function Page(): React.JSX.Element {
             </Button>
             <Button
               variant="solid"
+              onClick={handleAddUser}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
               sx={{
                 borderRadius: "20px",
@@ -466,7 +742,12 @@ export default function Page(): React.JSX.Element {
                       spacing={1}
                       sx={{ alignItems: "center" }}
                     >
-                      {user.initials ? (
+                      {user.avatar ? (
+                        <Avatar
+                          src={user.avatar}
+                          sx={{ width: 40, height: 40 }}
+                        />
+                      ) : user.initials ? (
                         <Avatar sx={{ bgcolor: "#E0E7FF", color: "#4F46E5" }}>
                           {user.initials}
                         </Avatar>
@@ -502,7 +783,11 @@ export default function Page(): React.JSX.Element {
                       {hoveredRow === index && (
                         <IconButton
                           size="sm"
-                          onClick={() => handleCopyEmail(user.email)}
+                          onClick={() => {
+                            if (typeof user.email === "string") {
+                              handleCopyEmail(user.email);
+                            }
+                          }}
                           sx={{
                             position: "absolute",
                             right: "-30px",
@@ -569,16 +854,24 @@ export default function Page(): React.JSX.Element {
                         fontSize: "var(--joy-fontSize-sm)",
                       }}
                     >
-                      <MenuItem 
-  onMouseDown={(event) => {
-    event.preventDefault();
-    handleOpenDetail(event, user.id); // Pass the event
-  }}
->
-  <EyeIcon fontSize="var(--Icon-fontSize)" style={{ marginRight: "8px" }} />
-  Open detail
-</MenuItem>
-                      <MenuItem onClick={() => handleEdit(user.id)}>
+                      <MenuItem
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleOpenDetail(event, user.id);
+                        }}
+                      >
+                        <EyeIcon
+                          fontSize="var(--Icon-fontSize)"
+                          style={{ marginRight: "8px" }}
+                        />
+                        Open detail
+                      </MenuItem>
+                      <MenuItem
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleEdit(user.id);
+                        }}
+                      >
                         <PencilIcon
                           fontSize="var(--Icon-fontSize)"
                           style={{ marginRight: "8px" }}
@@ -597,6 +890,13 @@ export default function Page(): React.JSX.Element {
                           style={{ marginRight: "8px" }}
                         />
                         Deactivate
+                      </MenuItem>
+                      <MenuItem>
+                        <Password
+                          fontSize="var(--Icon-fontSize)"
+                          style={{ marginRight: "8px" }}
+                        />
+                        Reset password
                       </MenuItem>
                       <MenuItem
                         onMouseDown={(event) => {
@@ -619,6 +919,11 @@ export default function Page(): React.JSX.Element {
             </tbody>
           </Table>
         </Box>
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       </Stack>
 
       <DeleteDeactivateUserModal
@@ -642,6 +947,19 @@ export default function Page(): React.JSX.Element {
         anchorEl={popoverAnchorEl}
         user={selectedUser}
       />
+
+      <AddEditUser
+        open={openEditModal}
+        onClose={handleCloseEditModal}
+        user={userToEdit}
+        onSave={handleSaveUser}
+      />
+
+      <AddEditUser
+        open={openAddUserModal}
+        onClose={handleCloseAddUserModal}
+        onSave={handleSaveUser}
+      />  
     </Box>
   );
 }
