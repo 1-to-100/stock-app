@@ -14,6 +14,11 @@ declare module '@mui/joy/styles' {
   interface Palette {
     gradient: { 1: string; 2: string; 3: string; 4: string };
   }
+
+  interface PaletteBackground {
+    mainBg: string;
+    navActiveBg: string;
+  }
 }
 
 declare module '@mui/joy/Table' {

@@ -17,6 +17,11 @@ import { Storefront as StorefrontIcon } from '@phosphor-icons/react/dist/ssr/Sto
 import { Thermometer as ThermometerIcon } from '@phosphor-icons/react/dist/ssr/Thermometer';
 import { Truck as TruckIcon } from '@phosphor-icons/react/dist/ssr/Truck';
 import { Users as UsersIcon } from '@phosphor-icons/react/dist/ssr/Users';
+import { HandTap as HandTap } from '@phosphor-icons/react/dist/ssr/HandTap';
+import { UsersThree as UsersThree } from '@phosphor-icons/react/dist/ssr/UsersThree';
+import { Money as Money } from '@phosphor-icons/react/dist/ssr/Money';
+import { Files as Files } from '@phosphor-icons/react/dist/ssr/Files';
+import { Info as Info } from '@phosphor-icons/react/dist/ssr/Info';
 
 export const icons = {
   'chart-pie': ChartPieIcon,
@@ -26,6 +31,12 @@ export const icons = {
   'shopping-bag': ShoppingBagIcon,
   'shopping-cart': ShoppingCartIcon,
   'sign-out': SignOutIcon,
+  'user': UsersIcon,
+  'role': HandTap,
+  'customer': UsersThree,
+  'accounting': Money,
+  'documentation': Files,
+  'help': Info,
   buildings: BuildingsIcon,
   file: FileIcon,
   house: HouseIcon,

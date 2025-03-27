@@ -6,8 +6,10 @@ import Badge from '@mui/joy/Badge';
 import Box from '@mui/joy/Box';
 import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
+import Input from '@mui/joy/Input'; // Додаємо Input для Search
 import { Bell as BellIcon } from '@phosphor-icons/react/dist/ssr/Bell';
 import { List as ListIcon } from '@phosphor-icons/react/dist/ssr/List';
+import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'; // Іконка пошуку
 
 import type { NavItemConfig } from '@/types/nav';
 import type { User } from '@/types/user';
@@ -16,6 +18,7 @@ import { usePopover } from '@/hooks/use-popover';
 import { MobileNav } from './mobile-nav';
 import { NotificationsPopover } from './notifications-popover';
 import { UserPopover } from './user-popover/user-popover';
+import Typography from '@mui/joy/Typography';
 
 const user = {
   id: 'USR-000',
@@ -50,9 +53,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
         <Box
           sx={{
             bgcolor: 'var(--Content-background)',
-            borderBottom: '1px solid var(--joy-palette-divider)',
             borderRadius: { lg: 'var(--Content-radius) var(--Content-radius) 0 0' },
-            boxShadow: 'rgba(0, 0, 0, 0.06) 0px 12px 40px -12px',
             display: 'flex',
             flex: '1 1 auto',
             minHeight: 'var(--MainNav-height, 72px)',
@@ -70,6 +71,29 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             >
               <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
             </IconButton>
+            <Input
+              startDecorator={<SearchIcon />}
+              placeholder="Search"
+              sx={{
+                width: { xs: '100%', sm: '300px' },
+                display: { xs: 'none', sm: 'flex' },
+                bgcolor: '#F5F7FA',
+                borderRadius: '20px',
+                border: 'none',
+                '&:hover': {
+                  bgcolor: '#EDEFF2',
+                },
+                '& .MuiInput-input': {
+                  padding: '8px 0px',
+                  fontSize: '16px',
+                  color: '#636B74',
+                },
+                '& .MuiInput-startDecorator': {
+                  color: '#636B74', 
+                  marginLeft: '2px',
+                },
+              }}
+            />
           </Stack>
           <Stack
             direction="row"
@@ -95,6 +119,14 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             >
               <Avatar src={user.avatar} />
             </Badge>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography fontWeight="lg" textColor="inherit">
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography level="body-xs" textColor="neutral.500">
+                {user.email}
+              </Typography>
+            </Box>
           </Stack>
         </Box>
       </Box>
@@ -110,7 +142,11 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
         onClose={notificationsPopover.handleClose}
         open={notificationsPopover.open}
       />
-      <UserPopover anchorEl={userPopover.anchorRef.current} onClose={userPopover.handleClose} open={userPopover.open} />
+      <UserPopover 
+        anchorEl={userPopover.anchorRef.current} 
+        onClose={userPopover.handleClose} 
+        open={userPopover.open} 
+      />
     </React.Fragment>
   );
 }

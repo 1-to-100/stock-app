@@ -1,173 +1,647 @@
-import * as React from 'react';
-import type { Metadata } from 'next';
-import Box from '@mui/joy/Box';
-import Grid from '@mui/joy/Grid';
-import IconButton from '@mui/joy/IconButton';
-import Stack from '@mui/joy/Stack';
-import Tab from '@mui/joy/Tab';
-import TabList from '@mui/joy/TabList';
-import Tabs from '@mui/joy/Tabs';
-import Typography from '@mui/joy/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-import dayjs from 'dayjs';
+"use client";
 
-import { config } from '@/config';
-import { Activity } from '@/components/dashboard/smart-home/activity';
-import { Appliances } from '@/components/dashboard/smart-home/appliances';
-import { PowerUsageByDevice } from '@/components/dashboard/smart-home/power-usage-by-device';
-import { PowerUsageByRoom } from '@/components/dashboard/smart-home/power-usage-by-room';
-import { PowerUsageToday } from '@/components/dashboard/smart-home/power-usage-today';
-import { Thermostat } from '@/components/dashboard/smart-home/thermostat';
+import * as React from "react";
+import type { Metadata } from "next";
+import Box from "@mui/joy/Box";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import IconButton from "@mui/joy/IconButton";
+import Table from "@mui/joy/Table";
+import Checkbox from "@mui/joy/Checkbox";
+import Avatar from "@mui/joy/Avatar";
+import Button from "@mui/joy/Button";
+import Tooltip from "@mui/joy/Tooltip";
+import Menu from "@mui/joy/Menu";
+import MenuItem from "@mui/joy/MenuItem";
+import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
+import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { DotsThreeVertical as DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
+import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
+import { X as X } from "@phosphor-icons/react/dist/ssr/X";
+import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
+import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
+import { config } from "@/config";
+import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
+import UserDetailsPopover from '@/components/dashboard/smart-home/user-details-popover';
 
-export const metadata = { title: `Smart home | Dashboard | ${config.site.name}` } satisfies Metadata;
+const metadata = {
+  title: `User Management | Dashboard | ${config.site.name}`,
+} satisfies Metadata;
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
+  initials?: string;
+}
+
+const initialUsers: User[] = [
+  {
+    id: 1,
+    name: "Jacob Jones",
+    email: "trungkienspktnd@gmail.com",
+    customer: "StockHive",
+    role: "Customer admin",
+    persona: "Education",
+    status: "suspended",
+  },
+  {
+    id: 2,
+    name: "Albert Flores",
+    email: "nvt.isst.nute@gmail.com",
+    customer: "TradeNest",
+    role: "User",
+    persona: "Titles",
+    status: "active",
+  },
+  {
+    id: 3,
+    name: "Devon Lane",
+    email: "binhan628@gmail.com",
+    customer: "TradeNest",
+    role: "Customer admin",
+    persona: "Experience",
+    status: "active",
+  },
+  {
+    id: 4,
+    name: "Floyd Miles",
+    email: "danghoang87hl@gmail.com",
+    customer: "TradeNest",
+    role: "Customer admin",
+    persona: "Responsibilities",
+    status: "active",
+  },
+  {
+    id: 5,
+    name: "Eleanor Pena",
+    email: "binhan628@gmail.com",
+    customer: "MarketSphere",
+    role: "Customer admin",
+    persona: "Customer admin",
+    status: "active",
+    initials: "JG",
+  },
+  {
+    id: 6,
+    name: "Courtney Henry",
+    email: "tranthuy.nute@gmail.com",
+    customer: "InvestHorizon",
+    role: "User",
+    persona: "User",
+    status: "inactive",
+  },
+  {
+    id: 7,
+    name: "Annette Black",
+    email: "tranthuy.nute@gmail.com",
+    customer: "InvestHorizon",
+    role: "User",
+    persona: "Education",
+    status: "active",
+  },
+  {
+    id: 8,
+    name: "Brooklyn Simmons",
+    email: "ckctm12@gmail.com",
+    customer: "EquityVault",
+    role: "User",
+    persona: "Education",
+    status: "active",
+  },
+  {
+    id: 9,
+    name: "Kristin Watson",
+    email: "vuhaithuongnute@gmail.com",
+    customer: "StockAnchor",
+    role: "User",
+    persona: "Education",
+    status: "active",
+  },
+  {
+    id: 10,
+    name: "Theresa Webb",
+    email: "nvt.isst.nute@gmail.com",
+    customer: "EquityVault",
+    role: "User",
+    persona: "Experience",
+    status: "active",
+  },
+  {
+    id: 11,
+    name: "Jane Cooper",
+    email: "tranthuy.nute@gmail.com",
+    customer: "BullBear Hub",
+    role: "User",
+    persona: "Experience",
+    status: "inactive",
+  },
+  {
+    id: 12,
+    name: "Arlene McCoy",
+    email: "manhhackt08@gmail.com",
+    customer: "BullBear Hub",
+    role: "User",
+    persona: "Titles",
+    status: "inactive",
+    initials: "JG",
+  },
+  {
+    id: 13,
+    name: "Jerome Bell",
+    email: "vuhaithuongnute@gmail.com",
+    customer: "StockAnchor",
+    role: "User",
+    persona: "Titles",
+    status: "inactive",
+  },
+  {
+    id: 14,
+    name: "Marvin McKinney",
+    email: "binhan628@gmail.com",
+    customer: "StockAnchor",
+    role: "User",
+    persona: "Education",
+    status: "inactive",
+    initials: "JG",
+  },
+];
 
 export default function Page(): React.JSX.Element {
+  const [users, setUsers] = React.useState<User[]>(initialUsers);
+  const [selectedRows, setSelectedRows] = React.useState<number[]>([]);
+  const [hoveredRow, setHoveredRow] = React.useState<number | null>(null);
+  const [copiedEmail, setCopiedEmail] = React.useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [menuRowIndex, setMenuRowIndex] = React.useState<number | null>(null);
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [openDeactivateModal, setOpenDeactivateModal] = React.useState(false);
+  const [rowsToDelete, setRowsToDelete] = React.useState<number[]>([]);
+  const [isDeactivating, setIsDeactivating] = React.useState(false);
+  const [popoverAnchorEl, setPopoverAnchorEl] = React.useState<null | HTMLElement>(null); // For popover
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null); // For selected user
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (anchorEl && !anchorEl.contains(event.target as Node)) {
+        handleMenuClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [anchorEl]);
+
+  const handleRowCheckboxChange = (userId: number) => {
+    setSelectedRows((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleSelectAllChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.checked) {
+      setSelectedRows(users.map((user) => user.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedRows.length > 0) {
+      setRowsToDelete(selectedRows);
+      setOpenDeleteModal(true);
+    }
+  };
+
+  const handleDeleteRow = React.useCallback((userId: number) => {
+    setRowsToDelete([userId]);
+    setOpenDeleteModal(true);
+  }, []);
+
+  const handleDeactivate = (userId: number) => {
+    setRowsToDelete([userId]);
+    setIsDeactivating(true);
+    setOpenDeactivateModal(true);
+    handleMenuClose();
+  };
+
+  const handleBulkDeactivate = () => {
+    if (selectedRows.length > 0) {
+      setRowsToDelete(selectedRows);
+      setIsDeactivating(true);
+      setOpenDeactivateModal(true);
+    }
+  };
+
+  const confirmDelete = () => {
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => !rowsToDelete.includes(user.id))
+    );
+    setSelectedRows([]);
+    setRowsToDelete([]);
+    setOpenDeleteModal(false);
+  };
+
+  const confirmDeactivate = () => {
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        rowsToDelete.includes(user.id) ? { ...user, status: "inactive" } : user
+      )
+    );
+    setSelectedRows([]);
+    setRowsToDelete([]);
+    setOpenDeactivateModal(false);
+  };
+
+  const handleCopyEmail = (email: string) => {
+    navigator.clipboard.writeText(email).then(() => {
+      setCopiedEmail(email);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    });
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    index: number
+  ) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setMenuRowIndex(index);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuRowIndex(null);
+  };
+
+  const handleOpenDetail = (event: React.MouseEvent<HTMLElement>, userId: number) => {
+    const user = users.find((u) => u.id === userId);
+    if (user) {
+      setSelectedUser(user);
+      setPopoverAnchorEl(event.currentTarget); // Use the triggering element
+    }
+    handleMenuClose();
+  };
+
+  const handleClosePopover = () => {
+    setSelectedUser(null);
+    setPopoverAnchorEl(null);
+  };
+
+  const handleEdit = (userId: number) => {
+    console.log(`Edit user ${userId}`);
+    handleMenuClose();
+  };
+
+  const usersToDelete = rowsToDelete
+    .map((userId) => {
+      const user = users.find((u) => u.id === userId);
+      return user ? user.name : undefined;
+    })
+    .filter((name): name is string => name !== undefined);
+
   return (
-    <Box sx={{ p: 'var(--Content-padding)' }}>
+    <Box sx={{ p: "var(--Content-padding)" }}>
       <Stack spacing={3}>
-        <Stack direction={{ lg: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
-          <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-            <Typography fontSize={{ xs: 'xl3', lg: 'xl4' }} level="h1">
-              Smart Home
+        <Stack
+          direction={{ lg: "row" }}
+          spacing={3}
+          sx={{ alignItems: "flex-start" }}
+        >
+          <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+            <Typography fontSize={{ xs: "xl3", lg: "xl3" }} level="h1">
+              User Management
             </Typography>
           </Stack>
-          <div>
-            <Tabs size="sm" value="all" variant="custom">
-              <TabList>
-                <Tab disableIndicator value="all">
-                  All
-                </Tab>
-                <Tab disableIndicator value="bedroom">
-                  Bedroom
-                </Tab>
-                <Tab disableIndicator value="living-room">
-                  Living Room
-                </Tab>
-                <IconButton color="neutral" variant="plain">
-                  <PlusIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-                </IconButton>
-              </TabList>
-            </Tabs>
-          </div>
+
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+            {selectedRows.length > 0 ? (
+              <>
+                <Box
+                  sx={{
+                    borderRight: "1px solid #E5E7EB",
+                    display: "flex",
+                    alignItems: "center",
+                    paddingRight: "16px",
+                    gap: "12px",
+                  }}
+                >
+                  <Typography level="body-sm">
+                    {selectedRows.length} row
+                    {selectedRows.length > 1 ? "s" : ""} selected
+                  </Typography>
+                  <IconButton
+                    onClick={handleDelete}
+                    sx={{
+                      bgcolor: "#FEE2E2",
+                      color: "#EF4444",
+                      borderRadius: "50%",
+                      width: 32,
+                      height: 32,
+                      "&:hover": {
+                        bgcolor: "#FECACA",
+                      },
+                    }}
+                  >
+                    <TrashIcon fontSize="var(--Icon-fontSize)" />
+                  </IconButton>
+                  <IconButton
+                    onClick={handleBulkDeactivate}
+                    sx={{
+                      bgcolor: "var(--joy-palette-background-mainBg)",
+                      color: "#636B74",
+                      borderRadius: "50%",
+                      width: 32,
+                      height: 32,
+                    }}
+                  >
+                    <ToggleLeft fontSize="var(--Icon-fontSize)" />
+                  </IconButton>
+                </Box>
+              </>
+            ) : null}
+            <Button
+              variant="outlined"
+              startDecorator={<FunnelIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                borderColor: "#E5E7EB",
+                borderRadius: "20px",
+                bgcolor: "#FFFFFF",
+                color: "#000000",
+                padding: "8px 16px",
+                "&:hover": {
+                  bgcolor: "#F5F7FA",
+                },
+              }}
+            >
+              Filter
+            </Button>
+            <Button
+              variant="solid"
+              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                borderRadius: "20px",
+                bgcolor: "#4F46E5",
+                color: "#FFFFFF",
+                padding: "8px 16px",
+                "&:hover": {
+                  bgcolor: "#4338CA",
+                },
+              }}
+            >
+              Add user
+            </Button>
+          </Stack>
         </Stack>
-        <Grid container spacing={3}>
-          <Grid lg={8} md={6} xs={12}>
-            <Stack spacing={3}>
-              <PowerUsageToday
-                data={[
-                  { name: '12AM', v1: 506, v2: 549 },
-                  { name: '1AM', v1: 479, v2: 531 },
-                  { name: '2AM', v1: 678, v2: 504 },
-                  { name: '3AM', v1: 642, v2: 438 },
-                  { name: '4AM', v1: 523, v2: 409 },
-                  { name: '5AM', v1: 575, v2: 611 },
-                  { name: '6AM', v1: 588, v2: 518 },
-                  { name: '7AM', v1: 697, v2: 662 },
-                  { name: '8AM', v1: 615, v2: 561 },
-                  { name: '9AM', v1: 672, v2: 547 },
-                  { name: '10AM', v1: 631, v2: 521 },
-                  { name: '11AM', v1: 624, v2: 0 },
-                  { name: '12PM', v1: 437, v2: 0 },
-                  { name: '1PM', v1: 482, v2: 0 },
-                  { name: '2PM', v1: 663, v2: 0 },
-                  { name: '3PM', v1: 459, v2: 0 },
-                  { name: '4PM', v1: 460, v2: 0 },
-                  { name: '5PM', v1: 500, v2: 0 },
-                  { name: '6PM', v1: 623, v2: 0 },
-                  { name: '7PM', v1: 474, v2: 0 },
-                  { name: '8PM', v1: 400, v2: 0 },
-                  { name: '9PM', v1: 513, v2: 0 },
-                  { name: '10PM', v1: 547, v2: 0 },
-                  { name: '11PM', v1: 409, v2: 0 },
-                ]}
-              />
-              <Grid container spacing={3}>
-                <Grid sx={{ '& > *': { height: '100%' } }} xl={6} xs={12}>
-                  <PowerUsageByRoom
-                    data={[
-                      { id: 'ROOM-005', name: 'Living Room', value: 80, color: '#3CCB7F' },
-                      { id: 'ROOM-004', name: 'Kitchen', value: 50, color: '#EAC54F' },
-                      { id: 'ROOM-003', name: 'Study', value: 30, color: '#FD853A' },
-                      { id: 'ROOM-002', name: 'Washroom', value: 90, color: '#2E90FA' },
-                      { id: 'ROOM-001', name: 'Bedroom', value: 60, color: '#DD2590' },
-                    ]}
+
+        <Box sx={{ overflowX: "auto" }}>
+          <Table
+            aria-label="user management table"
+            sx={{
+              minWidth: 800,
+              border: "1px solid #E5E7EB",
+              borderRadius: "8px",
+              "& thead th": {
+                backgroundColor: "var(--joy-palette-background-mainBg)",
+                alignItems: "center",
+                verticalAlign: "middle",
+              },
+              "& th, & td": {
+                padding: "10px",
+                alignItems: "center",
+                verticalAlign: "middle",
+              },
+              "& tbody tr:hover": {
+                backgroundColor: "var(--joy-palette-background-mainBg)",
+                cursor: "pointer",
+              },
+            }}
+          >
+            <thead>
+              <tr>
+                <th style={{ width: "5%" }}>
+                  <Checkbox
+                    checked={selectedRows.length === users.length}
+                    onChange={handleSelectAllChange}
+                    sx={{ alignSelf: "center" }}
                   />
-                </Grid>
-                <Grid sx={{ '& > *': { height: '100%' } }} xl={6} xs={12}>
-                  <Activity
-                    data={[
-                      {
-                        id: 'EV-005',
-                        description: 'Activate home wake up mode.',
-                        createdAt: dayjs().subtract(5, 'minute').subtract(1, 'hour').toDate(),
-                      },
-                      {
-                        id: 'EV-004',
-                        description: '2 lights and 1 fan are switched on.',
-                        createdAt: dayjs().subtract(17, 'minute').subtract(1, 'hour').toDate(),
-                      },
-                      {
-                        id: 'EV-003',
-                        description: '1 Air Conditioner was switched on and was set to Cool mode.',
-                        createdAt: dayjs().subtract(51, 'minute').subtract(1, 'hour').toDate(),
-                      },
-                      {
-                        id: 'EV-002',
-                        description: '1 TV was switched on.',
-                        createdAt: dayjs().subtract(3, 'minute').subtract(9, 'hour').subtract(1, 'day').toDate(),
-                      },
-                      {
-                        id: 'EV-001',
-                        description: '1 Air Conditioner was turned off.',
-                        createdAt: dayjs().subtract(44, 'minute').subtract(9, 'hour').subtract(1, 'day').toDate(),
-                      },
-                    ]}
-                  />
-                </Grid>
-              </Grid>
-              <Appliances
-                appliances={[
-                  { id: 'DEV-009', name: 'Smart Lamp', type: 'smart-lamp', status: 'on', uptime: '12 hours' },
-                  { id: 'DEV-008', name: 'Smart TV', type: 'smart-tv', status: 'off', uptime: '12 hours' },
-                  { id: 'DEV-007', name: 'Air Conditioner', type: 'air-conditioner', status: 'on', uptime: '12 hours' },
-                  { id: 'DEV-006', name: 'Wifi', type: 'wifi', status: 'on', uptime: '12 hours' },
-                  { id: 'DEV-005', name: 'Smart Fans', type: 'smart-fans', status: 'on', uptime: '12 hours' },
-                  { id: 'DEV-004', name: 'Speaker', type: 'speaker', status: 'off', uptime: '12 hours' },
-                  { id: 'DEV-003', name: 'Refrigerator', type: 'refrigerator', status: 'on', uptime: '12 hours' },
-                  { id: 'DEV-002', name: 'Smart Lamp', type: 'smart-lamp', status: 'off', uptime: '12 hours' },
-                  { id: 'DEV-001', name: 'CCTV', type: 'cctv', status: 'off', uptime: '12 hours' },
-                ]}
-              />
-            </Stack>
-          </Grid>
-          <Grid lg={4} md={6} xs={12}>
-            <Stack spacing={3}>
-              <PowerUsageByDevice
-                data={[
-                  { name: 'Mon', value: 800 },
-                  { name: 'Tue', value: 970 },
-                  { name: 'Wed', value: 620 },
-                  { name: 'Thu', value: 820 },
-                  { name: 'Fri', value: 630 },
-                  { name: 'Sat', value: 100 },
-                  { name: 'Sun', value: 0 },
-                ]}
-                dataByDevice={[
-                  { id: 'DEV-008', name: 'Smart TV', type: 'smart-tv', units: 2, value: 42 },
-                  { id: 'DEV-007', name: 'Air Conditioner', type: 'air-conditioner', units: 2, value: 87 },
-                  { id: 'DEV-006', name: 'Smart Lamp', type: 'smart-lamp', units: 18, value: 25 },
-                  { id: 'DEV-005', name: 'Smart Fans', type: 'smart-fans', units: 11, value: 37 },
-                  { id: 'DEV-004', name: 'Speaker', type: 'speaker', units: 5, value: 58 },
-                  { id: 'DEV-003', name: 'CCTV', type: 'cctv', units: 9, value: 63 },
-                  { id: 'DEV-002', name: 'Refrigerator', type: 'refrigerator', units: 1, value: 13 },
-                  { id: 'DEV-001', name: 'Wifi', type: 'wifi', units: 1, value: 10 },
-                ]}
-              />
-              <Thermostat mode="Cool" status="on" temp={32} />
-            </Stack>
-          </Grid>
-        </Grid>
+                </th>
+                <th style={{ width: "20%" }}>User name</th>
+                <th style={{ width: "25%" }}>Email</th>
+                <th style={{ width: "20%" }}>Customer</th>
+                <th style={{ width: "15%" }}>Role</th>
+                <th style={{ width: "15%" }}>Persona</th>
+                <th style={{ width: "5%" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user, index) => (
+                <tr
+                  key={user.id}
+                  onMouseEnter={() => setHoveredRow(index)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  <td>
+                    <Checkbox
+                      checked={selectedRows.includes(user.id)}
+                      onChange={() => handleRowCheckboxChange(user.id)}
+                      sx={{ alignSelf: "center" }}
+                    />
+                  </td>
+                  <td>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ alignItems: "center" }}
+                    >
+                      {user.initials ? (
+                        <Avatar sx={{ bgcolor: "#E0E7FF", color: "#4F46E5" }}>
+                          {user.initials}
+                        </Avatar>
+                      ) : (
+                        <Avatar />
+                      )}
+                      <Typography>{user.name}</Typography>
+                      <Tooltip
+                        title={user.status}
+                        placement="top"
+                        sx={{ background: "#DAD8FD", color: "#3D37DD" }}
+                      >
+                        <Box
+                          sx={{
+                            bgcolor:
+                              user.status === "active"
+                                ? "#1A7D36"
+                                : user.status === "inactive"
+                                ? "#D3232F"
+                                : "#FAE17D",
+                            borderRadius: "50%",
+                            width: "10px",
+                            height: "10px",
+                            display: "inline-block",
+                          }}
+                        />
+                      </Tooltip>
+                    </Stack>
+                  </td>
+                  <td>
+                    <Box sx={{ position: "relative", display: "inline-block" }}>
+                      {user.email}
+                      {hoveredRow === index && (
+                        <IconButton
+                          size="sm"
+                          onClick={() => handleCopyEmail(user.email)}
+                          sx={{
+                            position: "absolute",
+                            right: "-30px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            bgcolor: "transparent",
+                            "&:hover": {
+                              bgcolor: "transparent",
+                            },
+                          }}
+                        >
+                          <CopyIcon fontSize="var(--Icon-fontSize)" />
+                        </IconButton>
+                      )}
+                      {copiedEmail === user.email && (
+                        <Box
+                          sx={{
+                            position: "fixed",
+                            bottom: "20px",
+                            right: "50%",
+                            bgcolor: "#DCFCE7",
+                            color: "#16A34A",
+                            padding: "4px 6px",
+                            borderRadius: "10px",
+                            fontSize: "12px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            zIndex: 1000,
+                          }}
+                        >
+                          Copied to clipboard
+                          <IconButton
+                            size="sm"
+                            onClick={() => setCopiedEmail(null)}
+                            sx={{ color: "#16A34A" }}
+                          >
+                            <X fontSize="var(--Icon-fontSize)" />
+                          </IconButton>
+                        </Box>
+                      )}
+                    </Box>
+                  </td>
+                  <td>{user.customer}</td>
+                  <td>{user.role}</td>
+                  <td>{user.persona}</td>
+                  <td>
+                    <IconButton
+                      size="sm"
+                      onClick={(event) => {
+                        handleMenuOpen(event, index);
+                      }}
+                    >
+                      <DotsThreeVertical fontSize="var(--Icon-fontSize)" />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={menuRowIndex === index && Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                      sx={{
+                        minWidth: "150px",
+                        borderRadius: "8px",
+                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                        fontSize: "var(--joy-fontSize-sm)",
+                      }}
+                    >
+                      <MenuItem 
+  onMouseDown={(event) => {
+    event.preventDefault();
+    handleOpenDetail(event, user.id); // Pass the event
+  }}
+>
+  <EyeIcon fontSize="var(--Icon-fontSize)" style={{ marginRight: "8px" }} />
+  Open detail
+</MenuItem>
+                      <MenuItem onClick={() => handleEdit(user.id)}>
+                        <PencilIcon
+                          fontSize="var(--Icon-fontSize)"
+                          style={{ marginRight: "8px" }}
+                        />
+                        Edit
+                      </MenuItem>
+                      <MenuItem
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleDeactivate(user.id);
+                          handleMenuClose();
+                        }}
+                      >
+                        <ToggleLeft
+                          fontSize="var(--Icon-fontSize)"
+                          style={{ marginRight: "8px" }}
+                        />
+                        Deactivate
+                      </MenuItem>
+                      <MenuItem
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleDeleteRow(user.id);
+                          handleMenuClose();
+                        }}
+                        sx={{ color: "#EF4444" }}
+                      >
+                        <TrashIcon
+                          fontSize="var(--Icon-fontSize)"
+                          style={{ marginRight: "8px" }}
+                        />
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Box>
       </Stack>
+
+      <DeleteDeactivateUserModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={confirmDelete}
+        usersToDelete={usersToDelete}
+      />
+
+      <DeleteDeactivateUserModal
+        open={openDeactivateModal}
+        onClose={() => setOpenDeactivateModal(false)}
+        onConfirm={confirmDeactivate}
+        usersToDelete={usersToDelete}
+        isDeactivate={true}
+      />
+
+      <UserDetailsPopover
+        open={Boolean(popoverAnchorEl)}
+        onClose={handleClosePopover}
+        anchorEl={popoverAnchorEl}
+        user={selectedUser}
+      />
     </Box>
   );
 }

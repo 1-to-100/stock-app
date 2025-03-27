@@ -36,10 +36,10 @@ export function ColorSchemeSwitch(): React.JSX.Element {
       onChange={handleToggle}
       sx={{
         borderRadius: 'var(--joy-radius-lg)',
-        '& .MuiTabList-root': { bgcolor: 'var(--joy-palette-neutral-800)' },
+        '& .MuiTabList-root': { bgcolor: 'transparent' },
         '& .MuiTab-root': {
           color: 'var(--joy-palette-neutral-400)',
-          '&.Mui-selected': { bgcolor: 'var(--joy-palette-neutral-700)', color: 'var(--joy-palette-common-white)' },
+          '&.Mui-selected': { bgcolor: 'var(--joy-palette-background-navActiveBg)', color: 'var(--joy-palette-text-primary)' },
           '&:not(&.Mui-selected):hover': {
             bgcolor: 'var(--joy-palette-neutral-700)',
             color: 'var(--joy-palette-common-white)',

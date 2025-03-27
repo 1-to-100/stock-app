@@ -18,7 +18,7 @@ export default function Layout({ children, modal }: LayoutProps): React.JSX.Elem
       <GlobalStyles
         styles={{
           '[data-joy-color-scheme="dark"]': { '--Layout-bg': 'var(--joy-palette-common-black)' },
-          '[data-joy-color-scheme="light"]': { '--Layout-bg': 'var(--joy-palette-neutral-900)' },
+          '[data-joy-color-scheme="light"]': { '--Layout-bg': 'var(--joy-palette-background-mainBg)' },
           body: {
             '--Layout-gap': '24px',
             '--MainNav-height': '72px',
@@ -29,7 +29,7 @@ export default function Layout({ children, modal }: LayoutProps): React.JSX.Elem
             '--MobileNav-zIndex': 1100,
             // When RTL is used, for some reason, Global styles are applied before default styles.
             // The !important is needed to override this behavior.
-            background: 'var(--Layout-bg) !important',
+            background: 'var(--joy-palette-background-mainBg) !important',
           },
         }}
       />
