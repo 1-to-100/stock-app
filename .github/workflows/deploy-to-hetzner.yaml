@@ -18,6 +18,6 @@ jobs:
           script: |
             cd /opt/stock-app-web
             git pull https://${{ secrets.GH_PAT }}@github.com/Huboxt/stock-app-web.git
-            docker-compose -f additional-files build 
-            docker-compose -f additional-files up -d 
+            docker-compose -f additional-files/docker-compose.yml build 
+            docker-compose -f additional-files/docker-compose.yml up -d 
             docker system prune -af
