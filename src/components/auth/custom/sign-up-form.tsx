@@ -30,14 +30,15 @@ import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
 
 interface OAuthProvider {
-  id: 'google' | 'discord';
+  id: 'google' | 'microsoft' | 'linkedin';
   name: string;
   logo: string;
 }
 
 const oAuthProviders = [
   { id: 'google', name: 'Google', logo: '/assets/logo-google.svg' },
-  { id: 'discord', name: 'Discord', logo: '/assets/logo-discord.svg' },
+  { id: 'microsoft', name: 'Microsoft', logo: '/assets/logo-microsoft.svg' },
+  { id: 'linkedin', name: 'LinkedIn', logo: '/assets/logo-linkedin.svg' },
 ] satisfies OAuthProvider[];
 
 const schema = zod.object({

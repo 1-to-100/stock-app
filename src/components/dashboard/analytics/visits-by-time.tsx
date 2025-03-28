@@ -35,7 +35,7 @@ export function VisitsByTime({ data = [] }: VisitsByTimeProps): React.JSX.Elemen
                   {row.values.map(
                     (value, colIndex): React.JSX.Element => (
                       <Box
-                        // eslint-disable-next-line react/no-array-index-key -- Expected
+                         
                         key={colIndex}
                         sx={{
                           bgcolor: getCellColor(value),

@@ -110,7 +110,7 @@ export function Reviews(): React.JSX.Element {
   );
 }
 
-export interface ReviewCardProps extends Review {}
+export type ReviewCardProps = Review
 
 function ReviewCard({ author, comment }: ReviewCardProps): React.JSX.Element {
   return (

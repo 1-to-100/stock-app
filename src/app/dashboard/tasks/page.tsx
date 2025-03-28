@@ -88,11 +88,13 @@ const tasks = [
 ] satisfies Task[];
 
 interface PageProps {
-  searchParams: { view?: 'board' | 'list' };
+  searchParams: Promise<{ view?: 'board' | 'list' }>;
 }
 
-export default function Page({ searchParams }: PageProps): React.JSX.Element {
-  const view = searchParams.view ?? 'board';
+export default async function Page({ searchParams }: PageProps) {
+
+  const params = await searchParams;
+  const view = params.view ?? 'board';
 
   return (
     <TasksProvider columns={columns} tasks={tasks}>

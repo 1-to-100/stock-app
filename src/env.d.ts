@@ -44,6 +44,7 @@ export interface Env {
 
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends Env {}
+    type ProcessEnv = Env;
   }
 }
+

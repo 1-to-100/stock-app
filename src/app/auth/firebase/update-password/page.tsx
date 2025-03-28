@@ -11,11 +11,11 @@ import { SplitLayout } from '@/components/auth/split-layout';
 export const metadata = { title: `Update password | Firebase | Auth | ${config.site.name}` } satisfies Metadata;
 
 interface PageProps {
-  searchParams: { oobCode?: string };
+  searchParams: Promise<{ oobCode?: string }>;
 }
 
-export default function Page({ searchParams }: PageProps): React.JSX.Element {
-  const { oobCode } = searchParams;
+export default async function Page({ searchParams }: PageProps) {
+  const { oobCode } = await searchParams;
 
   if (!oobCode) {
     return (

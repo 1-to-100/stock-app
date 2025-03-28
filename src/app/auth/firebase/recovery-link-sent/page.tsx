@@ -17,11 +17,11 @@ import { DynamicLogo } from '@/components/core/logo';
 export const metadata = { title: `Recovery link sent | Firebase | Auth | ${config.site.name}` } satisfies Metadata;
 
 interface PageProps {
-  searchParams: { email?: string };
+  searchParams: Promise<{ email?: string }>;
 }
 
-export default function Page({ searchParams }: PageProps): React.JSX.Element {
-  const { email } = searchParams;
+export default async function Page({ searchParams }: PageProps) {
+  const { email } = await searchParams;
 
   if (!email) {
     return (

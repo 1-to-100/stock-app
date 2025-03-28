@@ -81,11 +81,12 @@ const orders = [
 ] satisfies Order[];
 
 interface PageProps {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default function Page({ searchParams }: PageProps): React.JSX.Element {
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const page = params.page ? parseInt(params.page, 10) : 1;
   const rowsPerPage = 5;
   const paginatedOrders = applyPagination(orders, page, rowsPerPage);
 

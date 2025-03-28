@@ -91,7 +91,6 @@ interface TooltipContentProps {
 
 function TooltipContent({ active, payload }: TooltipContentProps): React.JSX.Element | null {
   if (!active) {
-    null;
   }
 
   const time = payload?.[0]?.payload.name;

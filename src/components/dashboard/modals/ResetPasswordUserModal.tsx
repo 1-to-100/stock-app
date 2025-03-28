@@ -8,7 +8,7 @@ import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
 import { X as XIcon } from "@phosphor-icons/react/dist/ssr/X";
-import { useEffect, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 
 interface ResetPasswordUserProps {
   open: boolean;
@@ -25,7 +25,9 @@ export default function ResetPasswordUserModal({
   userEmail,
   onConfirm,
 }: ResetPasswordUserProps) {
-  const emailArray = Array.isArray(userEmail) ? userEmail : [userEmail];
+  const emailArray = useMemo(() => {
+      return Array.isArray(userEmail) ? userEmail : [userEmail];
+  }, [userEmail]);
 
   const [selectedEmail, setSelectedEmail] = useState<string>(
     emailArray[0] || ""
@@ -33,7 +35,7 @@ export default function ResetPasswordUserModal({
 
   useEffect(() => {
     setSelectedEmail(emailArray[0] || "");
-  }, [userEmail]);
+  }, [emailArray]);
 
   return (
     <Modal open={open} onClose={onClose}>

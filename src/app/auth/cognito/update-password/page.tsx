@@ -11,11 +11,11 @@ import { SplitLayout } from '@/components/auth/split-layout';
 export const metadata = { title: `Update password | Cognito | Auth | ${config.site.name}` } satisfies Metadata;
 
 interface PageProps {
-  searchParams: { email?: string };
+  searchParams: Promise<{ email?: string }>;
 }
 
-export default function Page({ searchParams }: PageProps): React.JSX.Element {
-  const { email } = searchParams;
+export default async  function Page({ searchParams }: PageProps) {
+  const { email } = await searchParams;
 
   if (!email) {
     return (
