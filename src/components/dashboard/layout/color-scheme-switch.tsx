@@ -39,6 +39,7 @@ export function ColorSchemeSwitch(): React.JSX.Element {
         '& .MuiTabList-root': { bgcolor: 'transparent' },
         '& .MuiTab-root': {
           color: 'var(--joy-palette-neutral-400)',
+          borderRadius: 'var(--joy-radius-xl)',
           '&.Mui-selected': { bgcolor: 'var(--joy-palette-background-navActiveBg)', color: 'var(--joy-palette-text-primary)' },
           '&:not(&.Mui-selected):hover': {
             bgcolor: 'var(--joy-palette-neutral-700)',

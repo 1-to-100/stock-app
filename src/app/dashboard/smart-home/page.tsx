@@ -29,6 +29,7 @@ import UserDetailsPopover from "@/components/dashboard/smart-home/user-details-p
 import { useState, useCallback } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
+import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -42,7 +43,6 @@ interface User {
   role: string;
   persona: string;
   status: string;
-  initials?: string;
   avatar?: string;
   activity?: { id: number; browserOs: string; locationTime: string }[];
 }
@@ -150,7 +150,6 @@ const initialUsers: User[] = [
     role: "Customer admin",
     persona: "Customer admin",
     status: "active",
-    initials: "JG",
     activity: [
       {
         id: 0,
@@ -313,7 +312,6 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Titles",
     status: "inactive",
-    initials: "JG",
     activity: [
       {
         id: 0,
@@ -356,7 +354,6 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Education",
     status: "inactive",
-    initials: "JG",
     activity: [
       {
         id: 0,
@@ -416,12 +413,16 @@ export default function Page(): React.JSX.Element {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
+  const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+    null
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const rowsPerPage = 5;
   const totalPages = Math.ceil(users.length / rowsPerPage);
- 
+
   const startIndex = (currentPage - 1) * rowsPerPage;
 
   React.useEffect(() => {
@@ -489,7 +490,9 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
     setRowsToDelete([]);
     setOpenDeleteModal(false);
-    const newTotalPages = Math.ceil((users.length - rowsToDelete.length) / rowsPerPage);
+    const newTotalPages = Math.ceil(
+      (users.length - rowsToDelete.length) / rowsPerPage
+    );
     if (currentPage > newTotalPages) {
       setCurrentPage(newTotalPages || 1);
     }
@@ -560,9 +563,25 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleSaveUser = (updatedUser: User) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-    );
+    setUsers((prevUsers) => {
+      const userExists = prevUsers.some((user) => user.id === updatedUser.id);
+      if (userExists) {
+        return prevUsers.map((user) =>
+          user.id === updatedUser.id ? updatedUser : user
+        );
+      } else {
+        return [...prevUsers, updatedUser];
+      }
+    });
+  };
+
+  const handleResetPassword = (userId: number) => {
+    const user = users.find((u) => u.id === userId);
+    if (user) {
+      setUserToResetPassword(user);
+      setOpenResetPasswordModal(true);
+    }
+    handleMenuClose();
   };
 
   const handleCloseEditModal = () => {
@@ -693,11 +712,16 @@ export default function Page(): React.JSX.Element {
                 backgroundColor: "var(--joy-palette-background-mainBg)",
                 alignItems: "center",
                 verticalAlign: "middle",
+                "&:first-of-type": { borderTopLeftRadius: "8px" },
+                "&:last-of-type": { borderTopRightRadius: "8px" },
+                fontWeight: 600,
               },
               "& th, & td": {
                 padding: "10px",
                 alignItems: "center",
                 verticalAlign: "middle",
+                color: "var(--joy-palette-text-primary)",
+                fontWeight: 300,
               },
               "& tbody tr:hover": {
                 backgroundColor: "var(--joy-palette-background-mainBg)",
@@ -711,7 +735,13 @@ export default function Page(): React.JSX.Element {
                   <Checkbox
                     checked={selectedRows.length === users.length}
                     onChange={handleSelectAllChange}
-                    sx={{ alignSelf: "center" }}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                      padding: 0,
+                    }}
                   />
                 </th>
                 <th style={{ width: "20%" }}>User name</th>
@@ -733,7 +763,13 @@ export default function Page(): React.JSX.Element {
                     <Checkbox
                       checked={selectedRows.includes(user.id)}
                       onChange={() => handleRowCheckboxChange(user.id)}
-                      sx={{ alignSelf: "center" }}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                        padding: 0,
+                      }}
                     />
                   </td>
                   <td>
@@ -745,14 +781,10 @@ export default function Page(): React.JSX.Element {
                       {user.avatar ? (
                         <Avatar
                           src={user.avatar}
-                          sx={{ width: 40, height: 40 }}
+                          sx={{ width: 28, height: 28 }}
                         />
-                      ) : user.initials ? (
-                        <Avatar sx={{ bgcolor: "#E0E7FF", color: "#4F46E5" }}>
-                          {user.initials}
-                        </Avatar>
                       ) : (
-                        <Avatar />
+                        <Avatar sx={{ width: 28, height: 28 }} />
                       )}
                       <Typography>{user.name}</Typography>
                       <Tooltip
@@ -778,7 +810,14 @@ export default function Page(): React.JSX.Element {
                     </Stack>
                   </td>
                   <td>
-                    <Box sx={{ position: "relative", display: "inline-block" }}>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        display: "inline-block",
+                        fontWeight: 400,
+                        color: "var(--joy-palette-text-secondary)",
+                      }}
+                    >
                       {user.email}
                       {hoveredRow === index && (
                         <IconButton
@@ -807,7 +846,8 @@ export default function Page(): React.JSX.Element {
                           sx={{
                             position: "fixed",
                             bottom: "20px",
-                            right: "50%",
+                            left: "50%",
+                            transform: "translateX(-50%)",
                             bgcolor: "#DCFCE7",
                             color: "#16A34A",
                             padding: "4px 6px",
@@ -831,9 +871,20 @@ export default function Page(): React.JSX.Element {
                       )}
                     </Box>
                   </td>
-                  <td>{user.customer}</td>
-                  <td>{user.role}</td>
-                  <td>{user.persona}</td>
+                  <td
+                    style={{
+                      fontWeight: 400,
+                      color: "var(--joy-palette-text-secondary)",
+                    }}
+                  >
+                    {user.customer}
+                  </td>
+                  <td style={{ color: "var(--joy-palette-text-secondary)" }}>
+                    {user.role}
+                  </td>
+                  <td style={{ color: "var(--joy-palette-text-secondary)" }}>
+                    {user.persona}
+                  </td>
                   <td>
                     <IconButton
                       size="sm"
@@ -841,7 +892,11 @@ export default function Page(): React.JSX.Element {
                         handleMenuOpen(event, index);
                       }}
                     >
-                      <DotsThreeVertical fontSize="var(--Icon-fontSize)" />
+                      <DotsThreeVertical
+                        weight="bold"
+                        size={22}
+                        color="var(--joy-palette-text-secondary)"
+                      />
                     </IconButton>
                     <Menu
                       anchorEl={anchorEl}
@@ -891,7 +946,12 @@ export default function Page(): React.JSX.Element {
                         />
                         Deactivate
                       </MenuItem>
-                      <MenuItem>
+                      <MenuItem
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          handleResetPassword(user.id);
+                        }}
+                      >
                         <Password
                           fontSize="var(--Icon-fontSize)"
                           style={{ marginRight: "8px" }}
@@ -959,7 +1019,17 @@ export default function Page(): React.JSX.Element {
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
         onSave={handleSaveUser}
-      />  
+      />
+
+      <ResetPasswordUser
+        open={openResetPasswordModal}
+        onClose={() => setOpenResetPasswordModal(false)}
+        userName={userToResetPassword?.name || ""}
+        userEmail={userToResetPassword?.email || ""}
+        onConfirm={(selectedEmail) => {
+          console.log(`Resetting password for ${selectedEmail}`);
+        }}
+      />
     </Box>
   );
 }

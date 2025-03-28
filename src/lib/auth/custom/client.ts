@@ -24,7 +24,7 @@ export interface SignUpParams {
 }
 
 export interface SignInWithOAuthParams {
-  provider: 'google' | 'discord';
+  provider: 'google' | 'microsoft' | 'linkedin';
 }
 
 export interface SignInWithPasswordParams {

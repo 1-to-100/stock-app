@@ -32,14 +32,15 @@ import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
 
 interface OAuthProvider {
-  id: 'google' | 'discord';
+  id: 'google' | 'microsoft' | 'linkedin';
   name: string;
   logo: string;
 }
 
 const oAuthProviders = [
   { id: 'google', name: 'Google', logo: '/assets/logo-google.svg' },
-  { id: 'discord', name: 'Discord', logo: '/assets/logo-discord.svg' },
+  { id: 'microsoft', name: 'Microsoft', logo: '/assets/logo-microsoft.svg' },
+  { id: 'linkedin', name: 'LinkedIn', logo: '/assets/logo-linkedin.svg' },
 ] satisfies OAuthProvider[];
 
 const schema = zod.object({
@@ -106,13 +107,14 @@ export function SignInForm(): React.JSX.Element {
   );
 
   return (
-    <Stack spacing={5}>
+    <Stack spacing={2}>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-          <DynamicLogo colorDark="light" colorLight="dark" height={32} width={154} />
+          <DynamicLogo colorDark="light" colorLight="dark" height={24} width={150} />
         </Box>
       </Box>
-      <Tabs value="sign-in" variant="custom">
+      <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}  >Welcome to StockApp <br /> admin panel</Box>
+      {/* <Tabs value="sign-in" variant="custom">
         <TabList>
           <Tab component={RouterLink} href={paths.auth.custom.signIn} value="sign-in">
             Sign In
@@ -121,7 +123,7 @@ export function SignInForm(): React.JSX.Element {
             Create Account
           </Tab>
         </TabList>
-      </Tabs>
+      </Tabs> */}
       <Stack spacing={3}>
         <Stack spacing={2}>
           {oAuthProviders.map(
@@ -185,7 +187,7 @@ export function SignInForm(): React.JSX.Element {
               )}
             />
             <div>
-              <Link component={RouterLink} href={paths.auth.custom.resetPassword}>
+              <Link component={RouterLink} href={paths.auth.custom.resetPassword} fontSize={'sm'} fontWeight="sm" marginBottom={2}>
                 Forgot password?
               </Link>
             </div>

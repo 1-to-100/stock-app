@@ -27,7 +27,6 @@ interface User {
   role: string;
   persona: string;
   status: string;
-  initials?: string;
   avatar?: string;
   activity?: { id: number; browserOs: string; locationTime: string }[];
 }
@@ -184,7 +183,7 @@ export default function AddEditUser({
                 {avatarPreview ? (
                   <Avatar
                     src={avatarPreview}
-                    sx={{ width: 48, height: 48, borderRadius: "50%" }}
+                    sx={{ width: 64, height: 64, borderRadius: "50%" }}
                   />
                 ) : (
                   <IconButton

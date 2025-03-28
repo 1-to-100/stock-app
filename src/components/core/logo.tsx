@@ -19,7 +19,7 @@ export interface LogoProps {
 }
 
 export function Logo({ color = 'dark', height = HEIGHT, width = WIDTH }: LogoProps): React.JSX.Element {
-  const url = color === 'light' ? '/assets/logo.svg' : '/assets/logo--dark.svg';
+  const url = color === 'light' ? '/assets/logo.svg' : '/assets/logo.svg';
 
   return <Image alt="logo" height={height} src={url} width={width} />;
 }

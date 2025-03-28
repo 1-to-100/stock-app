@@ -217,7 +217,7 @@ function renderNavItems({
   );
 
   return (
-    <List data-depth={depth} sx={{ "--List-gap": "4px", "--List-padding": 0 }}>
+    <List data-depth={depth} sx={{ "--List-gap": "8px", "--List-padding": 0 }}>
       {children}
     </List>
   );
@@ -291,7 +291,7 @@ function NavItem({
             color: "var(--NavItem-color)",
             cursor: "pointer",
             display: "flex",
-            gap: 1,
+            gap: 2,
             p: "12px",
             textDecoration: "none",
             ...(disabled && {
@@ -302,7 +302,7 @@ function NavItem({
             ...(active && {
               bgcolor: "var(--NavItem-active-background)",
               borderRadius: "30px",
-              color: "var(--NavItem-active-color)",
+              color: "var(--joy-palette-text-primary)",
             }),
             ...(open && { color: "var(--NavItem-open-color)" }),
             // '&:hover': {
@@ -325,7 +325,7 @@ function NavItem({
                     : "var(--NavItem-text-primary)"
                 }
                 fontSize="var(--joy-fontSize-xl)"
-                weight={forceOpen || active ? "fill" : "bold"}
+                weight={forceOpen || active ? "regular" : "thin"}
               />
             </Box>
           ) : null}
@@ -333,7 +333,7 @@ function NavItem({
             <Typography
               component="span"
               fontSize="16px"
-              fontWeight="md"
+              fontWeight="400"
               textColor="inherit"
             >
               {title}

@@ -66,7 +66,7 @@ export function colorSchemes(config: Config): Partial<Record<ColorScheme, ColorS
         primary: { ...primary },
         text: {
           primary: '#0B0D0E',
-          secondary: 'var(--joy-palette-neutral-700)',
+          secondary: '#636B74',
           tertiary: 'var(--joy-palette-neutral-500)',
         },
         warning: { ...metalicOrange },

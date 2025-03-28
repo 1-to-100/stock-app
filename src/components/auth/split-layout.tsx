@@ -17,11 +17,14 @@ export function SplitLayout({ children }: SplitLayoutProps): React.JSX.Element {
       <GlobalStyles
         styles={{
           body: {
-            // When RTL is used, for some reason, Global styles are applied before default styles.
-            // The !important is needed to override this behavior.
-            background: 'var(--joy-palette-neutral-950) !important',
+            backgroundColor: 'var(--joy-palette-neutral-950) !important',
+            backgroundImage: 'url("/assets/sign-in-bg.png")',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
           },
         }}
+        
       />
       <Box
         component="main"
@@ -55,10 +58,10 @@ export function SplitLayout({ children }: SplitLayoutProps): React.JSX.Element {
               p: 3,
             }}
           >
-            <Box sx={{ maxWidth: '420px', width: '100%' }}>{children}</Box>
+            <Box sx={{ maxWidth: '400px', width: '100%' }}>{children}</Box>
           </Box>
         </Box>
-        <Box
+        {/* <Box
           sx={{
             alignItems: 'center',
             color: 'var(--joy-palette-common-white)',
@@ -144,7 +147,7 @@ export function SplitLayout({ children }: SplitLayoutProps): React.JSX.Element {
               </Box>
             </Box>
           </Stack>
-        </Box>
+        </Box> */}
       </Box>
     </React.Fragment>
   );
