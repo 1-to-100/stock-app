@@ -1,0 +1,23 @@
+name: deploy-hetzner
+on: 
+  push:
+    branches: [ main ]
+env: 
+  CI: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:      
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST_PROD }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /opt/stock-app-web
+            git pull https://${{ secrets.GH_PAT }}@github.com/Huboxt/stock-app-web.git
+            docker-compose -f additional-files build 
+            docker-compose -f additional-files up -d 
+            docker system prune -af
