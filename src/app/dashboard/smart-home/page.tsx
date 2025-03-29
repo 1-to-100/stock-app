@@ -673,17 +673,9 @@ export default function Page(): React.JSX.Element {
             </Button>
             <Button
               variant="solid"
+              color="primary"
               onClick={handleAddUser}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-              sx={{
-                borderRadius: "20px",
-                bgcolor: "#4F46E5",
-                color: "#FFFFFF",
-                padding: "8px 16px",
-                "&:hover": {
-                  bgcolor: "#4338CA",
-                },
-              }}
             >
               Add user
             </Button>
@@ -723,6 +715,7 @@ export default function Page(): React.JSX.Element {
                 <th style={{ width: "5%" }}>
                   <Checkbox
                     checked={selectedRows.length === users.length}
+                    color="primary"
                     onChange={handleSelectAllChange}
                     sx={{
                       display: "flex",
