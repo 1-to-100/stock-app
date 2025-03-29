@@ -18,18 +18,8 @@ import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import { Box } from "@mui/joy";
+import { User } from "@/types/user";
 
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 interface AddEditUserProps {
   open: boolean;

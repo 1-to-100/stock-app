@@ -30,22 +30,11 @@ import { useState, useCallback } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
+import type { User } from "@/types/user";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
-
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 const initialUsers: User[] = [
   {
@@ -1006,6 +995,7 @@ export default function Page(): React.JSX.Element {
         onClose={handleClosePopover}
         anchorEl={popoverAnchorEl}
         user={selectedUser}
+        onSave={handleSaveUser}
       />
 
       <AddEditUser

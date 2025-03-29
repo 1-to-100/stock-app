@@ -1,8 +1,13 @@
 export interface User {
-  id: string;
-  name?: string;
+  id: number;
+  name: string;
+  email: string | string[];
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
   avatar?: string;
-  email?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
 
   [key: string]: unknown;
 }
