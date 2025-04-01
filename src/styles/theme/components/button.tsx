@@ -3,13 +3,28 @@ import type { Components, Theme } from '@mui/joy/styles';
 export const JoyButton = {
   styleOverrides: {
     root: ({ ownerState }) => ({
-      borderRadius: 'var(--joy-radius-md)',
-      ...(ownerState.variant === 'outlined' && { boxShadow: 'var(--joy-shadow-xs)' }),
-      ...(ownerState.variant === 'solid' &&
-        ownerState.color === 'neutral' && {
-          '--variant-solidBg': 'var(--joy-palette-neutral-900)',
-          '--variant-solidHoverBg': 'var(--joy-palette-neutral-700)',
-        }),
+      borderRadius: '20px',
+      padding: '8px 16px',
+      fontSize: '16px',
+      fontWeight: 600,
+      color: '#FFFFFF',
+      transition: 'all 0.2s ease-in-out',
+
+      ...(ownerState.variant === 'solid' && ownerState.color === 'primary' && {
+        '--variant-solidBg': 'linear-gradient(120deg, #282490 0%, #3F4DCF 100%)',
+        '--variant-solidHoverBg': 'linear-gradient(120deg, #1E1A6F 0%, #3439B0 100%)', 
+        boxShadow: '0 3px 6px rgba(0,102,204,0.2)',
+      
+        background: 'var(--variant-solidBg)',
+
+        '&:hover': {
+          background: 'var(--variant-solidHoverBg)',
+        },
+
+        '&:active': {
+          transform: 'scale(0.98)',
+        },
+      }),
     }),
   },
 } satisfies Components<Theme>['JoyButton'];

@@ -26,10 +26,12 @@ import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
 import UserDetailsPopover from "@/components/dashboard/smart-home/user-details-popover";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
+import UserManagementFilter from "@/components/dashboard/smart-home/user-management-filter";
+import { Popper } from "@mui/base/Popper";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -397,6 +399,8 @@ const initialUsers: User[] = [
 
 export default function Page(): React.JSX.Element {
   const [users, setUsers] = useState<User[]>(initialUsers);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(initialUsers);
+  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -417,13 +421,17 @@ export default function Page(): React.JSX.Element {
   const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
     null
   );
-
   const [currentPage, setCurrentPage] = useState(1);
 
-  const rowsPerPage = 5;
-  const totalPages = Math.ceil(users.length / rowsPerPage);
-
+  const rowsPerPage = 10;
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
+
+  useEffect(() => {
+    if (!filtersApplied) {
+      setFilteredUsers(users);
+    }
+  }, [users, filtersApplied]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -450,7 +458,7 @@ export default function Page(): React.JSX.Element {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
-      setSelectedRows(users.map((user) => user.id));
+      setSelectedRows(filteredUsers.map((user) => user.id));
     } else {
       setSelectedRows([]);
     }
@@ -487,14 +495,21 @@ export default function Page(): React.JSX.Element {
     setUsers((prevUsers) =>
       prevUsers.filter((user) => !rowsToDelete.includes(user.id))
     );
+    if (filtersApplied) {
+      setFilteredUsers((prevFiltered) =>
+        prevFiltered.filter((user) => !rowsToDelete.includes(user.id))
+      );
+    }
     setSelectedRows([]);
     setRowsToDelete([]);
     setOpenDeleteModal(false);
-    const newTotalPages = Math.ceil(
-      (users.length - rowsToDelete.length) / rowsPerPage
-    );
-    if (currentPage > newTotalPages) {
-      setCurrentPage(newTotalPages || 1);
+    if (filtersApplied) {
+      const newTotalPages = Math.ceil(
+        (filteredUsers.length - rowsToDelete.length) / rowsPerPage
+      );
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages || 1);
+      }
     }
   };
 
@@ -504,6 +519,15 @@ export default function Page(): React.JSX.Element {
         rowsToDelete.includes(user.id) ? { ...user, status: "inactive" } : user
       )
     );
+    if (filtersApplied) {
+      setFilteredUsers((prevFiltered) =>
+        prevFiltered.map((user) =>
+          rowsToDelete.includes(user.id)
+            ? { ...user, status: "inactive" }
+            : user
+        )
+      );
+    }
     setSelectedRows([]);
     setRowsToDelete([]);
     setOpenDeactivateModal(false);
@@ -535,7 +559,7 @@ export default function Page(): React.JSX.Element {
     userId: number
   ) => {
     event.preventDefault();
-    const user = users.find((u) => u.id === userId);
+    const user = filteredUsers.find((u) => u.id === userId);
     if (user) {
       setSelectedUser(user);
       setPopoverAnchorEl(event.currentTarget);
@@ -549,7 +573,7 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleEdit = (userId: number) => {
-    const user = users.find((u) => u.id === userId);
+    const user = filteredUsers.find((u) => u.id === userId);
     if (user) {
       setUserToEdit(user);
       setOpenEditModal(true);
@@ -573,10 +597,24 @@ export default function Page(): React.JSX.Element {
         return [...prevUsers, updatedUser];
       }
     });
+    if (filtersApplied) {
+      setFilteredUsers((prevFiltered) => {
+        const userExists = prevFiltered.some(
+          (user) => user.id === updatedUser.id
+        );
+        if (userExists) {
+          return prevFiltered.map((user) =>
+            user.id === updatedUser.id ? updatedUser : user
+          );
+        } else {
+          return prevFiltered;
+        }
+      });
+    }
   };
 
   const handleResetPassword = (userId: number) => {
-    const user = users.find((u) => u.id === userId);
+    const user = filteredUsers.find((u) => u.id === userId);
     if (user) {
       setUserToResetPassword(user);
       setOpenResetPasswordModal(true);
@@ -599,9 +637,15 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
   };
 
+  const handleFilter = (filtered: User[], filtersApplied: boolean) => {
+    setFiltersApplied(filtersApplied);
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  };
+
   const usersToDelete = rowsToDelete
     .map((userId) => {
-      const user = users.find((u) => u.id === userId);
+      const user = filteredUsers.find((u) => u.id === userId);
       return user ? user.name : undefined;
     })
     .filter((name): name is string => name !== undefined);
@@ -666,35 +710,12 @@ export default function Page(): React.JSX.Element {
                 </Box>
               </>
             ) : null}
-            <Button
-              variant="outlined"
-              startDecorator={<FunnelIcon fontSize="var(--Icon-fontSize)" />}
-              sx={{
-                borderColor: "#E5E7EB",
-                borderRadius: "20px",
-                bgcolor: "#FFFFFF",
-                color: "#000000",
-                padding: "8px 16px",
-                "&:hover": {
-                  bgcolor: "#F5F7FA",
-                },
-              }}
-            >
-              Filter
-            </Button>
+            <UserManagementFilter users={users} onFilter={handleFilter} />
             <Button
               variant="solid"
+              color="primary"
               onClick={handleAddUser}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-              sx={{
-                borderRadius: "20px",
-                bgcolor: "#4F46E5",
-                color: "#FFFFFF",
-                padding: "8px 16px",
-                "&:hover": {
-                  bgcolor: "#4338CA",
-                },
-              }}
             >
               Add user
             </Button>
@@ -733,7 +754,7 @@ export default function Page(): React.JSX.Element {
               <tr>
                 <th style={{ width: "5%" }}>
                   <Checkbox
-                    checked={selectedRows.length === users.length}
+                    checked={selectedRows.length === filteredUsers.length}
                     onChange={handleSelectAllChange}
                     sx={{
                       display: "flex",
@@ -753,7 +774,10 @@ export default function Page(): React.JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
+              {(filtersApplied
+                ? filteredUsers.slice(startIndex, startIndex + rowsPerPage)
+                : filteredUsers
+              ).map((user, index) => (
                 <tr
                   key={user.id}
                   onMouseEnter={() => setHoveredRow(index)}
@@ -790,7 +814,11 @@ export default function Page(): React.JSX.Element {
                       <Tooltip
                         title={user.status}
                         placement="top"
-                        sx={{ background: "#DAD8FD", color: "#3D37DD" }}
+                        sx={{
+                          background: "#DAD8FD",
+                          color: "#3D37DD",
+                          textTransform: "capitalize",
+                        }}
                       >
                         <Box
                           sx={{
@@ -898,81 +926,131 @@ export default function Page(): React.JSX.Element {
                         color="var(--joy-palette-text-secondary)"
                       />
                     </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
+                    <Popper
                       open={menuRowIndex === index && Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                      sx={{
+                      anchorEl={anchorEl}
+                      placement="bottom-start"
+                      style={{
                         minWidth: "150px",
                         borderRadius: "8px",
                         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        fontSize: "var(--joy-fontSize-sm)",
+                        backgroundColor: "white",
+                        zIndex: 1300,
                       }}
                     >
-                      <MenuItem
+                      <Box
                         onMouseDown={(event) => {
                           event.preventDefault();
                           handleOpenDetail(event, user.id);
                         }}
+                        sx={{
+                          padding: "8px 16px",
+                          fontSize: "16px",
+                          fontWeight: "400",
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          color: "var(--joy-palette-text-primary)",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                        }}
                       >
                         <EyeIcon
-                          fontSize="var(--Icon-fontSize)"
+                          fontSize="20px"
                           style={{ marginRight: "8px" }}
                         />
                         Open detail
-                      </MenuItem>
-                      <MenuItem
+                      </Box>
+                      <Box
                         onMouseDown={(event) => {
                           event.preventDefault();
                           handleEdit(user.id);
                         }}
+                        sx={{
+                          padding: "8px 16px",
+                          fontSize: "16px",
+                          fontWeight: "400",
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          color: "var(--joy-palette-text-primary)",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                        }}
                       >
                         <PencilIcon
-                          fontSize="var(--Icon-fontSize)"
+                          fontSize="20px"
                           style={{ marginRight: "8px" }}
                         />
                         Edit
-                      </MenuItem>
-                      <MenuItem
+                      </Box>
+                      <Box
                         onMouseDown={(event) => {
                           event.preventDefault();
                           handleDeactivate(user.id);
                           handleMenuClose();
                         }}
+                        sx={{
+                          padding: "8px 16px",
+                          fontSize: "16px",
+                          fontWeight: "400",
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          color: "var(--joy-palette-text-primary)",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                        }}
                       >
                         <ToggleLeft
-                          fontSize="var(--Icon-fontSize)"
+                          fontSize="20px"
                           style={{ marginRight: "8px" }}
                         />
                         Deactivate
-                      </MenuItem>
-                      <MenuItem
+                      </Box>
+                      <Box
                         onMouseDown={(event) => {
                           event.preventDefault();
                           handleResetPassword(user.id);
                         }}
+                        sx={{
+                          padding: "8px 16px",
+                          fontSize: "16px",
+                          fontWeight: "400",
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          color: "var(--joy-palette-text-primary)",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                        }}
                       >
                         <Password
-                          fontSize="var(--Icon-fontSize)"
+                          fontSize="20px"
                           style={{ marginRight: "8px" }}
                         />
                         Reset password
-                      </MenuItem>
-                      <MenuItem
+                      </Box>
+                      <Box
                         onMouseDown={(event) => {
                           event.preventDefault();
                           handleDeleteRow(user.id);
                           handleMenuClose();
                         }}
-                        sx={{ color: "#EF4444" }}
+                        sx={{
+                          padding: "8px 16px",
+                          fontSize: "16px",
+                          fontWeight: "400",
+                          display: "flex",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          color: "#EF4444",
+                          "&:hover": { backgroundColor: "#f5f5f5" },
+                        }}
                       >
                         <TrashIcon
-                          fontSize="var(--Icon-fontSize)"
+                          fontSize="20px"
                           style={{ marginRight: "8px" }}
                         />
                         Delete
-                      </MenuItem>
-                    </Menu>
+                      </Box>
+                    </Popper>
                   </td>
                 </tr>
               ))}
@@ -1006,6 +1084,7 @@ export default function Page(): React.JSX.Element {
         onClose={handleClosePopover}
         anchorEl={popoverAnchorEl}
         user={selectedUser}
+        onSave={handleSaveUser}
       />
 
       <AddEditUser

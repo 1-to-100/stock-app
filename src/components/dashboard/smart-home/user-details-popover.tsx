@@ -18,8 +18,9 @@ import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import DeleteDeactivateUserModal from "../modals/DeleteDeactivateUserModal";
 import ResetPasswordUserModal from "../modals/ResetPasswordUserModal";
-import SuspendUserModal from "../modals/SuspendUserModal"; 
+import SuspendUserModal from "../modals/SuspendUserModal";
 import { useState } from "react";
+import AddEditUser from "../modals/AddEditUser";
 
 interface User {
   id: number;
@@ -29,18 +30,13 @@ interface User {
   role: string;
   persona: string;
   status: string;
-  initials?: string;
   avatar?: string;
-  activity?: Array<{
-    id: number;
-    browserOs: string;
-    locationTime: string;
-  }>;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
 }
-
 interface UserDetailsPopoverProps {
   open: boolean;
   onClose: () => void;
+  onSave: (updatedUser: User) => void;
   anchorEl: HTMLElement | null;
   user: User | null;
 }
@@ -49,6 +45,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   open,
   onClose,
   anchorEl,
+  onSave,
   user,
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -56,6 +53,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
   const [openSuspendModal, setOpenSuspendModal] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
+  const [openEditModal, setOpenEditModal] = useState(false);
 
   if (!open || !anchorEl || !user) return null;
 
@@ -78,9 +77,17 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     setMenuAnchorEl(null);
   };
 
-  const handleEdit = () => {
-    console.log(`Edit user ${user.id}`);
+  const handleEdit = (user: User) => {
+    if (user) {
+      setUserToEdit(user);
+      setOpenEditModal(true);
+    }
     handleMenuClose();
+  };
+
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setUserToEdit(undefined);
   };
 
   const handleDeactivate = () => {
@@ -219,7 +226,12 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               zIndex: 1301,
             }}
           >
-            <MenuItem onClick={handleEdit}>
+            <MenuItem
+              onMouseDown={(event) => {
+                event.preventDefault();
+                handleEdit(user);
+              }}
+            >
               <PencilIcon
                 fontSize="var(--Icon-fontSize)"
                 style={{ marginRight: "8px" }}
@@ -484,8 +496,19 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         onClose={() => setOpenSuspendModal(false)}
         userName={user.name}
         onConfirm={(reason, customReason) => {
-          console.log(`Suspending user for reason: ${reason}${customReason ? `, details: ${customReason}` : ""}`);
+          console.log(
+            `Suspending user for reason: ${reason}${
+              customReason ? `, details: ${customReason}` : ""
+            }`
+          );
         }}
+      />
+
+      <AddEditUser
+        open={openEditModal}
+        onClose={handleCloseEditModal}
+        user={userToEdit}
+        onSave={onSave}
       />
     </>
   );
