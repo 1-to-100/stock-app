@@ -22,8 +22,17 @@ import SuspendUserModal from "../modals/SuspendUserModal";
 import { useState } from "react";
 import AddEditUser from "../modals/AddEditUser";
 
-import type { User } from "/Users/oleksandrromanov/Work/stock-app/src/types/user";
-
+interface User {
+  id: number;
+  name: string;
+  email: string | string[];
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
+}
 interface UserDetailsPopoverProps {
   open: boolean;
   onClose: () => void;

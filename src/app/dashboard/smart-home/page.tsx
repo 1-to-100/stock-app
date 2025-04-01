@@ -30,13 +30,24 @@ import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
-import type { User } from "@/types/user";
 import UserManagementFilter from "@/components/dashboard/smart-home/user-management-filter";
 import { Popper } from "@mui/base/Popper";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
+
+interface User {
+  id: number;
+  name: string;
+  email: string | string[];
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
+}
 
 const initialUsers: User[] = [
   {

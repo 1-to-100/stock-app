@@ -10,12 +10,23 @@ import Button from "@mui/joy/Button";
 import Checkbox from "@mui/joy/Checkbox";
 import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
-import type { User } from "@/types/user";
 
 interface UserManagementFilterProps {
   users: User[];
   onFilter: (filteredUsers: User[], filtersApplied: boolean) => void;
 }
+
+interface User {
+    id: number;
+    name: string;
+    email: string | string[];
+    customer: string;
+    role: string;
+    persona: string;
+    status: string;
+    avatar?: string;
+    activity?: { id: number; browserOs: string; locationTime: string }[];
+  }
 
 const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
   users,
