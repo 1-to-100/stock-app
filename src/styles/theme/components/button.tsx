@@ -25,6 +25,24 @@ export const JoyButton = {
           transform: 'scale(0.98)',
         },
       }),
+
+      ...(ownerState.color === 'neutral' && {
+        backgroundColor: '#646872',
+        border: '1px solid #E5E7EB',
+        padding: '2px 10px',
+  
+        '&:hover': {
+          backgroundColor: '#646872',
+        },
+      }),
+  
+      ...(ownerState.color === 'danger' && {
+        backgroundColor: '#D3232F',
+        padding: '2px 10px',
+        '&:hover': {
+          backgroundColor: '#DC2626',
+        },
+      }),
     }),
   },
 } satisfies Components<Theme>['JoyButton'];

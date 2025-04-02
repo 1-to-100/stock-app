@@ -7,20 +7,20 @@ import Stack from "@mui/joy/Stack";
 import Box from "@mui/joy/Box";
 import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
-import Menu from "@mui/joy/Menu";
-import MenuItem from "@mui/joy/MenuItem";
 import { X as XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { DotsThreeVertical as DotsIcon } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
-import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
+import { Warning as Warning } from "@phosphor-icons/react/dist/ssr/Warning";
 import DeleteDeactivateUserModal from "../modals/DeleteDeactivateUserModal";
 import ResetPasswordUserModal from "../modals/ResetPasswordUserModal";
 import SuspendUserModal from "../modals/SuspendUserModal";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import AddEditUser from "../modals/AddEditUser";
+import { Popper } from "@mui/base/Popper";
+import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 
 interface User {
   id: number;
@@ -55,6 +55,30 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const [openSuspendModal, setOpenSuspendModal] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
   const [openEditModal, setOpenEditModal] = useState(false);
+  const popperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popperRef.current &&
+        !popperRef.current.contains(event.target as Node) &&
+        menuAnchorEl &&
+        !menuAnchorEl.contains(event.target as Node)
+      ) {
+        handleMenuClose();
+      }
+    };
+
+    if (menuAnchorEl) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      if (menuAnchorEl) {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
+    };
+  }, [menuAnchorEl]);
 
   if (!open || !anchorEl || !user) return null;
 
@@ -110,6 +134,22 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     handleMenuClose();
   };
 
+  const menuItemStyle = {
+    padding: "8px 16px",
+    fontSize: "16px",
+    fontWeight: "400",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    color: "var(--joy-palette-text-primary)",
+    "&:hover": { backgroundColor: "#f5f5f5" },
+  };
+
+  const iconStyle = {
+    marginRight: "14px",
+    color: "var(--joy-palette-text-primary)",
+  };
+
   return (
     <>
       <Sheet
@@ -117,7 +157,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
           position: "fixed",
           top: "20.3%",
           right: "1.5%",
-          width: "400px",
+          width: "500px",
           borderRadius: "8px",
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
           overflow: "hidden",
@@ -147,148 +187,196 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <Button
                 variant="plain"
                 size="sm"
-                sx={{ color: "#636B74" }}
+                sx={{
+                  color: "var(--joy-palette-text-secondary)",
+                  "&:hover": {
+                    background: "transparent",
+                    opacity: "0.8",
+                  },
+                  p: "0 5px",
+                }}
                 onClick={onClose}
               >
-                <XIcon fontSize="var(--Icon-fontSize)" />
+                <XIcon fontSize="20px" weight="bold" />
               </Button>
             </Stack>
           </Stack>
-
           <Stack
-            direction="row"
+            direction="column"
             spacing={2}
             sx={{
-              alignItems: "center",
-              mb: 2,
-              justifyContent: "space-between",
               width: "100%",
               borderBottom: "1px solid #E5E7EB",
               paddingBottom: 2,
+              mb: 2,
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              {user.avatar ? (
-                <Avatar src={user.avatar} sx={{ width: 64, height: 64 }} />
-              ) : (
-                <Avatar sx={{ width: 64, height: 64 }} />
-              )}
-              <Stack>
-                <Typography
-                  level="body-lg"
-                  sx={{
-                    fontSize: "18px",
-                    color: "var(--joy-palette-text-primary)",
-                  }}
-                  fontWeight="600"
-                >
-                  {user.name}
-                </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                {user.avatar ? (
+                  <Avatar src={user.avatar} sx={{ width: 64, height: 64 }} />
+                ) : (
+                  <Avatar sx={{ width: 64, height: 64 }} />
+                )}
+                <Stack>
+                  <Typography
+                    level="body-lg"
+                    sx={{
+                      fontSize: "18px",
+                      color: "var(--joy-palette-text-primary)",
+                    }}
+                    fontWeight="600"
+                  >
+                    {user.name}
+                  </Typography>
+                  <Typography
+                    level="body-sm"
+                    sx={{
+                      color:
+                        user.status === "active"
+                          ? "#1A7D36"
+                          : user.status === "suspended"
+                          ? "#4D2D00"
+                          : "#D3232F",
+                      bgcolor:
+                        user.status === "active"
+                          ? "#DCFCE7"
+                          : user.status === "suspended"
+                          ? "#FFF8C5"
+                          : "#FEE2E2",
+                      borderRadius: "10px",
+                      px: 1,
+                      display: "inline-block",
+                      width: "fit-content",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Button
+                variant="plain"
+                size="sm"
+                sx={{
+                  color: "#636B74",
+                  background: "transparent",
+                  p: 0,
+                  "&:hover": {
+                    background: "transparent",
+                    opacity: "0.8",
+                  },
+                }}
+                onClick={handleMenuOpen}
+              >
+                <DotsIcon
+                  weight="bold"
+                  size={22}
+                  color="var(--joy-palette-text-secondary)"
+                />
+              </Button>
+            </Box>
+
+            {user.status === "suspended" && (
+              <Box
+                sx={{
+                  bgcolor: "#FFF8C5",
+                  borderRadius: "8px",
+                  px: 2,
+                  py: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  width: "100%",
+                }}
+              >
+                <Warning size={20} color="#4D2D00" />
                 <Typography
                   level="body-sm"
-                  sx={{
-                    color: user.status === "active" ? "#1A7D36" : "#D3232F",
-                    bgcolor: user.status === "active" ? "#DCFCE7" : "#FEE2E2",
-                    borderRadius: "10px",
-                    px: 1,
-                    display: "inline-block",
-                    width: "fit-content",
-                    fontSize: "12px",
-                  }}
+                  sx={{ fontSize: "14px", color: "#4D2D00", fontWeight: 300 }}
                 >
-                  {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                  Account suspended by suspicious activity
                 </Typography>
-              </Stack>
-            </Box>
-            <Button
-              variant="plain"
-              size="sm"
-              sx={{ color: "#636B74" }}
-              onClick={handleMenuOpen}
-            >
-              <DotsIcon
-                weight="bold"
-                size={22}
-                color="var(--joy-palette-text-secondary)"
-              />
-            </Button>
+              </Box>
+            )}
           </Stack>
-
-          <Menu
+          <Popper
+            ref={popperRef}
             anchorEl={menuAnchorEl}
             open={Boolean(menuAnchorEl)}
-            onClose={handleMenuClose}
-            sx={{
+            placement="bottom-start"
+            style={{
               minWidth: "150px",
               borderRadius: "8px",
               boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-              fontSize: "var(--joy-fontSize-sm)",
+              backgroundColor: "white",
               zIndex: 1301,
             }}
           >
-            <MenuItem
+            <Box
               onMouseDown={(event) => {
                 event.preventDefault();
                 handleEdit(user);
               }}
+              sx={menuItemStyle}
             >
-              <PencilIcon
-                fontSize="var(--Icon-fontSize)"
-                style={{ marginRight: "8px" }}
-              />
+              <PencilIcon fontSize="20px" style={iconStyle} />
               Edit
-            </MenuItem>
-            <MenuItem
+            </Box>
+            <Box sx={menuItemStyle}>
+              <ArrowRightIcon fontSize="20px" style={iconStyle} />
+              Impersonate user
+            </Box>
+            <Box
               onMouseDown={(event) => {
                 event.preventDefault();
                 handleDeactivate();
               }}
+              sx={menuItemStyle}
             >
-              <ToggleLeft
-                fontSize="var(--Icon-fontSize)"
-                style={{ marginRight: "8px" }}
-              />
+              <ToggleLeft fontSize="20px" style={iconStyle} />
               Deactivate
-            </MenuItem>
-            <MenuItem
+            </Box>
+            <Box
               onMouseDown={(event) => {
                 event.preventDefault();
                 handleSuspend();
               }}
+              sx={menuItemStyle}
             >
-              <WarningCircle
-                fontSize="var(--Icon-fontSize)"
-                style={{ marginRight: "8px" }}
-              />
+              <Warning fontSize="20px" style={{ marginRight: "14px" }} />
               Suspend
-            </MenuItem>
-            <MenuItem
+            </Box>
+            <Box
               onMouseDown={(event) => {
                 event.preventDefault();
                 handleResetPassword();
               }}
+              sx={menuItemStyle}
             >
-              <Password
-                fontSize="var(--Icon-fontSize)"
-                style={{ marginRight: "8px" }}
-              />
+              <Password fontSize="20px" style={iconStyle} />
               Reset password
-            </MenuItem>
-            <MenuItem
+            </Box>
+            <Box
               onMouseDown={(event) => {
                 event.preventDefault();
                 handleDelete();
               }}
-              sx={{ color: "#EF4444" }}
+              sx={{ ...menuItemStyle, color: "#EF4444" }}
             >
-              <TrashIcon
-                fontSize="var(--Icon-fontSize)"
-                style={{ marginRight: "8px" }}
-              />
+              <TrashIcon fontSize="20px" style={{ marginRight: "14px" }} />
               Delete
-            </MenuItem>
-          </Menu>
-
+            </Box>
+          </Popper>
+          ;
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
               <Typography
@@ -441,14 +529,20 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                       <Typography
                         level="body-sm"
                         fontWeight="300"
-                        sx={{ color: "#111827" }}
+                        sx={{
+                          color: "var(--joy-palette-text-primary)",
+                          fontSize: "14px",
+                        }}
                       >
                         {act.browserOs}
                       </Typography>
                       <Typography
                         level="body-sm"
                         fontWeight="300"
-                        sx={{ color: "#111827" }}
+                        sx={{
+                          color: "var(--joy-palette-text-secondary)",
+                          fontSize: "12px",
+                        }}
                       >
                         {act.locationTime}
                       </Typography>

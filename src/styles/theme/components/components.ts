@@ -13,6 +13,7 @@ import { JoyStack } from './stack';
 import { JoyTable } from './table';
 import { JoyTabs } from './tabs';
 import { JoyTextarea } from './textarea';
+import { JoyCheckbox } from './checkbox';
 
 export const components = {
   JoyBreadcrumbs,
@@ -28,4 +29,5 @@ export const components = {
   JoyTable,
   JoyTabs,
   JoyTextarea,
+  JoyCheckbox
 } satisfies Components<Theme>;
