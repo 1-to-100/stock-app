@@ -11,6 +11,30 @@ export const JoyTable = {
           borderBottom: 'var(--Table-headerUnderlineThickness) solid var(--TableCell-borderColor)',
         },
       }),
+      
+      minWidth: 800,
+      border: '1px solid #E5E7EB',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      '& thead th': {
+        backgroundColor: 'var(--joy-palette-background-mainBg)',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+        '&:first-of-type': { borderTopLeftRadius: '8px' },
+        '&:last-of-type': { borderTopRightRadius: '8px' },
+        fontWeight: 600,
+      },
+      '& th, & td': {
+        padding: '10px',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+        color: 'var(--joy-palette-text-primary)',
+        fontWeight: 300,
+      },
+      '& tbody tr:hover': {
+        backgroundColor: 'var(--joy-palette-background-mainBg)',
+        cursor: 'pointer',
+      },
     }),
   },
 } satisfies Components<Theme>['JoyTable'];

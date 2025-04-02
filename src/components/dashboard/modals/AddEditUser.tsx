@@ -12,7 +12,7 @@ import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
 import Switch from "@mui/joy/Switch";
-import Tooltip from "@mui/joy/Tooltip"; 
+import Tooltip from "@mui/joy/Tooltip";
 import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
@@ -56,7 +56,8 @@ export default function AddEditUser({
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (user && open) {
@@ -126,7 +127,7 @@ export default function AddEditUser({
 
   const handleDeleteAvatar = () => {
     setAvatarPreview(null);
-    setShowDeleteConfirmation(false); 
+    setShowDeleteConfirmation(false);
   };
 
   const handleSave = () => {
@@ -218,7 +219,8 @@ export default function AddEditUser({
                 </Typography>
               </Box>
               <IconButton
-                onClick={() => setShowDeleteConfirmation(true)} 
+                onClick={() => setShowDeleteConfirmation(true)}
+                disabled={!avatarPreview}
                 sx={{
                   bgcolor: "transparent",
                   color: "#6B7280",
@@ -228,7 +230,7 @@ export default function AddEditUser({
                 <Trash fontSize="20px" />
               </IconButton>
             </Stack>
-           
+
             {showDeleteConfirmation && (
               <Stack
                 direction="row"
@@ -253,34 +255,15 @@ export default function AddEditUser({
                 <Stack direction="row" spacing={1}>
                   <Button
                     variant="solid"
+                    color="neutral"
                     onClick={() => setShowDeleteConfirmation(false)}
-                    sx={{
-                      borderRadius: "20px",
-                      backgroundColor: "#646872",
-                      border: "1px solid #E5E7EB",
-                      color: "white",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      padding: "12px",
-                      height: "25px",
-                      "&:hover": { bgcolor: "#646872" },
-                    }}
                   >
                     No
                   </Button>
                   <Button
                     variant="solid"
-                    onClick={handleDeleteAvatar} 
-                    sx={{
-                      borderRadius: "20px",
-                      bgcolor: "#D3232F",
-                      color: "#FFFFFF",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      padding: "12px",
-                      height: "25px",
-                      "&:hover": { bgcolor: "#DC2626" },
-                    }}
+                    color="danger"
+                    onClick={handleDeleteAvatar}
                   >
                     Yes
                   </Button>
@@ -548,7 +531,7 @@ export default function AddEditUser({
                   sx={{
                     background: "#DAD8FD",
                     color: "#3D37DD",
-                    width: "300px",
+                    width: "206px",
                   }}
                 >
                   <Box sx={{ background: "none", cursor: "pointer" }}>

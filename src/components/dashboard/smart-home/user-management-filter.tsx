@@ -10,28 +10,29 @@ import Button from "@mui/joy/Button";
 import Checkbox from "@mui/joy/Checkbox";
 import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { X as X } from "@phosphor-icons/react/dist/ssr/X";
+
+interface User {
+  id: number;
+  name: string;
+  email: string | string[];
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
+}
 
 interface UserManagementFilterProps {
   users: User[];
   onFilter: (filteredUsers: User[], filtersApplied: boolean) => void;
 }
 
-interface User {
-    id: number;
-    name: string;
-    email: string | string[];
-    customer: string;
-    role: string;
-    persona: string;
-    status: string;
-    avatar?: string;
-    activity?: { id: number; browserOs: string; locationTime: string }[];
-  }
-
-const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
+const UserManagementFilter = ({
   users,
   onFilter,
-}) => {
+}: UserManagementFilterProps) => {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -47,7 +48,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
   const uniqueRoles = Array.from(new Set(users.map((user) => user.role)));
   const uniquePersonas = Array.from(new Set(users.map((user) => user.persona)));
 
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
     setOpen(true);
   };
@@ -123,7 +124,10 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
     handleClose();
   };
 
-  const handleReset = () => {
+  const handleReset = (
+    event: React.MouseEvent<SVGSVGElement | HTMLButtonElement>
+  ) => {
+    event.stopPropagation();
     setSelectedStatuses([]);
     setSelectedCustomers([]);
     setSelectedRoles([]);
@@ -144,39 +148,31 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
         variant="outlined"
         startDecorator={
           totalFiltersApplied > 0 ? (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "25px",
-                height: "25px",
-                borderRadius: "50%",
-                background: "linear-gradient(120deg, #282490 0%, #3F4DCF 100%)",
-                color: "#FFFFFF",
-                fontSize: "14px",
-                fontWeight: "600",
-              }}
-            >
-              {totalFiltersApplied}
-            </Box>
+            <X fontSize="var(--Icon-fontSize)" onClick={handleReset} />
           ) : (
             <FunnelIcon fontSize="var(--Icon-fontSize)" />
           )
         }
         onClick={handleOpen}
         sx={{
-          borderColor: "#E5E7EB",
+          borderColor: totalFiltersApplied > 0 ? "transparent" : "#E5E7EB",
           borderRadius: "20px",
-          bgcolor: "#FFFFFF",
-          color: "#000000",
-          padding: "8px 16px",
+          background: totalFiltersApplied > 0 ? "#C7C5FC" : "#FFFFFF",
+          color:
+            totalFiltersApplied > 0
+              ? "#3D37DD"
+              : "var(--joy-palette-text-primary)",
+          padding: "7px 14px",
           "&:hover": {
-            bgcolor: "#F5F7FA",
+            background: totalFiltersApplied > 0 ? "#C7C5FC" : "#F5F7FA",
           },
         }}
       >
-        Filter
+        {totalFiltersApplied > 0
+          ? `${totalFiltersApplied} filter${
+              totalFiltersApplied !== 1 ? "s" : ""
+            } apply`
+          : "Filter"}
       </Button>
 
       {open && anchorEl && (
@@ -195,7 +191,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
           }}
         >
           <Stack direction="row" spacing={1}>
-            <Box sx={{ width: "60%", pr: 1 }}>
+            <Box sx={{ width: "58%", pr: 1 }}>
               <Typography
                 level="body-sm"
                 sx={{
@@ -216,7 +212,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    p: '6px 12px',
+                    p: "6px 12px",
                     bgcolor:
                       activeCategory === "Status" ? "#F5F7FA" : "transparent",
                     borderRadius: "4px",
@@ -238,7 +234,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    p: '6px 12px',
+                    p: "6px 12px",
                     bgcolor:
                       activeCategory === "Customer" ? "#F5F7FA" : "transparent",
                     borderRadius: "4px",
@@ -260,7 +256,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    p: '6px 12px',
+                    p: "6px 12px",
                     bgcolor:
                       activeCategory === "Role" ? "#F5F7FA" : "transparent",
                     borderRadius: "4px",
@@ -282,7 +278,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    p: '6px 12px',
+                    p: "6px 12px",
                     bgcolor:
                       activeCategory === "Persona" ? "#F5F7FA" : "transparent",
                     borderRadius: "4px",
@@ -302,7 +298,7 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
               </Stack>
             </Box>
 
-            <Box sx={{ width: "40%", pl: 1 }}>
+            <Box sx={{ width: "42%", pl: 1 }}>
               {activeCategory && (
                 <>
                   <Typography
@@ -319,64 +315,103 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
                   <Stack spacing={1}>
                     {activeCategory === "Status" &&
                       uniqueStatuses.map((status) => (
-                        <Box key={status}>
+                        <Box
+                          key={status}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
+                        >
                           <Checkbox
-                            label={
-                              status.charAt(0).toUpperCase() + status.slice(1)
-                            }
                             checked={selectedStatuses.includes(status)}
                             onChange={() => handleStatusChange(status)}
+                          />
+                          <Typography
+                            level="body-sm"
                             sx={{
-                              fontSize: "15px",
-                              fontWeight: "400",
+                              fontSize: "14px",
                               color: "var(--joy-palette-text-primary)",
                             }}
-                          />
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </Typography>
                         </Box>
                       ))}
                     {activeCategory === "Customer" &&
                       uniqueCustomers.map((customer) => (
-                        <Box key={customer}>
+                        <Box
+                          key={customer}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
+                        >
                           <Checkbox
-                            label={customer}
                             checked={selectedCustomers.includes(customer)}
                             onChange={() => handleCustomerChange(customer)}
+                          />
+                          <Typography
+                            level="body-sm"
                             sx={{
-                              fontSize: "15px",
-                              fontWeight: "400",
+                              fontSize: "14px",
                               color: "var(--joy-palette-text-primary)",
                             }}
-                          />
+                          >
+                            {customer.charAt(0).toUpperCase() +
+                              customer.slice(1)}
+                          </Typography>
                         </Box>
                       ))}
                     {activeCategory === "Role" &&
                       uniqueRoles.map((role) => (
-                        <Box key={role}>
+                        <Box
+                          key={role}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
+                        >
                           <Checkbox
-                            label={role}
                             checked={selectedRoles.includes(role)}
                             onChange={() => handleRoleChange(role)}
+                          />
+                          <Typography
+                            level="body-sm"
                             sx={{
-                              fontSize: "15px",
-                              fontWeight: "400",
+                              fontSize: "14px",
                               color: "var(--joy-palette-text-primary)",
                             }}
-                          />
+                          >
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </Typography>
                         </Box>
                       ))}
                     {activeCategory === "Persona" &&
                       uniquePersonas.map((persona) => (
-                        <Box key={persona}>
+                        <Box
+                          key={persona}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                          }}
+                        >
                           <Checkbox
-                            label={persona}
                             checked={selectedPersonas.includes(persona)}
                             onChange={() => handlePersonaChange(persona)}
+                          />
+                          <Typography
+                            level="body-sm"
                             sx={{
-                              fontSize: "15px",
-                              fontWeight: "400",
+                              fontSize: "14px",
                               color: "var(--joy-palette-text-primary)",
                             }}
-                          />
+                          >
+                            {persona.charAt(0).toUpperCase() + persona.slice(1)}
+                          </Typography>
                         </Box>
                       ))}
                   </Stack>
@@ -397,7 +432,16 @@ const UserManagementFilter: React.FC<UserManagementFilterProps> = ({
             <Button
               variant="plain"
               onClick={handleReset}
-              sx={{ color: "#3D37DD", fontWeight: 600, fontSize: "14px" }}
+              sx={{
+                color: "#3D37DD",
+                fontWeight: 600,
+                fontSize: "14px",
+                padding: 0,
+                "&:hover": {
+                  background: "transparent",
+                  opacity: "0.8",
+                },
+              }}
             >
               Reset filters
             </Button>

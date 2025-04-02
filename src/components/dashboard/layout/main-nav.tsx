@@ -6,10 +6,10 @@ import Badge from '@mui/joy/Badge';
 import Box from '@mui/joy/Box';
 import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
-import Input from '@mui/joy/Input'; // Додаємо Input для Search
+import Input from '@mui/joy/Input'; 
 import { Bell as BellIcon } from '@phosphor-icons/react/dist/ssr/Bell';
 import { List as ListIcon } from '@phosphor-icons/react/dist/ssr/List';
-import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'; // Іконка пошуку
+import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'; 
 
 import type { NavItemConfig } from '@/types/nav';
 import type { User } from '@/types/user';
@@ -71,7 +71,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             >
               <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
             </IconButton>
-            <Input
+            {/* <Input
               startDecorator={<SearchIcon />}
               placeholder="Search"
               sx={{
@@ -93,7 +93,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
                   marginLeft: '2px',
                 },
               }}
-            />
+            /> */}
           </Stack>
           <Stack
             direction="row"
