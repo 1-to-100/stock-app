@@ -11,8 +11,6 @@ import Checkbox from "@mui/joy/Checkbox";
 import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
 import Tooltip from "@mui/joy/Tooltip";
-import Menu from "@mui/joy/Menu";
-import MenuItem from "@mui/joy/MenuItem";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
@@ -32,6 +30,9 @@ import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import UserManagementFilter from "@/components/dashboard/smart-home/user-management-filter";
 import { Popper } from "@mui/base/Popper";
+import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
+import SearchInput from "@/components/dashboard/layout/search-input";
+import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -52,12 +53,14 @@ interface User {
 const initialUsers: User[] = [
   {
     id: 1,
-    name: "Jacob Jones",
+    name: "Jannet Jones",
     email: "trungkienspktnd@gmail.com",
     customer: "StockHive",
     role: "Customer admin",
     persona: "Education",
     status: "suspended",
+    avatar:
+      "https://img.freepik.com/free-photo/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair_285396-896.jpg",
     activity: [
       {
         id: 0,
@@ -110,6 +113,8 @@ const initialUsers: User[] = [
     role: "Customer admin",
     persona: "Experience",
     status: "active",
+    avatar:
+      "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg",
     activity: [
       {
         id: 0,
@@ -421,6 +426,8 @@ export default function Page(): React.JSX.Element {
   const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
     null
   );
+  const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
 
   const rowsPerPage = 10;
@@ -433,7 +440,7 @@ export default function Page(): React.JSX.Element {
     }
   }, [users, filtersApplied]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (anchorEl && !anchorEl.contains(event.target as Node)) {
         handleMenuClose();
@@ -643,6 +650,51 @@ export default function Page(): React.JSX.Element {
     setCurrentPage(1);
   };
 
+  const handleSort = (column: keyof User) => {
+    const isAsc = sortColumn === column && sortDirection === "asc";
+    const newDirection = isAsc ? "desc" : "asc";
+    setSortColumn(column);
+    setSortDirection(newDirection);
+
+    const sortedUsers = [...filteredUsers].sort((a, b) => {
+      const valueA = a[column];
+      const valueB = b[column];
+
+      if (typeof valueA === "string" && typeof valueB === "string") {
+        return newDirection === "asc"
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+      return 0;
+    });
+
+    setFilteredUsers(sortedUsers);
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    const trimmedSearch = searchTerm.trim().toLowerCase();
+
+    if (!trimmedSearch) {
+      setFilteredUsers(users);
+      setFiltersApplied(false);
+      return;
+    }
+
+    const searchedUsers = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(trimmedSearch) ||
+        (typeof user.email === "string" &&
+          user.email.toLowerCase().includes(trimmedSearch)) ||
+        user.customer.toLowerCase().includes(trimmedSearch) ||
+        user.role.toLowerCase().includes(trimmedSearch) ||
+        user.persona.toLowerCase().includes(trimmedSearch)
+    );
+
+    setFilteredUsers(searchedUsers);
+    setFiltersApplied(true);
+    setCurrentPage(1);
+  };
+
   const usersToDelete = rowsToDelete
     .map((userId) => {
       const user = filteredUsers.find((u) => u.id === userId);
@@ -650,8 +702,27 @@ export default function Page(): React.JSX.Element {
     })
     .filter((name): name is string => name !== undefined);
 
+  const menuItemStyle = {
+    padding: "8px 16px",
+    fontSize: "16px",
+    fontWeight: "400",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    color: "var(--joy-palette-text-primary)",
+    "&:hover": { backgroundColor: "#f5f5f5" },
+  };
+
+  const iconStyle = {
+    marginRight: "14px",
+  };
+
   return (
     <Box sx={{ p: "var(--Content-padding)" }}>
+      <SearchInput
+        onSearch={handleSearch}
+        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
+      />
       <Stack spacing={3}>
         <Stack
           direction={{ lg: "row" }}
@@ -723,53 +794,139 @@ export default function Page(): React.JSX.Element {
         </Stack>
 
         <Box sx={{ overflowX: "auto" }}>
-          <Table
-            aria-label="user management table"
-            sx={{
-              minWidth: 800,
-              border: "1px solid #E5E7EB",
-              borderRadius: "8px",
-              "& thead th": {
-                backgroundColor: "var(--joy-palette-background-mainBg)",
-                alignItems: "center",
-                verticalAlign: "middle",
-                "&:first-of-type": { borderTopLeftRadius: "8px" },
-                "&:last-of-type": { borderTopRightRadius: "8px" },
-                fontWeight: 600,
-              },
-              "& th, & td": {
-                padding: "10px",
-                alignItems: "center",
-                verticalAlign: "middle",
-                color: "var(--joy-palette-text-primary)",
-                fontWeight: 300,
-              },
-              "& tbody tr:hover": {
-                backgroundColor: "var(--joy-palette-background-mainBg)",
-                cursor: "pointer",
-              },
-            }}
-          >
+          <Table aria-label="user management table">
             <thead>
               <tr>
                 <th style={{ width: "5%" }}>
                   <Checkbox
                     checked={selectedRows.length === filteredUsers.length}
                     onChange={handleSelectAllChange}
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      height: "100%",
-                      padding: 0,
-                    }}
                   />
                 </th>
-                <th style={{ width: "20%" }}>User name</th>
-                <th style={{ width: "25%" }}>Email</th>
-                <th style={{ width: "20%" }}>Customer</th>
-                <th style={{ width: "15%" }}>Role</th>
-                <th style={{ width: "15%" }}>Persona</th>
+                <th style={{ width: "20%" }} onClick={() => handleSort("name")}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      "& .sort-icon": {
+                        opacity: 0,
+                        transition: "opacity 0.2s ease-in-out",
+                      },
+                      "&:hover .sort-icon": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    User name
+                    <SortIcon
+                      className="sort-icon"
+                      fontSize="16"
+                      color="var(--joy-palette-text-secondary)"
+                    />
+                  </Box>
+                </th>
+                <th
+                  style={{ width: "25%" }}
+                  onClick={() => handleSort("email")}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      "& .sort-icon": {
+                        opacity: 0,
+                        transition: "opacity 0.2s ease-in-out",
+                      },
+                      "&:hover .sort-icon": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    Email
+                    <SortIcon
+                      className="sort-icon"
+                      fontSize="16"
+                      color="var(--joy-palette-text-secondary)"
+                    />
+                  </Box>
+                </th>
+                <th
+                  style={{ width: "20%" }}
+                  onClick={() => handleSort("customer")}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      "& .sort-icon": {
+                        opacity: 0,
+                        transition: "opacity 0.2s ease-in-out",
+                      },
+                      "&:hover .sort-icon": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    Customer
+                    <SortIcon
+                      className="sort-icon"
+                      fontSize="16"
+                      color="var(--joy-palette-text-secondary)"
+                    />
+                  </Box>
+                </th>
+                <th style={{ width: "15%" }} onClick={() => handleSort("role")}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      "& .sort-icon": {
+                        opacity: 0,
+                        transition: "opacity 0.2s ease-in-out",
+                      },
+                      "&:hover .sort-icon": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    Role
+                    <SortIcon
+                      className="sort-icon"
+                      fontSize="16"
+                      color="var(--joy-palette-text-secondary)"
+                    />
+                  </Box>
+                </th>
+                <th
+                  style={{ width: "15%" }}
+                  onClick={() => handleSort("persona")}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      "& .sort-icon": {
+                        opacity: 0,
+                        transition: "opacity 0.2s ease-in-out",
+                      },
+                      "&:hover .sort-icon": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    Persona
+                    <SortIcon
+                      className="sort-icon"
+                      fontSize="16"
+                      color="var(--joy-palette-text-secondary)"
+                    />
+                  </Box>
+                </th>
                 <th style={{ width: "5%" }}></th>
               </tr>
             </thead>
@@ -787,13 +944,6 @@ export default function Page(): React.JSX.Element {
                     <Checkbox
                       checked={selectedRows.includes(user.id)}
                       onChange={() => handleRowCheckboxChange(user.id)}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100%",
-                        padding: 0,
-                      }}
                     />
                   </td>
                   <td>
@@ -943,21 +1093,9 @@ export default function Page(): React.JSX.Element {
                           event.preventDefault();
                           handleOpenDetail(event, user.id);
                         }}
-                        sx={{
-                          padding: "8px 16px",
-                          fontSize: "16px",
-                          fontWeight: "400",
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          color: "var(--joy-palette-text-primary)",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
+                        sx={menuItemStyle}
                       >
-                        <EyeIcon
-                          fontSize="20px"
-                          style={{ marginRight: "8px" }}
-                        />
+                        <EyeIcon fontSize="20px" style={iconStyle} />
                         Open detail
                       </Box>
                       <Box
@@ -965,22 +1103,14 @@ export default function Page(): React.JSX.Element {
                           event.preventDefault();
                           handleEdit(user.id);
                         }}
-                        sx={{
-                          padding: "8px 16px",
-                          fontSize: "16px",
-                          fontWeight: "400",
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          color: "var(--joy-palette-text-primary)",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
+                        sx={menuItemStyle}
                       >
-                        <PencilIcon
-                          fontSize="20px"
-                          style={{ marginRight: "8px" }}
-                        />
+                        <PencilIcon fontSize="20px" style={iconStyle} />
                         Edit
+                      </Box>
+                      <Box sx={menuItemStyle}>
+                        <ArrowRightIcon fontSize="20px" style={iconStyle} />
+                        Impersonate user
                       </Box>
                       <Box
                         onMouseDown={(event) => {
@@ -988,21 +1118,9 @@ export default function Page(): React.JSX.Element {
                           handleDeactivate(user.id);
                           handleMenuClose();
                         }}
-                        sx={{
-                          padding: "8px 16px",
-                          fontSize: "16px",
-                          fontWeight: "400",
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          color: "var(--joy-palette-text-primary)",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
+                        sx={menuItemStyle}
                       >
-                        <ToggleLeft
-                          fontSize="20px"
-                          style={{ marginRight: "8px" }}
-                        />
+                        <ToggleLeft fontSize="20px" style={iconStyle} />
                         Deactivate
                       </Box>
                       <Box
@@ -1010,21 +1128,9 @@ export default function Page(): React.JSX.Element {
                           event.preventDefault();
                           handleResetPassword(user.id);
                         }}
-                        sx={{
-                          padding: "8px 16px",
-                          fontSize: "16px",
-                          fontWeight: "400",
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          color: "var(--joy-palette-text-primary)",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
+                        sx={menuItemStyle}
                       >
-                        <Password
-                          fontSize="20px"
-                          style={{ marginRight: "8px" }}
-                        />
+                        <Password fontSize="20px" style={iconStyle} />
                         Reset password
                       </Box>
                       <Box
@@ -1033,21 +1139,9 @@ export default function Page(): React.JSX.Element {
                           handleDeleteRow(user.id);
                           handleMenuClose();
                         }}
-                        sx={{
-                          padding: "8px 16px",
-                          fontSize: "16px",
-                          fontWeight: "400",
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                          color: "#EF4444",
-                          "&:hover": { backgroundColor: "#f5f5f5" },
-                        }}
+                        sx={{ ...menuItemStyle, color: "#EF4444" }}
                       >
-                        <TrashIcon
-                          fontSize="20px"
-                          style={{ marginRight: "8px" }}
-                        />
+                        <TrashIcon fontSize="20px" style={iconStyle} />
                         Delete
                       </Box>
                     </Popper>
