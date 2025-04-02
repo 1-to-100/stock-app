@@ -32,7 +32,7 @@ export interface Config {
 
 export const config = {
   site: {
-    name: 'Lotru',
+    name: 'StockApp',
     description: '',
     colorScheme: 'light',
     themeColor: '#090a0b',
