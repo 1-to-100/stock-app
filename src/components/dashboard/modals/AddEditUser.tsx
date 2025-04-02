@@ -30,7 +30,6 @@ interface User {
   avatar?: string;
   activity?: { id: number; browserOs: string; locationTime: string }[];
 }
-
 interface AddEditUserProps {
   open: boolean;
   onClose: () => void;
