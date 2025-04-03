@@ -23,9 +23,7 @@ export const SignInComplete: FC<SignInCompleteProps> = ({email}) => {
 
     }, [email, firebaseAuth]);
 
-    return (
-        <div>
-            Error signin with email link
-        </div>
-    );
+
+
+    return null;
 };
