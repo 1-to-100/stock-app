@@ -116,14 +116,6 @@ export default function SuspendUserModal({
             <Button
               variant="outlined"
               onClick={onClose}
-              sx={{
-                borderRadius: "20px",
-                borderColor: "#E5E7EB",
-                color: "#000000",
-                padding: "8px 16px",
-                minWidth: "100px",
-                fontSize: "14px",
-              }}
             >
               Cancel
             </Button>
@@ -137,7 +129,6 @@ export default function SuspendUserModal({
                 "&:hover": { bgcolor: "#4338CA" },
                 padding: "8px 24px",
                 minWidth: "140px",
-                fontSize: "14px",
               }}
             >
               Save

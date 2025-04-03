@@ -80,7 +80,7 @@ export default function Pagination({
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          color: currentPage === 1 ? "gray" : "black",
+          color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
         }}
       >
@@ -101,7 +101,7 @@ export default function Pagination({
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          color: currentPage === 1 ? "gray" : "black",
+          color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
         }}
       >
@@ -119,12 +119,6 @@ export default function Pagination({
               borderRadius: "50%", 
               minWidth: "40px",
               height: "40px",
-              backgroundColor: currentPage === page ? "#4F46E5" : "transparent",
-              color: currentPage === page ? "#FFFFFF" : "#000000",
-              borderColor: "gray",
-              "&:hover": {
-                backgroundColor: currentPage === page ? "#4338CA" : "#F5F7FA",
-              },
             }}
           >
             {page}
@@ -158,7 +152,7 @@ export default function Pagination({
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          color: currentPage === totalPages ? "gray" : "black",
+          color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
         }}
       >
@@ -178,7 +172,7 @@ export default function Pagination({
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          color: currentPage === totalPages ? "gray" : "black",
+          color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
         }}
       >

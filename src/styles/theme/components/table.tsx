@@ -13,7 +13,7 @@ export const JoyTable = {
       }),
       
       minWidth: 800,
-      border: '1px solid #E5E7EB',
+      border: '1px solid var(--joy-palette-divider)',
       borderRadius: '8px',
       cursor: 'pointer',
       '& thead th': {

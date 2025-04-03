@@ -18,6 +18,7 @@ import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import { Box } from "@mui/joy";
+import { useColorScheme } from '@mui/joy/styles';
 
 interface User {
   id: number;
@@ -58,6 +59,8 @@ export default function AddEditUser({
   const [isActive, setIsActive] = useState<boolean>(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] =
     useState<boolean>(false);
+  const { colorScheme } = useColorScheme();
+  const isLightTheme = colorScheme === 'light'  
 
   useEffect(() => {
     if (user && open) {
@@ -98,7 +101,9 @@ export default function AddEditUser({
   };
 
   const handleAddEmail = () => {
-    setAdditionalEmails([...additionalEmails, ""]);
+    if (additionalEmails.length < 2) {
+      setAdditionalEmails([...additionalEmails, ""]);
+    }
   };
 
   const handleAdditionalEmailChange = (index: number, value: string) => {
@@ -164,7 +169,7 @@ export default function AddEditUser({
           sx={{
             fontSize: "24px",
             fontWeight: 600,
-            color: "#111827",
+            color: "var(--joy-palette-text-primary)",
             mb: 2,
           }}
         >
@@ -237,17 +242,18 @@ export default function AddEditUser({
                 spacing={2}
                 alignItems="center"
                 sx={{
-                  bgcolor: "#DDDEE0",
+                  bgcolor: isLightTheme ? "#DDDEE0" : 'transparent',
                   borderRadius: "6px",
                   p: 1,
                   justifyContent: "space-between",
+                  border: "1px solid var(--joy-palette-divider)",
                 }}
               >
                 <Typography
                   level="body-md"
                   sx={{
                     fontSize: "14px",
-                    color: "#272930",
+                    color: isLightTheme ? "#272930" : "var(--joy-palette-text-secondary)",
                   }}
                 >
                   Are you sure you want to delete image?
@@ -277,16 +283,7 @@ export default function AddEditUser({
               <Switch
                 checked={isActive}
                 onChange={(event) => setIsActive(event.target.checked)}
-                sx={{
-                  "--Switch-trackBackground": "#E5E7EB",
-                  "--Switch-thumbBackground": "#FFFFFF",
-                  "&:hover": {
-                    "--Switch-trackBackground": "#D1D5DB",
-                  },
-                  "& .MuiSwitch-input:checked + .MuiSwitch-track": {
-                    backgroundColor: "#4F46E5",
-                  },
-                }}
+                
               />
               <Typography
                 level="body-sm"
@@ -318,8 +315,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "&::placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               />
             </Stack>
@@ -343,8 +340,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "&::placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               />
             </Stack>
@@ -371,8 +368,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "&::placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               />
             </Stack>
@@ -398,8 +395,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "& .MuiSelect-placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               >
                 <Option value="StockHive">StockHive</Option>
@@ -437,8 +434,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "&::placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               />
             </Stack>
@@ -467,8 +464,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "& .MuiSelect-placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               >
                 <Option value="Customer admin">Customer admin</Option>
@@ -497,8 +494,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "& .MuiSelect-placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               >
                 <Option value="Education">Education</Option>
@@ -549,8 +546,8 @@ export default function AddEditUser({
                   borderRadius: "6px",
                   border: "1px solid #E5E7EB",
                   fontSize: "14px",
-                  color: "#111827",
-                  "& .MuiSelect-placeholder": { color: "#9CA3AF" },
+                  color: "var(--joy-palette-text-primary)",
+                  "&::placeholder": { color: "var(--joy-palette-text-secondary)" },
                 }}
               >
                 <Option value="">None</Option>
@@ -565,11 +562,9 @@ export default function AddEditUser({
             onClick={handleAddEmail}
             sx={{
               alignSelf: "flex-start",
-              color: "#4F46E5",
               fontSize: "14px",
               fontWeight: 500,
               p: 0,
-              "&:hover": { bgcolor: "transparent", color: "#4338CA" },
             }}
           >
             Add Email
@@ -579,16 +574,6 @@ export default function AddEditUser({
             <Button
               variant="outlined"
               onClick={onClose}
-              sx={{
-                borderRadius: "20px",
-                border: "1px solid #E5E7EB",
-                color: "#111827",
-                fontSize: "14px",
-                fontWeight: 500,
-                px: 3,
-                py: 1,
-                "&:hover": { bgcolor: "#F3F4F6" },
-              }}
             >
               Cancel
             </Button>
@@ -599,7 +584,6 @@ export default function AddEditUser({
                 borderRadius: "20px",
                 bgcolor: "#4F46E5",
                 color: "#FFFFFF",
-                fontSize: "14px",
                 fontWeight: 500,
                 px: 3,
                 py: 1,

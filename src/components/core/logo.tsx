@@ -19,7 +19,8 @@ export interface LogoProps {
 }
 
 export function Logo({ color = 'dark', height = HEIGHT, width = WIDTH }: LogoProps): React.JSX.Element {
-  const url = color === 'light' ? '/assets/logo.svg' : '/assets/logo.svg';
+  const { colorScheme } = useColorScheme();
+  const url = colorScheme === 'light' ? '/assets/logo--light.svg' : '/assets/logo--dark.svg';
 
   return <Image alt="logo" height={height} src={url} width={width} />;
 }
@@ -39,6 +40,7 @@ export function DynamicLogo({
   ...props
 }: DynamicLogoProps): React.JSX.Element {
   const { colorScheme } = useColorScheme();
+  console.log('Current color scheme:', colorScheme);
   const color = colorScheme === 'dark' ? colorDark : colorLight;
 
   return (

@@ -28,7 +28,8 @@ export function colorSchemes(config: Config): Partial<Record<ColorScheme, ColorS
           level2: 'var(--joy-palette-neutral-700)',
           level3: 'var(--joy-palette-neutral-600)',
           mainBg: '#1a1a1a',
-          navActiveBg: '#E9EFF8'
+          navActiveBg: '#1a1a1a',
+          primaryColor: '#716bfd'
         },
         common: { black: '#000000', white: '#ffffff' },
         danger: { ...carminePink },
@@ -38,8 +39,8 @@ export function colorSchemes(config: Config): Partial<Record<ColorScheme, ColorS
         primary: { ...primary },
         success: { ...malachiteGreen },
         text: {
-          primary: 'var(--joy-palette-common-white)',
-          secondary: 'var(--joy-palette-neutral-200)',
+          primary: '#d9d4d4',
+          secondary: '#a8b0b6',
           tertiary: 'var(--joy-palette-neutral-500)',
         },
         warning: { ...metalicOrange },
@@ -56,7 +57,8 @@ export function colorSchemes(config: Config): Partial<Record<ColorScheme, ColorS
           level2: 'var(--joy-palette-neutral-100)',
           level3: 'var(--joy-palette-neutral-200)',
           mainBg: '#F6F8FB',
-          navActiveBg: '#E9EFF8'
+          navActiveBg: '#E9EFF8',
+          primaryColor: '#3D37DD'
         },
         common: { black: '#000000', white: '#ffffff' },
         danger: { ...carminePink },
