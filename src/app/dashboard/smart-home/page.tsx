@@ -361,23 +361,7 @@ const initialUsers: User[] = [
     role: "User",
     persona: "Education",
     status: "inactive",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Firefox, Windows 10",
-        locationTime: "Beijing, China • June 30 3:20AM",
-      },
-      {
-        id: 1,
-        browserOs: "Safari, iOS 16.2",
-        locationTime: "Shanghai, China • July 01 9:45AM",
-      },
-      {
-        id: 2,
-        browserOs: "Chrome, Android 12",
-        locationTime: "Guangzhou, China • July 02 1:15PM",
-      },
-    ],
+    activity: [],
   },
   {
     id: 15,
@@ -435,6 +419,7 @@ export default function Page(): React.JSX.Element {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const currentUsers = filteredUsers.slice(startIndex, endIndex);
+  const hasResults = filteredUsers.length > 0;
 
   useEffect(() => {
     if (!filtersApplied) {
@@ -466,8 +451,9 @@ export default function Page(): React.JSX.Element {
   const handleSelectAllChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    if (!hasResults) return;
     if (event.target.checked) {
-      setSelectedRows(filteredUsers.map((user) => user.id));
+      setSelectedRows(currentUsers.map((user) => user.id));
     } else {
       setSelectedRows([]);
     }
@@ -478,6 +464,19 @@ export default function Page(): React.JSX.Element {
       setRowsToDelete(selectedRows);
       setOpenDeleteModal(true);
     }
+  };
+
+  const handleDeleteUser = (userId: number) => {
+    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    if (filtersApplied) {
+      setFilteredUsers((prevFiltered) =>
+        prevFiltered.filter((user) => user.id !== userId)
+      );
+    }
+    if (selectedUser?.id === userId) {
+      setSelectedUser(null);
+    }
+    setPopoverAnchorEl(null);
   };
 
   const handleDeleteRow = useCallback((userId: number) => {
@@ -619,6 +618,9 @@ export default function Page(): React.JSX.Element {
           return prevFiltered;
         }
       });
+    }
+    if (selectedUser && selectedUser.id === updatedUser.id) {
+      setSelectedUser(updatedUser);
     }
   };
 
@@ -800,10 +802,16 @@ export default function Page(): React.JSX.Element {
             <thead>
               <tr>
                 <th style={{ width: "5%" }}>
-                  <Checkbox
-                    checked={selectedRows.length === filteredUsers.length}
-                    onChange={handleSelectAllChange}
-                  />
+                <Checkbox
+                  checked={hasResults && selectedRows.length === currentUsers.length}
+                  indeterminate={
+                    hasResults && 
+                    selectedRows.length > 0 && 
+                    selectedRows.length < currentUsers.length
+                  }
+                  onChange={handleSelectAllChange}
+                  disabled={!hasResults}
+                />
                 </th>
                 <th style={{ width: "20%" }} onClick={() => handleSort("name")}>
                   <Box
@@ -1002,6 +1010,7 @@ export default function Page(): React.JSX.Element {
                                   : "#FAE17D",
                               borderRadius: "50%",
                               width: "10px",
+                              minWidth: "10px",
                               height: "10px",
                               display: "inline-block",
                             }}
@@ -1190,6 +1199,7 @@ export default function Page(): React.JSX.Element {
           totalPages={totalPages}
           currentPage={currentPage}
           onPageChange={handlePageChange}
+          disabled={!hasResults}
         />
       </Stack>
 
@@ -1214,6 +1224,7 @@ export default function Page(): React.JSX.Element {
         anchorEl={popoverAnchorEl}
         user={selectedUser}
         onSave={handleSaveUser}
+        onDelete={handleDeleteUser}
       />
 
       <AddEditUser
