@@ -74,7 +74,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
               },
             }}
           >
-            <ListItemButton component={RouterLink} href={paths.dashboard.settings.profile} onClick={onClose}>
+            {/* <ListItemButton component={RouterLink} href={paths.dashboard.settings.profile} onClick={onClose}>
               <ListItemDecorator>
                 <UserIcon fontSize="var(--Icon-fontSize)" weight="bold" />
               </ListItemDecorator>
@@ -91,7 +91,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
                 <CreditCardIcon fontSize="var(--Icon-fontSize)" weight="bold" />
               </ListItemDecorator>
               <ListItemContent>Billing</ListItemContent>
-            </ListItemButton>
+            </ListItemButton> */}
             {config.auth.strategy === AuthStrategy.CUSTOM ? <CustomSignOut /> : null}
             {config.auth.strategy === AuthStrategy.AUTH0 ? <Auth0SignOut /> : null}{' '}
             {config.auth.strategy === AuthStrategy.COGNITO ? <CognitoSignOut /> : null}
