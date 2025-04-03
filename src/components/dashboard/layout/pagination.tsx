@@ -9,12 +9,14 @@ interface PaginationProps {
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  disabled: boolean;
 }
 
 export default function Pagination({
   totalPages,
   currentPage,
   onPageChange,
+  disabled
 }: PaginationProps): React.JSX.Element {
   const handleFirstPage = () => {
     onPageChange(1);
@@ -71,7 +73,7 @@ export default function Pagination({
       <Button
         variant="outlined"
         onClick={handleFirstPage}
-        disabled={currentPage === 1}
+        disabled={disabled || currentPage === 1}
         sx={{
           borderRadius: "20px",
           padding: "8px 16px",
@@ -92,7 +94,7 @@ export default function Pagination({
       <Button
         variant="outlined"
         onClick={handlePreviousPage}
-        disabled={currentPage === 1}
+        disabled={disabled || currentPage === 1}
         sx={{
           borderRadius: "20px",
           padding: "8px 16px",
@@ -115,6 +117,7 @@ export default function Pagination({
             key={index}
             variant={currentPage === page ? "solid" : "outlined"}
             onClick={() => handlePageClick(page)}
+            disabled={disabled}
             sx={{
               borderRadius: "50%", 
               minWidth: "40px",
@@ -132,7 +135,7 @@ export default function Pagination({
               justifyContent: "center",
               width: "40px",
               height: "40px",
-              color: "gray",
+              color: disabled ? "var(--joy-palette-text-disabled)" : "gray",
             }}
           >
             {page}
@@ -143,7 +146,7 @@ export default function Pagination({
       <Button
         variant="outlined"
         onClick={handleNextPage}
-        disabled={currentPage === totalPages}
+        disabled={disabled || currentPage === totalPages}
         sx={{
           borderRadius: "20px",
           padding: "8px 16px",
@@ -163,7 +166,7 @@ export default function Pagination({
       <Button
         variant="outlined"
         onClick={handleLastPage}
-        disabled={currentPage === totalPages}
+        disabled={disabled || currentPage === totalPages}
         sx={{
           borderRadius: "20px",
           padding: "8px 16px",
