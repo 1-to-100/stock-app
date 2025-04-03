@@ -1,329 +1,315 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Image from 'next/image';
-import RouterLink from 'next/link';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Alert from '@mui/joy/Alert';
-import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
-import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
-import FormHelperText from '@mui/joy/FormHelperText';
-import FormLabel from '@mui/joy/FormLabel';
-import IconButton from '@mui/joy/IconButton';
-import Input from '@mui/joy/Input';
-import Link from '@mui/joy/Link';
-import Stack from '@mui/joy/Stack';
-import Tab from '@mui/joy/Tab';
-import TabList from '@mui/joy/TabList';
-import Tabs from '@mui/joy/Tabs';
-import { Eye as EyeIcon } from '@phosphor-icons/react/dist/ssr/Eye';
-import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlash';
-import {GoogleAuthProvider, sendSignInLinkToEmail, signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
-import type { Auth } from 'firebase/auth';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import * as React from "react";
+import Image from "next/image";
+import RouterLink from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Alert from "@mui/joy/Alert";
+import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
+import Divider from "@mui/joy/Divider";
+import FormControl from "@mui/joy/FormControl";
+import FormHelperText from "@mui/joy/FormHelperText";
+import FormLabel from "@mui/joy/FormLabel";
+import IconButton from "@mui/joy/IconButton";
+import Input from "@mui/joy/Input";
+import Link from "@mui/joy/Link";
+import Stack from "@mui/joy/Stack";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import Tabs from "@mui/joy/Tabs";
+import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
+import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import type { Auth } from "firebase/auth";
+import { Controller, useForm } from "react-hook-form";
+import { z as zod } from "zod";
 
-import { paths } from '@/paths';
-import { getFirebaseAuth } from '@/lib/auth/firebase/client';
-import { DynamicLogo } from '@/components/core/logo';
-import { toast } from '@/components/core/toaster';
-import Typography from '@mui/joy/Typography';
+import { paths } from "@/paths";
+import { getFirebaseAuth } from "@/lib/auth/firebase/client";
+import { DynamicLogo } from "@/components/core/logo";
+import { toast } from "@/components/core/toaster";
+import Typography from "@mui/joy/Typography";
+import { SSOForm } from "./sso-form";
 
 interface OAuthProvider {
-    id: 'google' | 'github';
-    name: string;
-    logo: string;
+  id: "google" | "github";
+  name: string;
+  logo: string;
 }
 
-const oAuthProviders = [{ id: 'google', name: 'Google', logo: '/assets/logo-google.svg' }] satisfies OAuthProvider[];
+const oAuthProviders = [
+  { id: "google", name: "Google", logo: "/assets/logo-google.svg" },
+] satisfies OAuthProvider[];
 
 const schema = zod.object({
-    email: zod.string().min(1, { message: 'Email is required' }).email(),
-    password: zod.string().min(1, { message: 'Password is required' }),
+  email: zod.string().min(1, { message: "Email is required" }).email(),
+  password: zod.string().min(1, { message: "Password is required" }),
 });
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { email: '', password: '' } satisfies Values;
-
-const magicLinkSchema = zod.object({
-    email: zod.string().min(1, {message: 'Email is required'}).email(),
-});
-
-type MagicLinkValues = zod.infer<typeof magicLinkSchema>;
-
-const magicLinkDefaultValues = {email: ''} satisfies MagicLinkValues;
+const defaultValues = { email: "", password: "" } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
-    const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
+  const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
+  const [showPassword, setShowPassword] = React.useState<boolean>();
+  const [isPending, setIsPending] = React.useState<boolean>(false);
+  const [activeTab, setActiveTab] = React.useState<string>("sign-in");
 
-    const [showPassword, setShowPassword] = React.useState<boolean>();
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
-    const [isPending, setIsPending] = React.useState<boolean>(false);
+  const onAuth = React.useCallback(
+    async (providerId: OAuthProvider["id"]): Promise<void> => {
+      setIsPending(true);
 
-    const {
-        control,
-        handleSubmit,
-        setError,
-        formState: { errors },
-    } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+      let provider: GoogleAuthProvider;
 
-    const onAuth = React.useCallback(
-        async (providerId: OAuthProvider['id']): Promise<void> => {
-            setIsPending(true);
+      switch (providerId) {
+        case "google":
+          provider = new GoogleAuthProvider();
+          break;
+        default:
+          throw new Error(`Unknown provider: ${providerId}`);
+      }
 
-            let provider: GoogleAuthProvider;
+      try {
+        await signInWithPopup(firebaseAuth, provider);
+        // UserProvider will handle Router refresh
+        // After refresh, GuestGuard will handle the redirect
+      } catch (err) {
+        setIsPending(false);
+        toast.error((err as { message: string }).message);
+      }
+    },
+    [firebaseAuth]
+  );
 
-            switch (providerId) {
-                case 'google':
-                    provider = new GoogleAuthProvider();
-                    break;
-                default:
-                    throw new Error(`Unknown provider: ${providerId}`);
-            }
+  const onSubmit = React.useCallback(
+    async (values: Values): Promise<void> => {
+      setIsPending(true);
 
-            try {
-                await signInWithPopup(firebaseAuth, provider);
-                // UserProvider will handle Router refresh
-                // After refresh, GuestGuard will handle the redirect
-            } catch (err) {
-                setIsPending(false);
-                toast.error((err as { message: string }).message);
-            }
-        },
-        [firebaseAuth]
-    );
+      try {
+        await signInWithEmailAndPassword(
+          firebaseAuth,
+          values.email,
+          values.password
+        );
+        // UserProvider will handle Router refresh
+        // After refresh, GuestGuard will handle the redirect
+      } catch (err) {
+        setError("root", {
+          type: "server",
+          message: (err as { message: string }).message,
+        });
+        setIsPending(false);
+      }
+    },
+    [firebaseAuth, setError]
+  );
 
-    const onSubmit = React.useCallback(
-        async (values: Values): Promise<void> => {
-            setIsPending(true);
+  const handleTabChange = React.useCallback(
+    (event: React.SyntheticEvent | null, newValue: string | number | null) => {
+      setActiveTab((newValue as string) || "sign-in");
+    },
+    []
+  );
 
-            try {
-                await signInWithEmailAndPassword(firebaseAuth, values.email, values.password);
-                // UserProvider will handle Router refresh
-                // After refresh, GuestGuard will handle the redirect
-            } catch (err) {
-                setError('root', { type: 'server', message: (err as { message: string }).message });
-                setIsPending(false);
-            }
-        },
-        [firebaseAuth, setError]
-    );
-
-    return (
-        <Stack spacing={5}>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-                    <DynamicLogo colorDark="light" colorLight="dark" height={24} width={150} />
-                </Box>
-            </Box>
-            <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}>Welcome to StockApp <br /> admin panel</Box>
-            <Tabs value="sign-in" variant="custom">
-                <TabList>
-                    <Tab component={RouterLink} href={paths.auth.firebase.signIn} value="sign-in">
-                        Sign In
-                    </Tab>
-                    <Tab component={RouterLink} href={paths.auth.firebase.signUp} value="sign-up">
-                        Create Account
-                    </Tab>
-                </TabList>
-            </Tabs>
-            <Stack spacing={3}>
-                <Stack spacing={2}>
-                    {oAuthProviders.map(
-                        (provider): React.JSX.Element => (
-                            <Button
-                                disabled={isPending}
-                                endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
-                                key={provider.id}
-                                onClick={(): void => {
-                                    onAuth(provider.id).catch(() => {
-                                        // noop
-                                    });
-                                }}
-                                variant="outlined"
-                            >
-                                Continue with {provider.name}
-                            </Button>
-                        )
-                    )}
-                </Stack>
-                <Divider>or</Divider>
-
-                <CredentialsSignInForm />
-
-                <Divider>or</Divider>
-
-                <MagicLinkSignInForm />
-            </Stack>
+  return (
+    <Stack spacing={5}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box
+          component={RouterLink}
+          href={paths.home}
+          sx={{ display: "inline-block", fontSize: 0 }}
+        >
+          <DynamicLogo
+            colorDark="light"
+            colorLight="dark"
+            height={24}
+            width={150}
+          />
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          textAlign: "center",
+          fontSize: "30px",
+          color: "var(--joy-palette-text-primary)",
+          fontWeight: "600",
+          lineHeight: "32px",
+        }}
+      >
+        Welcome to StockApp <br /> admin panel
+      </Box>
+      <Stack spacing={3}>
+        <Stack spacing={2}>
+          {oAuthProviders.map(
+            (provider): React.JSX.Element => (
+              <Button
+                disabled={isPending}
+                endDecorator={
+                  <Image alt="" height={24} src={provider.logo} width={24} />
+                }
+                key={provider.id}
+                onClick={(): void => {
+                  onAuth(provider.id).catch(() => {
+                    // noop
+                  });
+                }}
+                variant="outlined"
+              >
+                Continue with {provider.name}
+              </Button>
+            )
+          )}
         </Stack>
-    );
+        <Divider>or</Divider>
+      </Stack>
+      <Tabs value={activeTab} onChange={handleTabChange} variant="custom">
+        <TabList>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.signIn}
+            value="sign-in"
+          >
+            Sign In
+          </Tab>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.sso}
+            value="sso"
+          >
+            SSO
+          </Tab>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.signUp}
+            value="sign-up"
+          >
+            Sign Up
+          </Tab>
+        </TabList>
+      </Tabs>
+      <Stack spacing={3}>
+        {activeTab === "sign-in" && <CredentialsSignInForm />}
+        {/* {activeTab === "sso" && <SSOForm />} */}
+        {activeTab === "sign-up" && <Divider>or</Divider>}
+      </Stack>
+    </Stack>
+  );
 }
 
 const CredentialsSignInForm = () => {
+  const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
+  const [showPassword, setShowPassword] = React.useState<boolean>();
+  const [isPending, setIsPending] = React.useState<boolean>(false);
 
-    const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
-    const [showPassword, setShowPassword] = React.useState<boolean>();
+  const onSubmit = React.useCallback(
+    async (values: Values): Promise<void> => {
+      setIsPending(true);
 
-    const [isPending, setIsPending] = React.useState<boolean>(false);
+      try {
+        await signInWithEmailAndPassword(
+          firebaseAuth,
+          values.email,
+          values.password
+        );
+        // UserProvider will handle Router refresh
+        // After refresh, GuestGuard will handle the redirect
+      } catch (err) {
+        setError("root", {
+          type: "server",
+          message: (err as { message: string }).message,
+        });
+        setIsPending(false);
+      }
+    },
+    [firebaseAuth, setError]
+  );
 
-    const {
-        control,
-        handleSubmit,
-        setError,
-        formState: {errors},
-    } = useForm<Values>({defaultValues, resolver: zodResolver(schema)});
-
-
-    const onSubmit = React.useCallback(
-        async (values: Values): Promise<void> => {
-            setIsPending(true);
-
-            try {
-                await signInWithEmailAndPassword(firebaseAuth, values.email, values.password);
-                // UserProvider will handle Router refresh
-                // After refresh, GuestGuard will handle the redirect
-            } catch (err) {
-                setError('root', {type: 'server', message: (err as { message: string }).message});
-                setIsPending(false);
-            }
-        },
-        [firebaseAuth, setError]
-    );
-
-    return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack spacing={2}>
-                <Controller
-                    control={control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormControl error={Boolean(errors.email)}>
-                            <FormLabel>Email Address</FormLabel>
-                            <Input {...field} type="email" />
-                            {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                        </FormControl>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Stack spacing={2}>
+        <Controller
+          control={control}
+          name="email"
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.email)}>
+              <FormLabel>Email Address</FormLabel>
+              <Input {...field} type="email" />
+              {errors.email ? (
+                <FormHelperText>{errors.email.message}</FormHelperText>
+              ) : null}
+            </FormControl>
+          )}
+        />
+        <Controller
+          control={control}
+          name="password"
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.password)}>
+              <FormLabel>Password</FormLabel>
+              <Input
+                {...field}
+                endDecorator={
+                  <IconButton
+                    onClick={(): void => {
+                      setShowPassword(!showPassword);
+                    }}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon
+                        fontSize="var(--Icon-fontSize)"
+                        weight="bold"
+                      />
+                    ) : (
+                      <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
                     )}
-                />
-                <Controller
-                    control={control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormControl error={Boolean(errors.password)}>
-                            <FormLabel>Password</FormLabel>
-                            <Input
-                                {...field}
-                                endDecorator={
-                                    <IconButton
-                                        onClick={(): void => {
-                                            setShowPassword(!showPassword);
-                                        }}
-                                    >
-                                        {showPassword ? (
-                                            <EyeSlashIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-                                        ) : (
-                                            <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-                                        )}
-                                    </IconButton>
-                                }
-                                type={showPassword ? 'text' : 'password'}
-                            />
-                            {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
-                        </FormControl>
-                    )}
-                />
-                <div>
-                    <Link component={RouterLink} href={paths.auth.firebase.resetPassword} fontSize={'sm'} fontWeight="sm" marginBottom={2}>
-                        Forgot password?
-                    </Link>
-                </div>
-                {errors.root ? <Alert color="danger">{errors.root.message}</Alert> : null}
-                <Button disabled={isPending} type="submit">
-                    Sign In
-                </Button>
-            </Stack>
-        </form>
-    )
-}
-
-const MagicLinkSignInForm = () => {
-
-    const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
-    const [isPending, setIsPending] = React.useState<boolean>(false);
-    const [showMessage, setShowMessage] = React.useState<boolean>(false);
-    const [email, setEmail] = React.useState<string>('');
-
-    const {
-        control,
-        handleSubmit,
-        setError,
-        formState: {errors},
-    } = useForm<MagicLinkValues>({defaultValues: magicLinkDefaultValues, resolver: zodResolver(magicLinkSchema)});
-
-
-    const onSubmit = React.useCallback(
-        async (values: MagicLinkValues): Promise<void> => {
-            setIsPending(true);
-
-            try {
-                console.log('magic link sign in', values);
-                // await signInWithEmailAndPassword(firebaseAuth, values.email, values.password);
-                const response = await sendSignInLinkToEmail(firebaseAuth, values.email, {
-                    url: `${window.location.origin}${paths.auth.firebase.signInComplete}?email=${values.email}`,
-                    handleCodeInApp: true,
-                })
-                setEmail(values.email);
-                setShowMessage(true);
-                // UserProvider will handle Router refresh
-                // After refresh, GuestGuard will handle the redirect
-            } catch (err) {
-                console.error('magic link sign in error', err);
-                setError('root', {type: 'server', message: (err as { message: string }).message});
-                setIsPending(false);
-            } finally {
-                setIsPending(false);
-            }
-        },
-        [firebaseAuth, setError]
-    );
-
-    if (showMessage) {
-        return (
-            <Box>
-                <Typography level="h3" textAlign="center">
-                    Check your email
-                </Typography>
-
-                <Typography textAlign="center">
-                    We emailed a magic link to <Typography fontWeight="lg">&quot;{email}&quot;</Typography>.
-                </Typography>
-            </Box>
-        )
-    }
-
-    return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack spacing={2}>
-                <Controller
-                    control={control}
-                    name="email"
-                    render={({field}) => (
-                        <FormControl error={Boolean(errors.email)}>
-                            <FormLabel>Email Address</FormLabel>
-                            <Input {...field} type="email"/>
-                            {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                        </FormControl>
-                    )}
-                />
-                {errors.root ? <Alert color="danger">{errors.root.message}</Alert> : null}
-                <Button disabled={isPending} type="submit">
-                    Send Magic Link
-                </Button>
-            </Stack>
-        </form>
-    )
-}
-
+                  </IconButton>
+                }
+                type={showPassword ? "text" : "password"}
+              />
+              {errors.password ? (
+                <FormHelperText>{errors.password.message}</FormHelperText>
+              ) : null}
+            </FormControl>
+          )}
+        />
+        <div>
+          <Link
+            component={RouterLink}
+            href={paths.auth.firebase.resetPassword}
+            fontSize={"sm"}
+            fontWeight="sm"
+            marginBottom={2}
+          >
+            Forgot password?
+          </Link>
+        </div>
+        {errors.root ? (
+          <Alert color="danger">{errors.root.message}</Alert>
+        ) : null}
+        <Button disabled={isPending} type="submit">
+          Sign In
+        </Button>
+      </Stack>
+    </form>
+  );
+};

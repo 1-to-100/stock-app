@@ -24,6 +24,7 @@ export const paths = {
     firebase: {
       signIn: '/auth/firebase/sign-in',
       signUp: '/auth/firebase/sign-up',
+      sso: '/auth/firebase/sso',
       signInComplete: '/auth/firebase/sign-in-complete',
       resetPassword: '/auth/firebase/reset-password',
       recoveryLinkSent: '/auth/firebase/recovery-link-sent',
@@ -40,7 +41,7 @@ export const paths = {
     },
   },
   dashboard: {
-    overview: '/dashboard',
+    overview: '/dashboard/smart-home',
     analytics: '/dashboard/analytics',
     crypto: '/dashboard/crypto',
     logistics: '/dashboard/logistics',

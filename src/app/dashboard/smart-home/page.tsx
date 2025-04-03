@@ -990,7 +990,7 @@ export default function Page(): React.JSX.Element {
                         ) : (
                           <Avatar sx={{ width: 28, height: 28 }} />
                         )}
-                        <Typography>{user.name}</Typography>
+                        <Typography sx={{wordBreak: "break-all"}}>{user.name}</Typography>
                         <Tooltip
                           title={user.status}
                           placement="top"
@@ -1025,6 +1025,7 @@ export default function Page(): React.JSX.Element {
                           display: "inline-block",
                           fontWeight: 400,
                           color: "var(--joy-palette-text-secondary)",
+                          wordBreak: "break-all"
                         }}
                       >
                         {user.email}
