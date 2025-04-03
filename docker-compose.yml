@@ -1,9 +1,9 @@
 version: "3.7"
 services:
   stock-app-web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     image: stock-app-web
     container_name: stock-app-web
     restart: unless-stopped
