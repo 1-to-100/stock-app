@@ -1,53 +1,69 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Image from 'next/image';
-import RouterLink from 'next/link';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Alert from '@mui/joy/Alert';
-import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
-import Checkbox from '@mui/joy/Checkbox';
-import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
-import FormHelperText from '@mui/joy/FormHelperText';
-import FormLabel from '@mui/joy/FormLabel';
-import Input from '@mui/joy/Input';
-import Link from '@mui/joy/Link';
-import Stack from '@mui/joy/Stack';
-import Tab from '@mui/joy/Tab';
-import TabList from '@mui/joy/TabList';
-import Tabs from '@mui/joy/Tabs';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import type { Auth } from 'firebase/auth';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import * as React from "react";
+import Image from "next/image";
+import RouterLink from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Alert from "@mui/joy/Alert";
+import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
+import Checkbox from "@mui/joy/Checkbox";
+import Divider from "@mui/joy/Divider";
+import FormControl from "@mui/joy/FormControl";
+import FormHelperText from "@mui/joy/FormHelperText";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
+import Link from "@mui/joy/Link";
+import Stack from "@mui/joy/Stack";
+import Tab from "@mui/joy/Tab";
+import TabList from "@mui/joy/TabList";
+import Tabs from "@mui/joy/Tabs";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import type { Auth } from "firebase/auth";
+import { Controller, useForm } from "react-hook-form";
+import { z as zod } from "zod";
 
-import { paths } from '@/paths';
-import { getFirebaseAuth } from '@/lib/auth/firebase/client';
-import { DynamicLogo } from '@/components/core/logo';
-import { toast } from '@/components/core/toaster';
-import { Typography } from '@mui/joy';
+import { paths } from "@/paths";
+import { getFirebaseAuth } from "@/lib/auth/firebase/client";
+import { DynamicLogo } from "@/components/core/logo";
+import { toast } from "@/components/core/toaster";
+import { Typography } from "@mui/joy";
 
 interface OAuthProvider {
-  id: 'google' | 'github';
+  id: "google" | "github";
   name: string;
   logo: string;
 }
 
-const oAuthProviders = [{ id: 'google', name: 'Google', logo: '/assets/logo-google.svg' }] satisfies OAuthProvider[];
+const oAuthProviders = [
+  { id: "google", name: "Google", logo: "/assets/logo-google.svg" },
+] satisfies OAuthProvider[];
 
 const schema = zod.object({
-  firstName: zod.string().min(1, { message: 'First name is required' }),
-  lastName: zod.string().min(1, { message: 'Last name is required' }),
-  email: zod.string().min(1, { message: 'Email is required' }).email(),
-  password: zod.string().min(6, { message: 'Password should be at least 6 characters' }),
-  terms: zod.boolean().refine((value) => value, 'You must accept the terms and conditions'),
+  firstName: zod.string().min(1, { message: "First name is required" }),
+  lastName: zod.string().min(1, { message: "Last name is required" }),
+  email: zod.string().min(1, { message: "Email is required" }).email(),
+  password: zod
+    .string()
+    .min(6, { message: "Password should be at least 6 characters" }),
+  terms: zod
+    .boolean()
+    .refine((value) => value, "You must accept the terms and conditions"),
 });
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { firstName: '', lastName: '', email: '', password: '', terms: false } satisfies Values;
+const defaultValues = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  terms: false,
+} satisfies Values;
 
 export function SignUpForm(): React.JSX.Element {
   const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
@@ -62,13 +78,13 @@ export function SignUpForm(): React.JSX.Element {
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
   const onAuth = React.useCallback(
-    async (providerId: OAuthProvider['id']): Promise<void> => {
+    async (providerId: OAuthProvider["id"]): Promise<void> => {
       setIsPending(true);
 
       let provider: GoogleAuthProvider;
 
       switch (providerId) {
-        case 'google':
+        case "google":
           provider = new GoogleAuthProvider();
           break;
         default:
@@ -92,11 +108,18 @@ export function SignUpForm(): React.JSX.Element {
       setIsPending(true);
 
       try {
-        await createUserWithEmailAndPassword(firebaseAuth, values.email, values.password);
+        await createUserWithEmailAndPassword(
+          firebaseAuth,
+          values.email,
+          values.password
+        );
         // UserProvider will handle Router refresh
         // After refresh, GuestGuard will handle the redirect
       } catch (err) {
-        setError('root', { type: 'server', message: (err as { message: string }).message });
+        setError("root", {
+          type: "server",
+          message: (err as { message: string }).message,
+        });
         setIsPending(false);
       }
     },
@@ -105,42 +128,79 @@ export function SignUpForm(): React.JSX.Element {
 
   return (
     <Stack spacing={5}>
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-          <DynamicLogo colorDark="light" colorLight="dark" height={32} width={154} />
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box
+          component={RouterLink}
+          href={paths.home}
+          sx={{ display: "inline-block", fontSize: 0 }}
+        >
+          <DynamicLogo
+            colorDark="light"
+            colorLight="dark"
+            height={32}
+            width={154}
+          />
         </Box>
       </Box>
+      <Box
+        sx={{
+          textAlign: "center",
+          fontSize: "30px",
+          color: "var(--joy-palette-text-primary)",
+          fontWeight: "600",
+          lineHeight: "32px",
+        }}
+      >
+        Welcome to StockApp <br /> admin panel
+      </Box>
+      <Stack spacing={2}>
+        {oAuthProviders.map(
+          (provider): React.JSX.Element => (
+            <Button
+              disabled={isPending}
+              endDecorator={
+                <Image alt="" height={24} src={provider.logo} width={24} />
+              }
+              key={provider.id}
+              onClick={(): void => {
+                onAuth(provider.id).catch(() => {
+                  // noop
+                });
+              }}
+              variant="outlined"
+            >
+              Continue with {provider.name}
+            </Button>
+          )
+        )}
+      </Stack>
+      <Divider>or</Divider>
       <Tabs value="sign-up" variant="custom">
         <TabList>
-          <Tab component={RouterLink} href={paths.auth.firebase.signIn} value="sign-in">
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.signIn}
+            value="sign-in"
+          >
             Sign In
           </Tab>
-          <Tab component={RouterLink} href={paths.auth.firebase.signUp} value="sign-up">
-            Create Account
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.sso}
+            value="sso"
+          >
+            SSO
+          </Tab>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.firebase.signUp}
+            value="sign-up"
+          >
+            Sign Up
           </Tab>
         </TabList>
       </Tabs>
       <Stack spacing={3}>
-        <Stack spacing={2}>
-          {oAuthProviders.map(
-            (provider): React.JSX.Element => (
-              <Button
-                disabled={isPending}
-                endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
-                key={provider.id}
-                onClick={(): void => {
-                  onAuth(provider.id).catch(() => {
-                    // noop
-                  });
-                }}
-                variant="outlined"
-              >
-                Continue with {provider.name}
-              </Button>
-            )
-          )}
-        </Stack>
-        <Divider>or</Divider>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
             <Controller
@@ -150,7 +210,9 @@ export function SignUpForm(): React.JSX.Element {
                 <FormControl error={Boolean(errors.firstName)}>
                   <FormLabel>First Name</FormLabel>
                   <Input {...field} />
-                  {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
+                  {errors.firstName ? (
+                    <FormHelperText>{errors.firstName.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
@@ -161,7 +223,9 @@ export function SignUpForm(): React.JSX.Element {
                 <FormControl error={Boolean(errors.lastName)}>
                   <FormLabel>Last Name</FormLabel>
                   <Input {...field} />
-                  {errors.lastName ? <FormHelperText>{errors.lastName.message}</FormHelperText> : null}
+                  {errors.lastName ? (
+                    <FormHelperText>{errors.lastName.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
@@ -172,7 +236,9 @@ export function SignUpForm(): React.JSX.Element {
                 <FormControl error={Boolean(errors.email)}>
                   <FormLabel>Email Address</FormLabel>
                   <Input {...field} type="email" />
-                  {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
+                  {errors.email ? (
+                    <FormHelperText>{errors.email.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
@@ -183,7 +249,9 @@ export function SignUpForm(): React.JSX.Element {
                 <FormControl error={Boolean(errors.password)}>
                   <FormLabel>Password</FormLabel>
                   <Input {...field} type="password" />
-                  {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
+                  {errors.password ? (
+                    <FormHelperText>{errors.password.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
@@ -192,17 +260,14 @@ export function SignUpForm(): React.JSX.Element {
               name="terms"
               render={({ field }) => (
                 <FormControl error={Boolean(errors.terms)}>
-                  <Box               
+                  <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
                       gap: 1.5,
                     }}
                   >
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onChange={field.onChange} />
                     <Typography
                       level="body-sm"
                       sx={{
@@ -213,11 +278,15 @@ export function SignUpForm(): React.JSX.Element {
                       I have read the <Link>terms and conditions</Link>
                     </Typography>
                   </Box>
-                  {errors.terms ? <FormHelperText>{errors.terms.message}</FormHelperText> : null}
+                  {errors.terms ? (
+                    <FormHelperText>{errors.terms.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
-            {errors.root ? <Alert color="danger">{errors.root.message}</Alert> : null}
+            {errors.root ? (
+              <Alert color="danger">{errors.root.message}</Alert>
+            ) : null}
             <Button disabled={isPending} type="submit">
               Create Account
             </Button>
