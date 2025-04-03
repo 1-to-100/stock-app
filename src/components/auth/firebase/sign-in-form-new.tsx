@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import RouterLink from 'next/link';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {zodResolver} from '@hookform/resolvers/zod';
 import Alert from '@mui/joy/Alert';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
@@ -18,18 +18,17 @@ import Stack from '@mui/joy/Stack';
 import Tab from '@mui/joy/Tab';
 import TabList from '@mui/joy/TabList';
 import Tabs from '@mui/joy/Tabs';
-import { Eye as EyeIcon } from '@phosphor-icons/react/dist/ssr/Eye';
-import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlash';
-import {GoogleAuthProvider, sendSignInLinkToEmail, signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
-import type { Auth } from 'firebase/auth';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import {Eye as EyeIcon} from '@phosphor-icons/react/dist/ssr/Eye';
+import {EyeSlash as EyeSlashIcon} from '@phosphor-icons/react/dist/ssr/EyeSlash';
+import {Auth, sendSignInLinkToEmail, signInWithEmailLink} from 'firebase/auth';
+import {GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
+import {Controller, useForm} from 'react-hook-form';
+import {z as zod} from 'zod';
 
-import { paths } from '@/paths';
-import { getFirebaseAuth } from '@/lib/auth/firebase/client';
-import { DynamicLogo } from '@/components/core/logo';
-import { toast } from '@/components/core/toaster';
-import Typography from '@mui/joy/Typography';
+import {paths} from '@/paths';
+import {getFirebaseAuth} from '@/lib/auth/firebase/client';
+import {DynamicLogo} from '@/components/core/logo';
+import {toast} from '@/components/core/toaster';
 
 interface OAuthProvider {
     id: 'google' | 'github';
@@ -37,16 +36,16 @@ interface OAuthProvider {
     logo: string;
 }
 
-const oAuthProviders = [{ id: 'google', name: 'Google', logo: '/assets/logo-google.svg' }] satisfies OAuthProvider[];
+const oAuthProviders = [{id: 'google', name: 'Google', logo: '/assets/logo-google.svg'}] satisfies OAuthProvider[];
 
 const schema = zod.object({
-    email: zod.string().min(1, { message: 'Email is required' }).email(),
-    password: zod.string().min(1, { message: 'Password is required' }),
+    email: zod.string().min(1, {message: 'Email is required'}).email(),
+    password: zod.string().min(1, {message: 'Password is required'}),
 });
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { email: '', password: '' } satisfies Values;
+const defaultValues = {email: '', password: ''} satisfies Values;
 
 const magicLinkSchema = zod.object({
     email: zod.string().min(1, {message: 'Email is required'}).email(),
@@ -59,16 +58,8 @@ const magicLinkDefaultValues = {email: ''} satisfies MagicLinkValues;
 export function SignInForm(): React.JSX.Element {
     const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
 
-    const [showPassword, setShowPassword] = React.useState<boolean>();
-
     const [isPending, setIsPending] = React.useState<boolean>(false);
 
-    const {
-        control,
-        handleSubmit,
-        setError,
-        formState: { errors },
-    } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
     const onAuth = React.useCallback(
         async (providerId: OAuthProvider['id']): Promise<void> => {
@@ -96,30 +87,14 @@ export function SignInForm(): React.JSX.Element {
         [firebaseAuth]
     );
 
-    const onSubmit = React.useCallback(
-        async (values: Values): Promise<void> => {
-            setIsPending(true);
-
-            try {
-                await signInWithEmailAndPassword(firebaseAuth, values.email, values.password);
-                // UserProvider will handle Router refresh
-                // After refresh, GuestGuard will handle the redirect
-            } catch (err) {
-                setError('root', { type: 'server', message: (err as { message: string }).message });
-                setIsPending(false);
-            }
-        },
-        [firebaseAuth, setError]
-    );
 
     return (
         <Stack spacing={5}>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-                    <DynamicLogo colorDark="light" colorLight="dark" height={24} width={150} />
+            <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                <Box component={RouterLink} href={paths.home} sx={{display: 'inline-block', fontSize: 0}}>
+                    <DynamicLogo colorDark="light" colorLight="dark" height={32} width={154}/>
                 </Box>
             </Box>
-            <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}>Welcome to StockApp <br /> admin panel</Box>
             <Tabs value="sign-in" variant="custom">
                 <TabList>
                     <Tab component={RouterLink} href={paths.auth.firebase.signIn} value="sign-in">
@@ -135,8 +110,9 @@ export function SignInForm(): React.JSX.Element {
                     {oAuthProviders.map(
                         (provider): React.JSX.Element => (
                             <Button
+                                color="neutral"
                                 disabled={isPending}
-                                endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
+                                endDecorator={<Image alt="" height={24} src={provider.logo} width={24}/>}
                                 key={provider.id}
                                 onClick={(): void => {
                                     onAuth(provider.id).catch(() => {
@@ -151,12 +127,9 @@ export function SignInForm(): React.JSX.Element {
                     )}
                 </Stack>
                 <Divider>or</Divider>
-
-                <CredentialsSignInForm />
-
+                <MagicLinkSignInForm/>
                 <Divider>or</Divider>
-
-                <MagicLinkSignInForm />
+                <CredentialsSignInForm/>
             </Stack>
         </Stack>
     );
@@ -200,18 +173,19 @@ const CredentialsSignInForm = () => {
                 <Controller
                     control={control}
                     name="email"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormControl error={Boolean(errors.email)}>
                             <FormLabel>Email Address</FormLabel>
-                            <Input {...field} type="email" />
+                            <Input {...field} type="email"/>
                             {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
                         </FormControl>
                     )}
                 />
+
                 <Controller
                     control={control}
                     name="password"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormControl error={Boolean(errors.password)}>
                             <FormLabel>Password</FormLabel>
                             <Input
@@ -223,9 +197,9 @@ const CredentialsSignInForm = () => {
                                         }}
                                     >
                                         {showPassword ? (
-                                            <EyeSlashIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                                            <EyeSlashIcon fontSize="var(--Icon-fontSize)" weight="bold"/>
                                         ) : (
-                                            <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                                            <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold"/>
                                         )}
                                     </IconButton>
                                 }
@@ -236,7 +210,7 @@ const CredentialsSignInForm = () => {
                     )}
                 />
                 <div>
-                    <Link component={RouterLink} href={paths.auth.firebase.resetPassword} fontSize={'sm'} fontWeight="sm" marginBottom={2}>
+                    <Link component={RouterLink} href={paths.auth.firebase.resetPassword}>
                         Forgot password?
                     </Link>
                 </div>
@@ -253,8 +227,6 @@ const MagicLinkSignInForm = () => {
 
     const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
     const [isPending, setIsPending] = React.useState<boolean>(false);
-    const [showMessage, setShowMessage] = React.useState<boolean>(false);
-    const [email, setEmail] = React.useState<string>('');
 
     const {
         control,
@@ -271,12 +243,10 @@ const MagicLinkSignInForm = () => {
             try {
                 console.log('magic link sign in', values);
                 // await signInWithEmailAndPassword(firebaseAuth, values.email, values.password);
-                const response = await sendSignInLinkToEmail(firebaseAuth, values.email, {
+                await sendSignInLinkToEmail(firebaseAuth, values.email, {
                     url: `${window.location.origin}${paths.auth.firebase.signInComplete}?email=${values.email}`,
                     handleCodeInApp: true,
                 })
-                setEmail(values.email);
-                setShowMessage(true);
                 // UserProvider will handle Router refresh
                 // After refresh, GuestGuard will handle the redirect
             } catch (err) {
@@ -289,20 +259,6 @@ const MagicLinkSignInForm = () => {
         },
         [firebaseAuth, setError]
     );
-
-    if (showMessage) {
-        return (
-            <Box>
-                <Typography level="h3" textAlign="center">
-                    Check your email
-                </Typography>
-
-                <Typography textAlign="center">
-                    We emailed a magic link to <Typography fontWeight="lg">&quot;{email}&quot;</Typography>.
-                </Typography>
-            </Box>
-        )
-    }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -326,4 +282,3 @@ const MagicLinkSignInForm = () => {
         </form>
     )
 }
-
