@@ -125,7 +125,6 @@ export function SignUpForm(): React.JSX.Element {
           {oAuthProviders.map(
             (provider): React.JSX.Element => (
               <Button
-                color="neutral"
                 disabled={isPending}
                 endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
                 key={provider.id}
