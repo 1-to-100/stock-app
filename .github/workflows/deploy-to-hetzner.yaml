@@ -8,7 +8,34 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:      
+    steps:   
+      
+      - uses: actions/checkout@v2
+
+
+      - name: Build Docker Image
+        run: |
+          echo "${{ secrets.ENV_PROD }}" | base64 --decode > .env
+          docker build -t stock-app-web:latest .
+
+      - name: Save Docker Image
+        run: |
+          docker save stock-app-web:latest | gzip > stock-app-web.tar.gz
+
+      - name: Save Docker Image
+        run: |
+          ls -lah
+
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete
+          path: stock-app-web.tar.gz
+          remote_path: /opt/stock-app-web
+          remote_host: ${{ secrets.DEPLOY_HOST_PROD }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}          
+
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
@@ -17,7 +44,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /opt/stock-app-web
-            git pull https://${{ secrets.GH_PAT }}@github.com/Huboxt/stock-app-web.git
-            docker-compose build 
+            docker load < stock-app-web.tar.gz
             docker-compose up -d 
             docker system prune -af
