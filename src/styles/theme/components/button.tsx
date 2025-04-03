@@ -45,6 +45,7 @@ export const JoyButton = {
       }),
 
       ...(ownerState.variant === 'plain' && {
+        color: "var(--joy-palette-text-secondary)",
         backgroundColor: 'transparent',
         background: 'var(--joy-palette-background-primaryColor)',
         WebkitBackgroundClip: 'text',

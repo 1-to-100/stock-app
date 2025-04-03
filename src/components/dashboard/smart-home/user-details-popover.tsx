@@ -40,6 +40,7 @@ interface UserDetailsPopoverProps {
   onSave: (updatedUser: User) => void;
   anchorEl: HTMLElement | null;
   user: User | null;
+  onDelete: (userId: number) => void;
 }
 
 const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
@@ -48,6 +49,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   anchorEl,
   onSave,
   user,
+  onDelete,
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -89,10 +91,18 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
 
   const confirmDelete = () => {
     setOpenDeleteModal(false);
+    if (user) {
+      onDelete(user.id);
+    }
+    onClose();
   };
 
   const confirmDeactivate = () => {
     setOpenDeactivateModal(false);
+    if (user) {
+      const updatedUser = { ...user, status: "inactive" };
+      onSave(updatedUser);
+    }
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -130,6 +140,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const handleResetPassword = () => {
     setOpenResetPasswordModal(true);
     handleMenuClose();
+  };
+
+  const handleConfirmSuspend = () => {
+    if (user) {
+      const updatedUser = { ...user, status: "suspended" };
+      onSave(updatedUser);
+      setOpenSuspendModal(false);
+    }
   };
 
   const handleSuspend = () => {
@@ -191,14 +209,6 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <Button
                 variant="plain"
                 size="sm"
-                sx={{
-                  color: "var(--joy-palette-text-secondary)",
-                  "&:hover": {
-                    background: "transparent",
-                    opacity: "0.8",
-                  },
-                  p: "0 5px",
-                }}
                 onClick={onClose}
               >
                 <XIcon fontSize="20px" weight="bold" />
@@ -557,7 +567,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   <Typography
                     level="body-sm"
                     fontWeight="300"
-                    sx={{ color: "#111827" }}
+                    sx={{ color: "var(--joy-palette-text-primary)" }}
                   >
                     No activity data available
                   </Typography>
@@ -570,6 +580,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
           open={openDeleteModal}
           onClose={() => setOpenDeleteModal(false)}
           onConfirm={confirmDelete}
+          usersToDelete={[user.name]}
         />
 
         <DeleteDeactivateUserModal
@@ -577,6 +588,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
           onClose={() => setOpenDeactivateModal(false)}
           onConfirm={confirmDeactivate}
           isDeactivate={true}
+          usersToDelete={[user.name]}
         />
       </Sheet>
 
@@ -594,13 +606,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         open={openSuspendModal}
         onClose={() => setOpenSuspendModal(false)}
         userName={user.name}
-        onConfirm={(reason, customReason) => {
-          console.log(
-            `Suspending user for reason: ${reason}${
-              customReason ? `, details: ${customReason}` : ""
-            }`
-          );
-        }}
+        onConfirm={handleConfirmSuspend}
       />
 
       <AddEditUser
