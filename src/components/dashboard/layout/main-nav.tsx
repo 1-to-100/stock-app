@@ -6,72 +6,64 @@ import Badge from '@mui/joy/Badge';
 import Box from '@mui/joy/Box';
 import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
-import Input from '@mui/joy/Input'; 
-import { Bell as BellIcon } from '@phosphor-icons/react/dist/ssr/Bell';
-import { List as ListIcon } from '@phosphor-icons/react/dist/ssr/List';
-import { MagnifyingGlass as SearchIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'; 
+import {Bell as BellIcon} from '@phosphor-icons/react/dist/ssr/Bell';
+import {List as ListIcon} from '@phosphor-icons/react/dist/ssr/List';
 
-import type { NavItemConfig } from '@/types/nav';
-import type { User } from '@/types/user';
-import { usePopover } from '@/hooks/use-popover';
+import type {NavItemConfig} from '@/types/nav';
+import {usePopover} from '@/hooks/use-popover';
 
-import { MobileNav } from './mobile-nav';
-import { NotificationsPopover } from './notifications-popover';
-import { UserPopover } from './user-popover/user-popover';
+import {MobileNav} from './mobile-nav';
+import {NotificationsPopover} from './notifications-popover';
+import {UserPopover} from './user-popover/user-popover';
 import Typography from '@mui/joy/Typography';
-
-const user = {
-  id: 'USR-000',
-  avatar: '/assets/avatar.png',
-  firstName: 'Rene',
-  lastName: 'Wells',
-  email: 'rene@devias.io',
-} satisfies User;
+import {useAuth} from '@/contexts/auth/user-context';
 
 export interface MainNavProps {
-  items: NavItemConfig[];
+    items: NavItemConfig[];
 }
 
-export function MainNav({ items }: MainNavProps): React.JSX.Element {
-  const [openNav, setOpenNav] = React.useState<boolean>(false);
-  const notificationsPopover = usePopover<HTMLButtonElement>();
-  const userPopover = usePopover<HTMLButtonElement>();
+export function MainNav({items}: MainNavProps): React.JSX.Element {
+    const [openNav, setOpenNav] = React.useState<boolean>(false);
+    const notificationsPopover = usePopover<HTMLButtonElement>();
+    const userPopover = usePopover<HTMLButtonElement>();
+    const {user} = useAuth();
 
-  return (
-    <React.Fragment>
-      <Box
-        component="header"
-        sx={{
-          bgcolor: 'var(--Layout-bg)',
-          left: 0,
-          position: 'sticky',
-          pt: { lg: 'var(--Layout-gap)' },
-          top: 0,
-          zIndex: 'var(--MainNav-zIndex)',
-        }}
-      >
-        <Box
-          sx={{
-            bgcolor: 'var(--Content-background)',
-            borderRadius: { lg: 'var(--Content-radius) var(--Content-radius) 0 0' },
-            display: 'flex',
-            flex: '1 1 auto',
-            minHeight: 'var(--MainNav-height, 72px)',
-            px: { xs: 2, lg: 3 },
-          }}
-        >
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flex: '1 1 auto' }}>
-            <IconButton
-              color="neutral"
-              onClick={(): void => {
-                setOpenNav(true);
-              }}
-              sx={{ display: { lg: 'none' } }}
-              variant="plain"
+
+    return (
+        <React.Fragment>
+            <Box
+                component="header"
+                sx={{
+                    bgcolor: 'var(--Layout-bg)',
+                    left: 0,
+                    position: 'sticky',
+                    pt: {lg: 'var(--Layout-gap)'},
+                    top: 0,
+                    zIndex: 'var(--MainNav-zIndex)',
+                }}
             >
-              <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-            </IconButton>
-            {/* <Input
+                <Box
+                    sx={{
+                        bgcolor: 'var(--Content-background)',
+                        borderRadius: {lg: 'var(--Content-radius) var(--Content-radius) 0 0'},
+                        display: 'flex',
+                        flex: '1 1 auto',
+                        minHeight: 'var(--MainNav-height, 72px)',
+                        px: {xs: 2, lg: 3},
+                    }}
+                >
+                    <Stack direction="row" spacing={2} sx={{alignItems: 'center', flex: '1 1 auto'}}>
+                        <IconButton
+                            color="neutral"
+                            onClick={(): void => {
+                                setOpenNav(true);
+                            }}
+                            sx={{display: {lg: 'none'}}}
+                            variant="plain"
+                        >
+                            <ListIcon fontSize="var(--Icon-fontSize)" weight="bold"/>
+                        </IconButton>
+                        {/* <Input
               startDecorator={<SearchIcon />}
               placeholder="Search"
               sx={{
@@ -89,64 +81,64 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
                   color: '#636B74',
                 },
                 '& .MuiInput-startDecorator': {
-                  color: '#636B74', 
+                  color: '#636B74',
                   marginLeft: '2px',
                 },
               }}
             /> */}
-          </Stack>
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ alignItems: 'center', flex: '1 1 auto', justifyContent: 'flex-end' }}
-          >
-            <Badge color="danger" sx={{ '& .MuiBadge-badge': { top: '6px', right: '6px' } }}>
-              <IconButton
-                color="neutral"
-                onClick={notificationsPopover.handleOpen}
-                ref={notificationsPopover.anchorRef}
-                variant="plain"
-              >
-                <BellIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-              </IconButton>
-            </Badge>
-            <Badge
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              color="success"
-              onClick={userPopover.handleOpen}
-              ref={userPopover.anchorRef}
-              sx={{ cursor: 'pointer', '& .MuiBadge-badge': { bottom: '4px', right: '4px' } }}
-            >
-              <Avatar src={user.avatar} />
-            </Badge>
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <Typography fontWeight="lg" textColor="inherit">
-                {user.firstName} {user.lastName}
-              </Typography>
-              <Typography level="body-xs" textColor="neutral.500">
-                {user.email}
-              </Typography>
+                    </Stack>
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        sx={{alignItems: 'center', flex: '1 1 auto', justifyContent: 'flex-end'}}
+                    >
+                        <Badge color="danger" sx={{'& .MuiBadge-badge': {top: '6px', right: '6px'}}}>
+                            <IconButton
+                                color="neutral"
+                                onClick={notificationsPopover.handleOpen}
+                                ref={notificationsPopover.anchorRef}
+                                variant="plain"
+                            >
+                                <BellIcon fontSize="var(--Icon-fontSize)" weight="bold"/>
+                            </IconButton>
+                        </Badge>
+                        <Badge
+                            anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+                            color="success"
+                            onClick={userPopover.handleOpen}
+                            ref={userPopover.anchorRef}
+                            sx={{cursor: 'pointer', '& .MuiBadge-badge': {bottom: '4px', right: '4px'}}}
+                        >
+                            <Avatar src={user?.avatar}/>
+                        </Badge>
+                        <Box sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                            <Typography fontWeight="lg" textColor="inherit">
+                                {user?.name}
+                            </Typography>
+                            <Typography level="body-xs" textColor="neutral.500">
+                                {user?.email}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </Box>
             </Box>
-          </Stack>
-        </Box>
-      </Box>
-      <MobileNav
-        items={items}
-        onClose={(): void => {
-          setOpenNav(false);
-        }}
-        open={openNav}
-      />
-      <NotificationsPopover
-        anchorEl={notificationsPopover.anchorRef.current}
-        onClose={notificationsPopover.handleClose}
-        open={notificationsPopover.open}
-      />
-      <UserPopover 
-        anchorEl={userPopover.anchorRef.current} 
-        onClose={userPopover.handleClose} 
-        open={userPopover.open} 
-      />
-    </React.Fragment>
-  );
+            <MobileNav
+                items={items}
+                onClose={(): void => {
+                    setOpenNav(false);
+                }}
+                open={openNav}
+            />
+            <NotificationsPopover
+                anchorEl={notificationsPopover.anchorRef.current}
+                onClose={notificationsPopover.handleClose}
+                open={notificationsPopover.open}
+            />
+            <UserPopover
+                anchorEl={userPopover.anchorRef.current}
+                onClose={userPopover.handleClose}
+                open={userPopover.open}
+            />
+        </React.Fragment>
+    );
 }

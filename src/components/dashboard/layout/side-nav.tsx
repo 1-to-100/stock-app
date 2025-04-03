@@ -302,7 +302,9 @@ function NavItem({
             ...(active && {
               bgcolor: "var(--NavItem-active-background)",
               borderRadius: "30px",
+              border: "1px solid var(--joy-palette-divider)",
               color: "var(--joy-palette-text-primary)",
+              boxShadow: "var(--joy-shadow-sm)"
             }),
             ...(open && { color: "var(--NavItem-open-color)" }),
             // '&:hover': {
@@ -321,8 +323,8 @@ function NavItem({
               <Icon
                 fill={
                   active
-                    ? "var(--NavItem-text-primary)"
-                    : "var(--NavItem-text-primary)"
+                    ? "var(--joy-palette-text-primary)"
+                    : "var(--joy-palette-text-primary)"
                 }
                 fontSize="var(--joy-fontSize-xl)"
                 weight={forceOpen || active ? "regular" : "thin"}

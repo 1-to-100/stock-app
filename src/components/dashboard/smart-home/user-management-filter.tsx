@@ -155,17 +155,17 @@ const UserManagementFilter = ({
         }
         onClick={handleOpen}
         sx={{
-          borderColor: totalFiltersApplied > 0 ? "transparent" : "#E5E7EB",
+          borderColor: totalFiltersApplied > 0 ? "transparent" : "var(--joy-palette-divider)",
           borderRadius: "20px",
-          background: totalFiltersApplied > 0 ? "#C7C5FC" : "#FFFFFF",
+          background: totalFiltersApplied > 0 ? "#C7C5FC" : "var(--joy-palette-background-mainBg)",
           color:
             totalFiltersApplied > 0
               ? "#3D37DD"
               : "var(--joy-palette-text-primary)",
           padding: "7px 14px",
-          "&:hover": {
-            background: totalFiltersApplied > 0 ? "#C7C5FC" : "#F5F7FA",
-          },
+          // "&:hover": {
+          //   background: totalFiltersApplied > 0 ? "#C7C5FC" : "#F5F7FA",
+          // },
         }}
       >
         {totalFiltersApplied > 0
@@ -184,6 +184,7 @@ const UserManagementFilter = ({
             width: "550px",
             borderRadius: "8px",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+            border: "1px solid var(--joy-palette-divider)",
             zIndex: 1300,
             p: 2,
             display: "flex",
@@ -205,7 +206,7 @@ const UserManagementFilter = ({
               </Typography>
               <Stack
                 spacing={1}
-                sx={{ borderRight: "1px solid #E5E7EB", paddingRight: "20px" }}
+                sx={{ borderRight: "1px solid var(--joy-palette-divider)", paddingRight: "20px" }}
               >
                 <Box
                   sx={{
@@ -214,8 +215,9 @@ const UserManagementFilter = ({
                     justifyContent: "space-between",
                     p: "6px 12px",
                     bgcolor:
-                      activeCategory === "Status" ? "#F5F7FA" : "transparent",
+                      activeCategory === "Status" ? "var(--joy-palette-background-mainBg)" : "transparent",
                     borderRadius: "4px",
+                    border:  activeCategory === "Status" ?  "1px solid var(--joy-palette-divider)" : "none",
                     cursor: "pointer",
                   }}
                   onClick={() => handleCategoryClick("Status")}
@@ -223,7 +225,7 @@ const UserManagementFilter = ({
                   <Typography
                     level="body-md"
                     fontWeight="400"
-                    sx={{ color: "#32383E", fontSize: "16px" }}
+                    sx={{ color: activeCategory === "Status" ? "var(--joy-palette-text-primary)" : "#32383E", fontSize: "16px" }}
                   >
                     Status
                   </Typography>
@@ -236,8 +238,9 @@ const UserManagementFilter = ({
                     justifyContent: "space-between",
                     p: "6px 12px",
                     bgcolor:
-                      activeCategory === "Customer" ? "#F5F7FA" : "transparent",
+                      activeCategory === "Customer" ? "var(--joy-palette-background-mainBg)" : "transparent",
                     borderRadius: "4px",
+                    border:  activeCategory === "Customer" ?  "1px solid var(--joy-palette-divider)" : "none",
                     cursor: "pointer",
                   }}
                   onClick={() => handleCategoryClick("Customer")}
@@ -245,7 +248,7 @@ const UserManagementFilter = ({
                   <Typography
                     level="body-md"
                     fontWeight="400"
-                    sx={{ color: "#32383E", fontSize: "16px" }}
+                    sx={{ color: activeCategory === "Customer" ? "var(--joy-palette-text-primary)" : "#32383E", fontSize: "16px" }}
                   >
                     Customer
                   </Typography>
@@ -258,8 +261,9 @@ const UserManagementFilter = ({
                     justifyContent: "space-between",
                     p: "6px 12px",
                     bgcolor:
-                      activeCategory === "Role" ? "#F5F7FA" : "transparent",
+                      activeCategory === "Role" ? "var(--joy-palette-background-mainBg)" : "transparent",
                     borderRadius: "4px",
+                    border:  activeCategory === "Role" ?  "1px solid var(--joy-palette-divider)" : "none",
                     cursor: "pointer",
                   }}
                   onClick={() => handleCategoryClick("Role")}
@@ -267,7 +271,7 @@ const UserManagementFilter = ({
                   <Typography
                     level="body-md"
                     fontWeight="400"
-                    sx={{ color: "#32383E", fontSize: "16px" }}
+                    sx={{ color: activeCategory === "Role" ? "var(--joy-palette-text-primary)" : "#32383E", fontSize: "16px" }}
                   >
                     Role
                   </Typography>
@@ -280,8 +284,9 @@ const UserManagementFilter = ({
                     justifyContent: "space-between",
                     p: "6px 12px",
                     bgcolor:
-                      activeCategory === "Persona" ? "#F5F7FA" : "transparent",
+                      activeCategory === "Persona" ? "var(--joy-palette-background-mainBg)" : "transparent",
                     borderRadius: "4px",
+                    border:  activeCategory === "Persona" ?  "1px solid var(--joy-palette-divider)" : "none",
                     cursor: "pointer",
                   }}
                   onClick={() => handleCategoryClick("Persona")}
@@ -289,7 +294,7 @@ const UserManagementFilter = ({
                   <Typography
                     level="body-md"
                     fontWeight="400"
-                    sx={{ color: "#32383E", fontSize: "16px" }}
+                    sx={{ color: activeCategory === "Persona" ? "var(--joy-palette-text-primary)" : "#32383E", fontSize: "16px" }}
                   >
                     Persona
                   </Typography>
@@ -432,16 +437,6 @@ const UserManagementFilter = ({
             <Button
               variant="plain"
               onClick={handleReset}
-              sx={{
-                color: "#3D37DD",
-                fontWeight: 600,
-                fontSize: "14px",
-                padding: 0,
-                "&:hover": {
-                  background: "transparent",
-                  opacity: "0.8",
-                },
-              }}
             >
               Reset filters
             </Button>
@@ -449,16 +444,6 @@ const UserManagementFilter = ({
               <Button
                 variant="outlined"
                 onClick={handleClose}
-                sx={{
-                  borderRadius: "20px",
-                  border: "1px solid #E5E7EB",
-                  color: "#111827",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  px: 3,
-                  py: 1,
-                  "&:hover": { bgcolor: "#F3F4F6" },
-                }}
               >
                 Cancel
               </Button>

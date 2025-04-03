@@ -18,6 +18,7 @@ declare module '@mui/joy/styles' {
   interface PaletteBackground {
     mainBg: string;
     navActiveBg: string;
+    primaryColor: string;
   }
 }
 

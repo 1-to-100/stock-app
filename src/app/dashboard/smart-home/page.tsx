@@ -430,9 +430,11 @@ export default function Page(): React.JSX.Element {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const rowsPerPage = 10;
+  const rowsPerPage = 11;
   const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
   useEffect(() => {
     if (!filtersApplied) {
@@ -710,7 +712,7 @@ export default function Page(): React.JSX.Element {
     alignItems: "center",
     cursor: "pointer",
     color: "var(--joy-palette-text-primary)",
-    "&:hover": { backgroundColor: "#f5f5f5" },
+    "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
   };
 
   const iconStyle = {
@@ -931,223 +933,256 @@ export default function Page(): React.JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {(filtersApplied
-                ? filteredUsers.slice(startIndex, startIndex + rowsPerPage)
-                : filteredUsers
-              ).map((user, index) => (
-                <tr
-                  key={user.id}
-                  onMouseEnter={() => setHoveredRow(index)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <td>
-                    <Checkbox
-                      checked={selectedRows.includes(user.id)}
-                      onChange={() => handleRowCheckboxChange(user.id)}
-                    />
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    <Typography level="body-md" color="neutral">
+                      No items found
+                    </Typography>
                   </td>
-                  <td>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{ alignItems: "center" }}
-                    >
-                      {user.avatar ? (
-                        <Avatar
-                          src={user.avatar}
-                          sx={{ width: 28, height: 28 }}
-                        />
-                      ) : (
-                        <Avatar sx={{ width: 28, height: 28 }} />
-                      )}
-                      <Typography>{user.name}</Typography>
-                      <Tooltip
-                        title={user.status}
-                        placement="top"
+                </tr>
+              ) : currentUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    <Typography level="body-md" color="neutral">
+                      No items found
+                    </Typography>
+                  </td>
+                </tr>
+              ) : (
+                currentUsers.map((user, index) => (
+                  <tr
+                    key={user.id}
+                    onMouseEnter={() => setHoveredRow(index)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                  >
+                    <td>
+                      <Checkbox
+                        checked={selectedRows.includes(user.id)}
+                        onChange={() => handleRowCheckboxChange(user.id)}
+                      />
+                    </td>
+                    <td>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: "center" }}
+                      >
+                        {user.avatar ? (
+                          <Avatar
+                            src={user.avatar}
+                            sx={{ width: 28, height: 28 }}
+                          />
+                        ) : (
+                          <Avatar sx={{ width: 28, height: 28 }} />
+                        )}
+                        <Typography>{user.name}</Typography>
+                        <Tooltip
+                          title={user.status}
+                          placement="top"
+                          sx={{
+                            background: "#DAD8FD",
+                            color: "#3D37DD",
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              bgcolor:
+                                user.status === "active"
+                                  ? "#1A7D36"
+                                  : user.status === "inactive"
+                                  ? "#D3232F"
+                                  : "#FAE17D",
+                              borderRadius: "50%",
+                              width: "10px",
+                              height: "10px",
+                              display: "inline-block",
+                            }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                    </td>
+                    <td>
+                      <Box
                         sx={{
-                          background: "#DAD8FD",
-                          color: "#3D37DD",
-                          textTransform: "capitalize",
+                          position: "relative",
+                          display: "inline-block",
+                          fontWeight: 400,
+                          color: "var(--joy-palette-text-secondary)",
                         }}
                       >
-                        <Box
-                          sx={{
-                            bgcolor:
-                              user.status === "active"
-                                ? "#1A7D36"
-                                : user.status === "inactive"
-                                ? "#D3232F"
-                                : "#FAE17D",
-                            borderRadius: "50%",
-                            width: "10px",
-                            height: "10px",
-                            display: "inline-block",
-                          }}
-                        />
-                      </Tooltip>
-                    </Stack>
-                  </td>
-                  <td>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        display: "inline-block",
+                        {user.email}
+                        {hoveredRow === index && (
+                          <Tooltip
+                            title="Copy Email"
+                            placement="top"
+                            sx={{
+                              background: "#DAD8FD",
+                              color: "#3D37DD",
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            <IconButton
+                              size="sm"
+                              onClick={() => {
+                                if (typeof user.email === "string") {
+                                  handleCopyEmail(user.email);
+                                }
+                              }}
+                              sx={{
+                                position: "absolute",
+                                right: "-30px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                bgcolor: "transparent",
+                                "&:hover": {
+                                  bgcolor: "transparent",
+                                },
+                              }}
+                            >
+                              <CopyIcon fontSize="var(--Icon-fontSize)" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {copiedEmail === user.email && (
+                          <Box
+                            sx={{
+                              position: "fixed",
+                              bottom: "20px",
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              bgcolor: "#DCFCE7",
+                              color: "#16A34A",
+                              padding: "4px 6px",
+                              borderRadius: "10px",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              zIndex: 1000,
+                            }}
+                          >
+                            Copied to clipboard
+                            <IconButton
+                              size="sm"
+                              onClick={() => setCopiedEmail(null)}
+                              sx={{ color: "#16A34A" }}
+                            >
+                              <X fontSize="var(--Icon-fontSize)" />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </Box>
+                    </td>
+                    <td
+                      style={{
                         fontWeight: 400,
                         color: "var(--joy-palette-text-secondary)",
                       }}
                     >
-                      {user.email}
-                      {hoveredRow === index && (
-                        <IconButton
-                          size="sm"
-                          onClick={() => {
-                            if (typeof user.email === "string") {
-                              handleCopyEmail(user.email);
-                            }
-                          }}
-                          sx={{
-                            position: "absolute",
-                            right: "-30px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            bgcolor: "transparent",
-                            "&:hover": {
-                              bgcolor: "transparent",
-                            },
-                          }}
-                        >
-                          <CopyIcon fontSize="var(--Icon-fontSize)" />
-                        </IconButton>
-                      )}
-                      {copiedEmail === user.email && (
+                      {user.customer}
+                    </td>
+                    <td style={{ color: "var(--joy-palette-text-secondary)" }}>
+                      {user.role}
+                    </td>
+                    <td style={{ color: "var(--joy-palette-text-secondary)" }}>
+                      {user.persona}
+                    </td>
+                    <td>
+                      <IconButton
+                        size="sm"
+                        onClick={(event) => {
+                          handleMenuOpen(event, index);
+                        }}
+                      >
+                        <DotsThreeVertical
+                          weight="bold"
+                          size={22}
+                          color="var(--joy-palette-text-secondary)"
+                        />
+                      </IconButton>
+                      <Popper
+                        open={menuRowIndex === index && Boolean(anchorEl)}
+                        anchorEl={anchorEl}
+                        placement="bottom-start"
+                        style={{
+                          minWidth: "150px",
+                          borderRadius: "8px",
+                          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                          backgroundColor:
+                            "var(--joy-palette-background-surface)",
+                          zIndex: 1300,
+                          border: "1px solid var(--joy-palette-divider)",
+                        }}
+                      >
                         <Box
-                          sx={{
-                            position: "fixed",
-                            bottom: "20px",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            bgcolor: "#DCFCE7",
-                            color: "#16A34A",
-                            padding: "4px 6px",
-                            borderRadius: "10px",
-                            fontSize: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            zIndex: 1000,
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleOpenDetail(event, user.id);
                           }}
+                          sx={menuItemStyle}
                         >
-                          Copied to clipboard
-                          <IconButton
-                            size="sm"
-                            onClick={() => setCopiedEmail(null)}
-                            sx={{ color: "#16A34A" }}
-                          >
-                            <X fontSize="var(--Icon-fontSize)" />
-                          </IconButton>
+                          <EyeIcon fontSize="20px" style={iconStyle} />
+                          Open detail
                         </Box>
-                      )}
-                    </Box>
-                  </td>
-                  <td
-                    style={{
-                      fontWeight: 400,
-                      color: "var(--joy-palette-text-secondary)",
-                    }}
-                  >
-                    {user.customer}
-                  </td>
-                  <td style={{ color: "var(--joy-palette-text-secondary)" }}>
-                    {user.role}
-                  </td>
-                  <td style={{ color: "var(--joy-palette-text-secondary)" }}>
-                    {user.persona}
-                  </td>
-                  <td>
-                    <IconButton
-                      size="sm"
-                      onClick={(event) => {
-                        handleMenuOpen(event, index);
-                      }}
-                    >
-                      <DotsThreeVertical
-                        weight="bold"
-                        size={22}
-                        color="var(--joy-palette-text-secondary)"
-                      />
-                    </IconButton>
-                    <Popper
-                      open={menuRowIndex === index && Boolean(anchorEl)}
-                      anchorEl={anchorEl}
-                      placement="bottom-start"
-                      style={{
-                        minWidth: "150px",
-                        borderRadius: "8px",
-                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        backgroundColor: "white",
-                        zIndex: 1300,
-                      }}
-                    >
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleOpenDetail(event, user.id);
-                        }}
-                        sx={menuItemStyle}
-                      >
-                        <EyeIcon fontSize="20px" style={iconStyle} />
-                        Open detail
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleEdit(user.id);
-                        }}
-                        sx={menuItemStyle}
-                      >
-                        <PencilIcon fontSize="20px" style={iconStyle} />
-                        Edit
-                      </Box>
-                      <Box sx={menuItemStyle}>
-                        <ArrowRightIcon fontSize="20px" style={iconStyle} />
-                        Impersonate user
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleDeactivate(user.id);
-                          handleMenuClose();
-                        }}
-                        sx={menuItemStyle}
-                      >
-                        <ToggleLeft fontSize="20px" style={iconStyle} />
-                        Deactivate
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleResetPassword(user.id);
-                        }}
-                        sx={menuItemStyle}
-                      >
-                        <Password fontSize="20px" style={iconStyle} />
-                        Reset password
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleDeleteRow(user.id);
-                          handleMenuClose();
-                        }}
-                        sx={{ ...menuItemStyle, color: "#EF4444" }}
-                      >
-                        <TrashIcon fontSize="20px" style={iconStyle} />
-                        Delete
-                      </Box>
-                    </Popper>
-                  </td>
-                </tr>
-              ))}
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleEdit(user.id);
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <PencilIcon fontSize="20px" style={iconStyle} />
+                          Edit
+                        </Box>
+                        <Box sx={menuItemStyle}>
+                          <ArrowRightIcon fontSize="20px" style={iconStyle} />
+                          Impersonate user
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleDeactivate(user.id);
+                            handleMenuClose();
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <ToggleLeft fontSize="20px" style={iconStyle} />
+                          Deactivate
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleResetPassword(user.id);
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <Password fontSize="20px" style={iconStyle} />
+                          Reset password
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleDeleteRow(user.id);
+                            handleMenuClose();
+                          }}
+                          sx={{ ...menuItemStyle, color: "#EF4444" }}
+                        >
+                          <TrashIcon fontSize="20px" style={iconStyle} />
+                          Delete
+                        </Box>
+                      </Popper>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </Table>
         </Box>

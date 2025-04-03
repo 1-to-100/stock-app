@@ -28,19 +28,19 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
       sx={{
         width: { xs: "100%", sm: "300px" },
         display: { xs: "none", sm: "flex" },
-        bgcolor: "#F5F7FA",
+        bgcolor: "var(--NavItem-active-background)",
         borderRadius: "20px",
-        border: "none",
+        border: "1px solid var(--joy-palette-divider)",
         "&:hover": {
-          bgcolor: "#EDEFF2",
-        },
+            background: "var(--joy-palette-background-mainBg)",
+          },
         "& .MuiInput-input": {
           padding: "8px 0px",
           fontSize: "16px",
-          color: "#636B74",
+          color: "var(--joy-palette-text-primary)",
         },
         "& .MuiInput-startDecorator": {
-          color: "#636B74",
+          color: "var(--joy-palette-text-primary)",
           marginLeft: "2px",
         },
       }}
