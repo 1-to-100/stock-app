@@ -107,9 +107,10 @@ export function SignInForm(): React.JSX.Element {
     <Stack spacing={5}>
       <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-          <DynamicLogo colorDark="light" colorLight="dark" height={32} width={154} />
+          <DynamicLogo colorDark="light" colorLight="dark" height={24} width={150} />
         </Box>
       </Box>
+      <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}>Welcome to StockApp <br /> admin panel</Box>
       <Tabs value="sign-in" variant="custom">
         <TabList>
           <Tab component={RouterLink} href={paths.auth.firebase.signIn} value="sign-in">
@@ -183,7 +184,7 @@ export function SignInForm(): React.JSX.Element {
               )}
             />
             <div>
-              <Link component={RouterLink} href={paths.auth.firebase.resetPassword}>
+              <Link component={RouterLink} href={paths.auth.firebase.resetPassword} fontSize={'sm'} fontWeight="sm" marginBottom={2}>
                 Forgot password?
               </Link>
             </div>

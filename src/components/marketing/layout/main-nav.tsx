@@ -15,6 +15,7 @@ import { paths } from '@/paths';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { Logo } from '@/components/core/logo';
 import { NoSsr } from '@/components/core/no-ssr';
+import { DynamicLogo } from '@/components/core/logo';
 
 import { ColorSchemeSwitch } from './color-scheme-switch';
 import { MobileNav } from './mobile-nav';
@@ -46,7 +47,7 @@ export function MainNav(): React.JSX.Element {
         >
           <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
             <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-              <Logo color="light" height={24} width={82} />
+              <DynamicLogo  colorDark="light" colorLight="dark" height={24} width={82} />
             </Box>
           </Stack>
           <Stack

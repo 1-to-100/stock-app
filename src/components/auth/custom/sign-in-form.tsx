@@ -114,7 +114,7 @@ export function SignInForm(): React.JSX.Element {
         </Box>
       </Box>
       <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}  >Welcome to StockApp <br /> admin panel</Box>
-      {/* <Tabs value="sign-in" variant="custom">
+      <Tabs value="sign-in" variant="custom">
         <TabList>
           <Tab component={RouterLink} href={paths.auth.custom.signIn} value="sign-in">
             Sign In
@@ -123,7 +123,7 @@ export function SignInForm(): React.JSX.Element {
             Create Account
           </Tab>
         </TabList>
-      </Tabs> */}
+      </Tabs>
       <Stack spacing={3}>
         <Stack spacing={2}>
           {oAuthProviders.map(

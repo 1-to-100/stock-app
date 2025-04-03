@@ -21,6 +21,7 @@ import { useState, useEffect, useRef } from "react";
 import AddEditUser from "../modals/AddEditUser";
 import { Popper } from "@mui/base/Popper";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { useColorScheme } from '@mui/joy/styles';
 
 interface User {
   id: number;
@@ -56,6 +57,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
   const [openEditModal, setOpenEditModal] = useState(false);
   const popperRef = useRef<HTMLDivElement>(null);
+  const { colorScheme } = useColorScheme();
+  const isLightTheme = colorScheme === 'light'
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -142,7 +145,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     alignItems: "center",
     cursor: "pointer",
     color: "var(--joy-palette-text-primary)",
-    "&:hover": { backgroundColor: "#f5f5f5" },
+    "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
   };
 
   const iconStyle = {
@@ -154,7 +157,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     <>
       <Sheet
         sx={{
-          position: "fixed",
+          position: "absolute",
           top: "20.3%",
           right: "1.5%",
           width: "500px",
@@ -162,6 +165,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
           overflow: "hidden",
           zIndex: 1300,
+          border: "1px solid var(--joy-palette-divider)",
         }}
       >
         <Box sx={{ p: 2 }}>
@@ -172,7 +176,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               alignItems: "center",
               justifyContent: "space-between",
               mb: 2,
-              borderBottom: "1px solid #E5E7EB",
+              borderBottom: "1px solid var(--joy-palette-divider)",
               paddingBottom: 2,
             }}
           >
@@ -206,7 +210,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             spacing={2}
             sx={{
               width: "100%",
-              borderBottom: "1px solid #E5E7EB",
+              borderBottom: "1px solid var(--joy-palette-divider)",
               paddingBottom: 2,
               mb: 2,
             }}
@@ -288,7 +292,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             {user.status === "suspended" && (
               <Box
                 sx={{
-                  bgcolor: "#FFF8C5",
+                  bgcolor: isLightTheme ? "#FFF8C5" : "transparent",
+                  border: isLightTheme ? "transparent" : "1px solid #4D2D00",
                   borderRadius: "8px",
                   px: 2,
                   py: 1.5,
@@ -298,10 +303,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   width: "100%",
                 }}
               >
-                <Warning size={20} color="#4D2D00" />
+                <Warning size={20} color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"}/>
                 <Typography
                   level="body-sm"
-                  sx={{ fontSize: "14px", color: "#4D2D00", fontWeight: 300 }}
+                  sx={{ fontSize: "14px", color: isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)", fontWeight: 300 }}
                 >
                   Account suspended by suspicious activity
                 </Typography>
@@ -317,8 +322,9 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               minWidth: "150px",
               borderRadius: "8px",
               boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "white",
+              backgroundColor: "var(--joy-palette-background-surface)",
               zIndex: 1301,
+              border: "1px solid var(--joy-palette-divider)",
             }}
           >
             <Box
@@ -376,7 +382,6 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               Delete
             </Box>
           </Popper>
-          ;
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
               <Typography
@@ -454,7 +459,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             <Stack
               direction="row"
               spacing={2}
-              sx={{ borderBottom: "1px solid #E5E7EB", paddingBottom: 2 }}
+              sx={{ borderBottom: "1px solid var(--joy-palette-divider)", paddingBottom: 2 }}
             >
               <Typography
                 level="body-sm"
@@ -475,7 +480,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             <Stack
               direction="row"
               spacing={2}
-              sx={{ borderBottom: "1px solid #E5E7EB", paddingBottom: 2 }}
+              sx={{ borderBottom: "1px solid var(--joy-palette-divider)", paddingBottom: 2 }}
             >
               <Typography
                 level="body-sm"
@@ -508,7 +513,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     Covered by MarketSphere
                   </a>
                 </Typography>
-                <Typography level="body-sm" sx={{ color: "#111827" }}>
+                <Typography level="body-sm" sx={{ color: "var(--joy-palette-text-primary)" }}>
                   2,000 users
                 </Typography>
               </Stack>

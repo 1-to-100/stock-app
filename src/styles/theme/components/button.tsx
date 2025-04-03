@@ -5,7 +5,7 @@ export const JoyButton = {
     root: ({ ownerState }) => ({
       borderRadius: '20px',
       padding: '8px 16px',
-      fontSize: '16px',
+      fontSize: '14px',
       fontWeight: 600,
       color: '#FFFFFF',
       transition: 'all 0.2s ease-in-out',
@@ -42,6 +42,35 @@ export const JoyButton = {
         '&:hover': {
           backgroundColor: '#DC2626',
         },
+      }),
+
+      ...(ownerState.variant === 'plain' && {
+        backgroundColor: 'transparent',
+        background: 'var(--joy-palette-background-primaryColor)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        padding: 0,
+        "&:hover": { 
+          backgroundColor: 'transparent', 
+          background: 'var(--joy-palette-background-primaryColor)',
+          opacity: '0.8',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        },
+        '& .MuiButton-startDecorator': {
+          color: 'var(--joy-palette-background-primaryColor)',
+        },
+      }),
+
+      ...(ownerState.variant === 'outlined' && {
+          borderColor: "#E5E7EB",
+          borderRadius: "20px",
+          bgcolor: "var(--NavItem-active-background)",
+          color: "var(--joy-palette-text-primary)",
+          padding: "7px 14px",
+          "&:hover": {
+            background: "var(--joy-palette-background-mainBg)",
+          },
       }),
     }),
   },

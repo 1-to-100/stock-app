@@ -34,7 +34,7 @@ export default function DeleteDeactivateUserModal({
           <Typography level="h3">
             {isDeactivate ? "Deactivate users?" : "Delete users?"}
           </Typography>
-          <Button variant="plain" onClick={onClose} sx={{ p: 0, minWidth: 0 }}>
+          <Button variant="plain" onClick={onClose} sx={{ p: 0, minWidth: 0, "&:hover": { bgcolor: "transparent" } }}>
             <XIcon fontSize="var(--Icon-fontSize)" />
           </Button>
         </Box>
@@ -51,21 +51,15 @@ export default function DeleteDeactivateUserModal({
           <Button
             variant="outlined"
             onClick={onClose}
-            sx={{
-              borderRadius: "20px",
-              borderColor: "#E5E7EB",
-              color: "#000000",
-              padding: "8px 16px",
-            }}
           >
             Cancel
           </Button>
           <Button
             variant="solid"
             onClick={onConfirm}
+            style={{background: isDeactivate ? "#4F46E5" : "#EF4444"}}
             sx={{
               borderRadius: "20px",
-              bgcolor: isDeactivate ? "#4F46E5" : "#EF4444",
               color: "#FFFFFF",
               padding: "8px 16px",
               "&:hover": {

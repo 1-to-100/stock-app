@@ -40,10 +40,10 @@ export function ColorSchemeSwitch(): React.JSX.Element {
         '& .MuiTab-root': {
           color: 'var(--joy-palette-neutral-400)',
           borderRadius: 'var(--joy-radius-xl)',
-          '&.Mui-selected': { bgcolor: 'var(--joy-palette-background-navActiveBg)', color: 'var(--joy-palette-text-primary)' },
+          '&.Mui-selected': { bgcolor: 'var(--joy-palette-background-navActiveBg)', color: 'var(--joy-palette-text-primary)', border: '1px solid var(--joy-palette-divider)' },
           '&:not(&.Mui-selected):hover': {
-            bgcolor: 'var(--joy-palette-neutral-700)',
-            color: 'var(--joy-palette-common-white)',
+            bgcolor: 'var(--joy-palette-background-mainBg)',
+            color: 'var(--joy-palette-text-secondary)',
           },
         },
       }}
