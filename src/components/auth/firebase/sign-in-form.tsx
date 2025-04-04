@@ -34,7 +34,6 @@ import { getFirebaseAuth } from "@/lib/auth/firebase/client";
 import { DynamicLogo } from "@/components/core/logo";
 import { toast } from "@/components/core/toaster";
 import Typography from "@mui/joy/Typography";
-import { SSOForm } from "./sso-form";
 
 interface OAuthProvider {
   id: "google" | "github";
@@ -57,9 +56,8 @@ const defaultValues = { email: "", password: "" } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
   const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
-  const [showPassword, setShowPassword] = React.useState<boolean>();
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const [isPending, setIsPending] = React.useState<boolean>(false);
-  const [activeTab, setActiveTab] = React.useState<string>("sign-in");
 
   const {
     control,
@@ -117,13 +115,6 @@ export function SignInForm(): React.JSX.Element {
     [firebaseAuth, setError]
   );
 
-  const handleTabChange = React.useCallback(
-    (event: React.SyntheticEvent | null, newValue: string | number | null) => {
-      setActiveTab((newValue as string) || "sign-in");
-    },
-    []
-  );
-
   return (
     <Stack spacing={5}>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -153,7 +144,7 @@ export function SignInForm(): React.JSX.Element {
       </Box>
       <Stack spacing={3}>
         <Stack spacing={2}>
-          {oAuthProviders.map(
+        {oAuthProviders.map(
             (provider): React.JSX.Element => (
               <Button
                 disabled={isPending}
@@ -175,7 +166,7 @@ export function SignInForm(): React.JSX.Element {
         </Stack>
         <Divider>or</Divider>
       </Stack>
-      <Tabs value={activeTab} onChange={handleTabChange} variant="custom">
+      <Tabs value="sign-in" variant="custom">
         <TabList>
           <Tab
             component={RouterLink}
@@ -201,115 +192,76 @@ export function SignInForm(): React.JSX.Element {
         </TabList>
       </Tabs>
       <Stack spacing={3}>
-        {activeTab === "sign-in" && <CredentialsSignInForm />}
-        {/* {activeTab === "sso" && <SSOForm />} */}
-        {activeTab === "sign-up" && <Divider>or</Divider>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={2}>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <FormControl error={Boolean(errors.email)}>
+                  <FormLabel>Email Address</FormLabel>
+                  <Input {...field} type="email" />
+                  {errors.email ? (
+                    <FormHelperText>{errors.email.message}</FormHelperText>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormControl error={Boolean(errors.password)}>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    {...field}
+                    endDecorator={
+                      <IconButton
+                        onClick={(): void => {
+                          setShowPassword(!showPassword);
+                        }}
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon
+                            fontSize="var(--Icon-fontSize)"
+                            weight="bold"
+                          />
+                        ) : (
+                          <EyeIcon
+                            fontSize="var(--Icon-fontSize)"
+                            weight="bold"
+                          />
+                        )}
+                      </IconButton>
+                    }
+                    type={showPassword ? "text" : "password"}
+                  />
+                  {errors.password ? (
+                    <FormHelperText>{errors.password.message}</FormHelperText>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+            <div>
+              <Link
+                component={RouterLink}
+                href={paths.auth.firebase.resetPassword}
+                fontSize={"sm"}
+                fontWeight="sm"
+                marginBottom={2}
+              >
+                Forgot password?
+              </Link>
+            </div>
+            {errors.root ? (
+              <Alert color="danger">{errors.root.message}</Alert>
+            ) : null}
+            <Button disabled={isPending} type="submit">
+              Sign In
+            </Button>
+          </Stack>
+        </form>
       </Stack>
     </Stack>
   );
 }
-
-const CredentialsSignInForm = () => {
-  const [firebaseAuth] = React.useState<Auth>(getFirebaseAuth());
-  const [showPassword, setShowPassword] = React.useState<boolean>();
-  const [isPending, setIsPending] = React.useState<boolean>(false);
-
-  const {
-    control,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
-
-  const onSubmit = React.useCallback(
-    async (values: Values): Promise<void> => {
-      setIsPending(true);
-
-      try {
-        await signInWithEmailAndPassword(
-          firebaseAuth,
-          values.email,
-          values.password
-        );
-        // UserProvider will handle Router refresh
-        // After refresh, GuestGuard will handle the redirect
-      } catch (err) {
-        setError("root", {
-          type: "server",
-          message: (err as { message: string }).message,
-        });
-        setIsPending(false);
-      }
-    },
-    [firebaseAuth, setError]
-  );
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2}>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field }) => (
-            <FormControl error={Boolean(errors.email)}>
-              <FormLabel>Email Address</FormLabel>
-              <Input {...field} type="email" />
-              {errors.email ? (
-                <FormHelperText>{errors.email.message}</FormHelperText>
-              ) : null}
-            </FormControl>
-          )}
-        />
-        <Controller
-          control={control}
-          name="password"
-          render={({ field }) => (
-            <FormControl error={Boolean(errors.password)}>
-              <FormLabel>Password</FormLabel>
-              <Input
-                {...field}
-                endDecorator={
-                  <IconButton
-                    onClick={(): void => {
-                      setShowPassword(!showPassword);
-                    }}
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon
-                        fontSize="var(--Icon-fontSize)"
-                        weight="bold"
-                      />
-                    ) : (
-                      <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-                    )}
-                  </IconButton>
-                }
-                type={showPassword ? "text" : "password"}
-              />
-              {errors.password ? (
-                <FormHelperText>{errors.password.message}</FormHelperText>
-              ) : null}
-            </FormControl>
-          )}
-        />
-        <div>
-          <Link
-            component={RouterLink}
-            href={paths.auth.firebase.resetPassword}
-            fontSize={"sm"}
-            fontWeight="sm"
-            marginBottom={2}
-          >
-            Forgot password?
-          </Link>
-        </div>
-        {errors.root ? (
-          <Alert color="danger">{errors.root.message}</Alert>
-        ) : null}
-        <Button disabled={isPending} type="submit">
-          Sign In
-        </Button>
-      </Stack>
-    </form>
-  );
-};

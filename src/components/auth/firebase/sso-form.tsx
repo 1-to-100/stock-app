@@ -52,7 +52,6 @@ export function SSOForm(): React.JSX.Element {
   const [isPending, setIsPending] = React.useState<boolean>(false);
   const [showMessage, setShowMessage] = React.useState<boolean>(false);
   const [email, setEmail] = React.useState<string>("");
-  const [activeTab, setActiveTab] = React.useState<string>("sso");
 
   const {
     control,
@@ -77,8 +76,6 @@ export function SSOForm(): React.JSX.Element {
       }
       try {
         await signInWithPopup(firebaseAuth, provider);
-        // UserProvider will handle Router refresh
-        // After refresh, GuestGuard will handle the redirect
       } catch (err) {
         setIsPending(false);
         toast.error((err as { message: string }).message);
@@ -104,19 +101,9 @@ export function SSOForm(): React.JSX.Element {
           message: (err as { message: string }).message,
         });
         setIsPending(false);
-      } finally {
-        setIsPending(false);
       }
     },
     [firebaseAuth, setError]
-  );
-
-  const handleTabChange = React.useCallback(
-    (event: React.SyntheticEvent | null, newValue: string | number | null) => {
-      event?.preventDefault(); // Запобігаємо переходу за посиланням
-      setActiveTab((newValue as string) || "sso");
-    },
-    []
   );
 
   return (
@@ -166,7 +153,7 @@ export function SSOForm(): React.JSX.Element {
         </Stack>
         <Divider>or</Divider>
       </Stack>
-      <Tabs value={activeTab} onChange={handleTabChange} variant="custom">
+      <Tabs value="sso" variant="custom">
         <TabList>
           <Tab
             component={RouterLink}
@@ -181,51 +168,45 @@ export function SSOForm(): React.JSX.Element {
             href={paths.auth.firebase.signUp}
             value="sign-up"
           >
-             Sign Up
+            Sign Up
           </Tab>
         </TabList>
       </Tabs>
       <Stack spacing={3}>
-        {activeTab === "sso" && (
-          <>
-            {showMessage ? (
-              <Stack spacing={2}>
-                <Typography level="h3" textAlign="center">
-                  Check your email
-                </Typography>
-                <Typography textAlign="center">
-                  We emailed a magic link to{" "}
-                  <Typography fontWeight="lg">&quot;{email}&quot;</Typography>.
-                </Typography>
-              </Stack>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <Stack spacing={2}>
-                  <Controller
-                    control={control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)}>
-                        <FormLabel>Email Address</FormLabel>
-                        <Input {...field} type="email" />
-                        {errors.email ? (
-                          <FormHelperText>
-                            {errors.email.message}
-                          </FormHelperText>
-                        ) : null}
-                      </FormControl>
-                    )}
-                  />
-                  {errors.root ? (
-                    <Alert color="danger">{errors.root.message}</Alert>
-                  ) : null}
-                  <Button disabled={isPending} type="submit">
-                    Send Magic Link
-                  </Button>
-                </Stack>
-              </form>
-            )}
-          </>
+        {showMessage ? (
+          <Stack spacing={2}>
+            <Typography level="h3" textAlign="center">
+              Check your email
+            </Typography>
+            <Typography textAlign="center">
+              We emailed a magic link to{" "}
+              <Typography fontWeight="lg">"{email}"</Typography>.
+            </Typography>
+          </Stack>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing={2}>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field }) => (
+                  <FormControl error={Boolean(errors.email)}>
+                    <FormLabel>Email Address</FormLabel>
+                    <Input {...field} type="email" />
+                    {errors.email ? (
+                      <FormHelperText>{errors.email.message}</FormHelperText>
+                    ) : null}
+                  </FormControl>
+                )}
+              />
+              {errors.root ? (
+                <Alert color="danger">{errors.root.message}</Alert>
+              ) : null}
+              <Button disabled={isPending} type="submit">
+                Send Magic Link
+              </Button>
+            </Stack>
+          </form>
         )}
       </Stack>
     </Stack>
