@@ -180,7 +180,7 @@ export function SSOForm(): React.JSX.Element {
             </Typography>
             <Typography textAlign="center">
               We emailed a magic link to{" "}
-              <Typography fontWeight="lg">"{email}"</Typography>.
+              <Typography fontWeight="lg">&quot;{email}&quot;</Typography>.
             </Typography>
           </Stack>
         ) : (
