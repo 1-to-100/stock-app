@@ -40,7 +40,7 @@ export function DynamicLogo({
   ...props
 }: DynamicLogoProps): React.JSX.Element {
   const { colorScheme } = useColorScheme();
-  console.log('Current color scheme:', colorScheme);
+  // console.log('Current color scheme:', colorScheme);
   const color = colorScheme === 'dark' ? colorDark : colorLight;
 
   return (

@@ -88,6 +88,9 @@ export const paths = {
       billing: '/dashboard/settings/billing',
       security: '/dashboard/settings/security',
     },
+    test: {
+        list: '/dashboard/test',
+    }
   },
   docs: 'https://docs.lotru.devias.io',
   purchase: 'https://mui.com/store/items/lotru',

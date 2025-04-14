@@ -43,6 +43,7 @@ switch (config.auth.strategy) {
 
 const useAuth = () => {
     const context = React.useContext(UserContext);
+
     if (!context) {
         throw new Error('useAuth must be used within a UserProvider');
     }
