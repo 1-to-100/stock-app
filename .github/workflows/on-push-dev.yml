@@ -40,10 +40,11 @@ jobs:
       
       - name: 'Configure Docker for Artifact Registry'
         run: |
-          gcloud auth configure-docker $( echo ${{ env.ARTIFACT_REGISTRY }} | cut -f1-2 -d'/' ) --quiet
+          gcloud auth configure-docker $( echo ${{ env.ARTIFACT_REGISTRY }} | cut -f1 -d'/' ) --quiet
       
       - name: 'Build and push Docker image'
         run: |
+          docker pull us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps:latest
           docker build -t ${{ env.ARTIFACT_REGISTRY }}:${{ github.ref_name }} .
           docker push ${{ env.ARTIFACT_REGISTRY }}:${{ github.ref_name }}
 
