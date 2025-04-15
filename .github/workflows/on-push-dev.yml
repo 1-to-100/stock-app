@@ -40,7 +40,7 @@ jobs:
       
       - name: 'Configure Docker for Artifact Registry'
         run: |
-          gcloud auth configure-docker $( echo ${{ env.ARTIFACT_REGISTRY }} | cut -f1 -d'/' ) --quiet
+          gcloud auth configure-docker $( echo ${{ env.ARTIFACT_REGISTRY }} | cut -f1-2 -d'/' ) --quiet
       
       - name: 'Build and push Docker image'
         run: |
