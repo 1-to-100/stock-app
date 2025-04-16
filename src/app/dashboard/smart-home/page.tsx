@@ -36,6 +36,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../lib/api/users";
 import { getRoles, Role } from "./../../../lib/api/roles";
 import { getCustomers, Customer } from "./../../../lib/api/customers";
+import { ApiUser } from "@/contexts/auth/types";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -87,18 +88,7 @@ export default function Page(): React.JSX.Element {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string | string[];
-    customerId: number;
-    roleId: number;
-    persona: string;
-    status: string;
-    avatar?: string;
-    activity?: { id: number; browserOs: string; locationTime: string }[];
-  }): User => {
+ const transformUser = (apiUser: ApiUser): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {

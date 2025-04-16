@@ -1,5 +1,39 @@
 import { apiFetch } from './api-fetch';
-import { User } from '@/types/user';
+import { Customer } from '@/lib/api/customers';
+import { Role } from '@/lib/api/roles';
+
+export interface ApiUser {
+  managerId: any;
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  customerId?: number;
+  customer?: Customer;
+  roleId?: number;
+  role?: Role;
+  persona?: string;
+  status: string;
+  avatar?: string;
+  createdAt?: string;
+  activity?: {
+    id: number;
+    browserOs: string;
+    locationTime: string;
+  }[];
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string | string[];
+  customer: string;
+  role: string;
+  persona: string;
+  status: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
+}
 
 interface CreateUserPayload {
   email: string;
@@ -24,7 +58,7 @@ interface GetUsersParams {
 }
 
 interface GetUsersResponse {
-  data: User[];
+  data: ApiUser[]; // Changed from User[] to ApiUser[]
   meta: {
     total: number;
     page: number;
@@ -38,15 +72,15 @@ interface GetUsersResponse {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function createUser(payload: CreateUserPayload): Promise<User> {
-  return apiFetch<User>(`${API_URL}/users`, {
+export async function createUser(payload: CreateUserPayload): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${API_URL}/users`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
-export async function updateUser(payload: UpdateUserPayload): Promise<User> {
-  return apiFetch<User>(`${API_URL}/users/${payload.id}`, {
+export async function updateUser(payload: UpdateUserPayload): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${API_URL}/users/${payload.id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
@@ -65,8 +99,8 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
   });
 }
 
-export async function getUserById(id: number): Promise<User> {
-  return apiFetch<User>(`${API_URL}/users/${id}`, {
+export async function getUserById(id: number): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${API_URL}/users/${id}`, {
     method: 'GET',
   });
 }

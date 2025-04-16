@@ -46,7 +46,7 @@ export const paths = {
     crypto: '/dashboard/crypto',
     roleSettings: {
       list: '/dashboard/role-settings',
-      systemAdmin: '/dashboard/role-settings/system-admin',
+      systemAdmin: '/dashboard/role-settings/role',
       customerSuccess: '/dashboard/role-settings/customer-success',
       customerAdmin: '/dashboard/role-settings/customer-admin',
       manager: '/dashboard/role-settings/manager',

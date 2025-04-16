@@ -1,3 +1,4 @@
+// SystemAdminSettings.tsx
 "use client";
 
 import * as React from "react";
@@ -40,11 +41,11 @@ import Pagination from "@/components/dashboard/layout/pagination";
 import InviteUser from "@/components/dashboard/modals/InviteUserModal";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers, getUserById, ApiUser } from "../../../../lib/api/users";
+import { getUsers, getUserById } from "../../../../lib/api/users";
 import { getRoles, Role } from "../../../../lib/api/roles";
 import { getCustomers, Customer } from "../../../../lib/api/customers";
+import { getRoleById } from "../../../../lib/api/roles";
 import Tooltip from "@mui/joy/Tooltip";
-
 
 const RouterLink = Link;
 
@@ -63,7 +64,8 @@ interface User {
 interface Permission {
   id: string;
   name: string;
-  description: string;
+  label: string;
+  description?: string;
   access: "Full access" | "Limited access" | "No access";
 }
 
@@ -74,55 +76,6 @@ interface SystemAdminRole {
   description: string;
   peopleCount: number;
 }
-
-const systemAdminRole: SystemAdminRole = {
-  id: "role-1",
-  abbreviation: "SA",
-  name: "System Admin",
-  description:
-    "Admins have full access to the platform, just like owners. Reserved for founders and tech ops.",
-  peopleCount: 0,
-};
-
-const permissions: Permission[] = [
-  {
-    id: "1",
-    name: "User Management",
-    description:
-      "System Admin fully controls User Management, including creating, editing, and removing users across tenants, assigning roles, and managing permissions to ensure proper access levels.",
-    access: "Full access",
-  },
-  {
-    id: "2",
-    name: "Customer Management",
-    description: "Manage customer accounts and data",
-    access: "Full access",
-  },
-  {
-    id: "3",
-    name: "Role & Personas Settings",
-    description: "Configure roles and user personas",
-    access: "Full access",
-  },
-  {
-    id: "4",
-    name: "Accounting",
-    description: "Access to financial data and reports",
-    access: "Full access",
-  },
-  {
-    id: "5",
-    name: "Documentation",
-    description: "Access system documentation",
-    access: "Full access",
-  },
-  {
-    id: "6",
-    name: "Help Centre",
-    description: "Manage help and support resources",
-    access: "Full access",
-  },
-];
 
 const SystemAdminSettings: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -148,7 +101,16 @@ const SystemAdminSettings: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const searchParams = useSearchParams();
+  const roleId = searchParams.get("roleId");
+
   const rowsPerPage = 10;
+ 
+  const { data: roleData, isLoading: isRoleLoading, error: roleError } = useQuery({
+    queryKey: ["role", roleId],
+    queryFn: () => getRoleById(Number(roleId)),
+    enabled: !!roleId,
+  });
 
   const { data: roles, isLoading: isRolesLoading } = useQuery({
     queryKey: ["roles"],
@@ -160,7 +122,7 @@ const SystemAdminSettings: React.FC = () => {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: ApiUser): User => {
+  const transformUser = (apiUser: any): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
@@ -188,7 +150,7 @@ const SystemAdminSettings: React.FC = () => {
       });
       return {
         ...response,
-        data: response.data.map(transformUser), // Transform ApiUser to User
+        data: response.data.map(transformUser),
       };
     },
     enabled: !isRolesLoading && !isCustomersLoading,
@@ -198,7 +160,30 @@ const SystemAdminSettings: React.FC = () => {
   const totalPages = data?.meta?.lastPage || 1;
   const hasResults = users.length > 0;
 
-  const updatedSystemAdminRole = { ...systemAdminRole, peopleCount: users.length };
+  const systemAdminRole: SystemAdminRole = roleData
+  ? {
+      id: String(roleData.id), 
+      abbreviation: roles?.find((r) => r.id === roleData.id)?.abbreviation || "RO",
+      name: roleData.name,
+      description: roleData.description || "No description provided",
+      peopleCount: users.length,
+    }
+  : {
+      id: "0",
+      abbreviation: "RO",
+      name: "Unknown Role",
+      description: "No description provided",
+      peopleCount: 0,
+    };
+
+
+const permissions: Permission[] = roleData?.permissions?.map((perm: any) => ({
+  id: perm.permissionId.toString(),
+  name: perm.permission.name,
+  label: perm.permission.label,
+  description: perm.permission.description || perm.permission.label,
+  access: "Full access",
+})) || [];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -325,7 +310,7 @@ const SystemAdminSettings: React.FC = () => {
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
       prev.includes(userId)
-        ? prev.filter((id) => id !== id)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
@@ -380,12 +365,12 @@ const SystemAdminSettings: React.FC = () => {
     marginRight: "14px",
   };
 
-  if (isLoading || isRolesLoading || isCustomersLoading) {
+  if (isRoleLoading || isRolesLoading || isCustomersLoading || isLoading) {
     return <Typography>Loading...</Typography>;
   }
 
-  if (error) {
-    return <Typography>Error loading users: {(error as Error).message}</Typography>;
+  if (roleError || error) {
+    return <Typography>Error: {(roleError || error)?.message}</Typography>;
   }
 
   return (
@@ -403,7 +388,7 @@ const SystemAdminSettings: React.FC = () => {
         }}
       >
         <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
-          {updatedSystemAdminRole.name}
+          {systemAdminRole.name}
         </Typography>
         <Box sx={{ position: "relative" }}>
           <Button
@@ -453,7 +438,7 @@ const SystemAdminSettings: React.FC = () => {
         <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
           Role Settings
         </BreadcrumbsItem>
-        <BreadcrumbsItem type="end">System Admin</BreadcrumbsItem>
+        <BreadcrumbsItem type="end">{systemAdminRole.name}</BreadcrumbsItem>
       </Breadcrumbs>
 
       <Box
@@ -481,7 +466,10 @@ const SystemAdminSettings: React.FC = () => {
               mt: 2,
             }}
           >
-            <Typography level="title-md" sx={{ fontWeight: "500", fontSize: "18px" }}>
+            <Typography
+              level="title-md"
+              sx={{ fontWeight: "500", fontSize: "18px" }}
+            >
               Users who have access
             </Typography>
             <Stack sx={{ alignItems: "center", ml: "auto", mr: 2 }}>
@@ -982,7 +970,7 @@ const SystemAdminSettings: React.FC = () => {
                 fontSize: "14px",
               }}
             >
-              {updatedSystemAdminRole.description}
+              {systemAdminRole.description}
             </Typography>
           </Box>
 
@@ -997,88 +985,100 @@ const SystemAdminSettings: React.FC = () => {
             Permission
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {permissions.map((perm) => {
-              const isExpanded = expandedPermissions.includes(perm.id);
-              return (
-                <Card
-                  key={perm.id}
-                  variant="outlined"
-                  sx={{
-                    p: "12px",
-                    cursor: "pointer",
-                    borderRadius: "8px",
-                    bgcolor: "var(--joy-palette-background-mainBg)",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                  onClick={() => togglePermission(perm.id)}
-                >
-                  <Box
-                    style={{
+            {permissions.length === 0 ? (
+              <Typography
+                sx={{
+                  color: "var(--joy-palette-text-secondary)",
+                  fontWeight: "400",
+                  fontSize: "14px",
+                }}
+              >
+                No permissions assigned
+              </Typography>
+            ) : (
+              permissions.map((perm) => {
+                const isExpanded = expandedPermissions.includes(perm.id);
+                return (
+                  <Card
+                    key={perm.id}
+                    variant="outlined"
+                    sx={{
+                      p: "12px",
+                      cursor: "pointer",
+                      borderRadius: "8px",
+                      bgcolor: "var(--joy-palette-background-mainBg)",
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
+                      flexDirection: "column",
                     }}
+                    onClick={() => togglePermission(perm.id)}
                   >
-                    <Box style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                      <Typography
-                        sx={{
-                          fontWeight: "300",
-                          fontSize: "14px",
-                          color: "var(--joy-palette-text-primary)",
-                        }}
-                      >
-                        {perm.name}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          color: "var(--joy-palette-text-secondary)",
-                          fontWeight: "400",
-                          fontSize: "12px",
-                          mr: 1,
-                        }}
-                      >
-                        {perm.access}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ ml: "auto" }}>
-                      {isExpanded ? (
-                        <CaretUp size={16} weight="bold" />
-                      ) : (
-                        <CaretDown size={16} weight="bold" />
-                      )}
-                    </Box>
-                  </Box>
-                  {isExpanded && (
                     <Box
-                      sx={{
-                        borderTop: "1px solid var(--joy-palette-divider)",
-                        pt: 1.5,
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "start", gap: 1 }}>
-                        <CheckCircle
-                          size={20}
-                          weight="bold"
-                          color="#1A7D36"
-                          style={{ minWidth: "20px" }}
-                        />
+                      <Box style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                        <Typography
+                          sx={{
+                            fontWeight: "300",
+                            fontSize: "14px",
+                            color: "var(--joy-palette-text-primary)",
+                          }}
+                        >
+                          {perm.label}
+                        </Typography>
                         <Typography
                           sx={{
                             color: "var(--joy-palette-text-secondary)",
                             fontWeight: "400",
                             fontSize: "12px",
+                            mr: 1,
                           }}
                         >
-                          {perm.description}
+                          {perm.access}
                         </Typography>
                       </Box>
+                      <Box sx={{ ml: "auto" }}>
+                        {isExpanded ? (
+                          <CaretUp size={16} weight="bold" />
+                        ) : (
+                          <CaretDown size={16} weight="bold" />
+                        )}
+                      </Box>
                     </Box>
-                  )}
-                </Card>
-              );
-            })}
+                    {isExpanded && (
+                      <Box
+                        sx={{
+                          borderTop: "1px solid var(--joy-palette-divider)",
+                          pt: 1.5,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "start", gap: 1 }}>
+                          <CheckCircle
+                            size={20}
+                            weight="bold"
+                            color="#1A7D36"
+                            style={{ minWidth: "20px" }}
+                          />
+                          <Typography
+                            sx={{
+                              color: "var(--joy-palette-text-secondary)",
+                              fontWeight: "400",
+                              fontSize: "12px",
+                            }}
+                          >
+                            {perm.description}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </Card>
+                );
+              })
+            )}
           </Box>
         </Box>
       </Box>

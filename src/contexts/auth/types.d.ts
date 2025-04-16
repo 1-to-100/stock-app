@@ -26,6 +26,7 @@ export type ApiUser = {
     status: string;
     avatar?: string;
     createdAt?: string;
+    managerId?: number;
     activity?: {
         id: number
         browserOs: string

@@ -27,21 +27,10 @@ import { createUser, updateUser, getUserById } from "./../../../lib/api/users";
 import { getRoles, Role } from "./../../../lib/api/roles";
 import { getCustomers, Customer } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
+import { ApiUser } from "@/contexts/auth/types";
 
 
-interface ApiUser {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string | string[];
-  customerId?: number;
-  roleId?: number;
-  persona?: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-  managerId?: number;
-}
+
 interface User {
   id: number;
   name: string;
@@ -110,28 +99,21 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     enabled: !!userId,
   });
 
-  const transformUser = (apiUser: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string | string[];
-    customerId?: number;
-    roleId?: number;
-    persona?: string;
-    status: string;
-    avatar?: string;
-    activity?: { id: number; browserOs: string; locationTime: string }[];
-  }): User => ({
-    id: apiUser.id,
-    name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-    email: apiUser.email,
-    customer: apiUser.customerId ? getCustomerName(apiUser.customerId) : "",
-    role: apiUser.roleId ? getRoleName(apiUser.roleId) : "",
-    persona: apiUser.persona || "",
-    status: apiUser.status,
-    avatar: apiUser.avatar || undefined,
-    activity: apiUser.activity,
-  });
+   const transformUser = (apiUser: ApiUser): User => {
+      const customer = customers?.find((c) => c.id === apiUser.customerId);
+      const role = roles?.find((r) => r.id === apiUser.roleId);
+      return {
+        id: apiUser.id,
+        name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
+        email: apiUser.email,
+        customer: customer ? customer.name : "",
+        role: role ? role.name : "",
+        persona: apiUser.persona || "",
+        status: apiUser.status,
+        avatar: apiUser.avatar || undefined,
+        activity: apiUser.activity,
+      };
+    };
 
   useEffect(() => {
     if (userId && userData && open) {
