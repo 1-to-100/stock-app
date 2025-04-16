@@ -71,6 +71,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.49.4
         version: 2.49.4
+      '@tanstack/react-query':
+        specifier: ^5.74.3
+        version: 5.74.3(react@19.1.0)
       '@tiptap/extension-link':
         specifier: ^2.11.7
         version: 2.11.7(@tiptap/core@2.11.7(@tiptap/pm@2.11.7))(@tiptap/pm@2.11.7)
@@ -1641,6 +1644,14 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tanstack/query-core@5.74.3':
+    resolution: {integrity: sha512-Mqk+5o3qTuAiZML248XpNH8r2cOzl15+LTbUsZQEwvSvn1GU4VQhvqzAbil36p+MBxpr/58oBSnRzhrBevDhfg==}
+
+  '@tanstack/react-query@5.74.3':
+    resolution: {integrity: sha512-QrycUn0wxjVPzITvQvOxFRdhlAwIoOQSuav7qWD4SWCoKCdLbyRZ2vji2GuBq/glaxbF4wBx3fqcYRDOt8KDTA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tiptap/core@2.11.7':
     resolution: {integrity: sha512-zN+NFFxLsxNEL8Qioc+DL6b8+Tt2bmRbXH22Gk6F6nD30x83eaUSFlSv3wqvgyCq3I1i1NO394So+Agmayx6rQ==}
@@ -6164,6 +6175,13 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tanstack/query-core@5.74.3': {}
+
+  '@tanstack/react-query@5.74.3(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.74.3
+      react: 19.1.0
 
   '@tiptap/core@2.11.7(@tiptap/pm@2.11.7)':
     dependencies:
