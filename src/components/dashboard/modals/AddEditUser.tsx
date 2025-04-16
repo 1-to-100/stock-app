@@ -28,6 +28,20 @@ import { getRoles, Role } from "./../../../lib/api/roles";
 import { getCustomers, Customer } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
 
+
+interface ApiUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string | string[];
+  customerId?: number;
+  roleId?: number;
+  persona?: string;
+  status: string;
+  avatar?: string;
+  activity?: { id: number; browserOs: string; locationTime: string }[];
+  managerId?: number;
+}
 interface User {
   id: number;
   name: string;

@@ -127,7 +127,7 @@ export function SignUpForm(): React.JSX.Element {
                 const token = await userCredentials.user.getIdToken();
                 console.log("token", token);
                 if (token) {
-                    auth?.syncUser?.(token);
+                    auth?.syncUser?.();
                 }
 
                 // UserProvider will handle Router refresh
