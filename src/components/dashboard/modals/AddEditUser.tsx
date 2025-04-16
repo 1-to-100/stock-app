@@ -110,7 +110,18 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     enabled: !!userId,
   });
 
-  const transformUser = (apiUser: any): User => ({
+  const transformUser = (apiUser: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string | string[];
+    customerId?: number;
+    roleId?: number;
+    persona?: string;
+    status: string;
+    avatar?: string;
+    activity?: { id: number; browserOs: string; locationTime: string }[];
+  }): User => ({
     id: apiUser.id,
     name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
     email: apiUser.email,
@@ -189,7 +200,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
   const checkEmailUniqueness = async (email: string, index?: number): Promise<boolean> => {
     if (!email || !validateEmail(email)) return false;
     try {
-      
+
       setEmailWarnings((prev) => {
         const newWarnings = [...prev];
         if (index !== undefined) {
@@ -233,7 +244,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
 
   const handleInputChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-   
+
     const newErrors: FormErrors = { ...errors };
     if (field === "firstName") {
       newErrors.firstName = value.trim() ? undefined : "First name is required";

@@ -8,3 +8,4 @@ export type PageProps<TParams = void> = Readonly<{
 export type LayoutProps<TParams = void, TParallelRoutes = void> = Readonly<
   PropsWithChildren<{ params: Promise<TParams> }> & TParallelRoutes
 >;
+

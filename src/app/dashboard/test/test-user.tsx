@@ -10,9 +10,7 @@ import {PermissionsForm} from '@/app/dashboard/test/permissions-form';
 import {RoleForm} from './role-form';
 import {toast} from '@/components/core/toaster';
 
-type TestUserProps = {};
-
-export const TestUser: FC<TestUserProps> = ({}) => {
+export const TestUser: FC = () => {
     const auth = useAuth();
 
     const testProtectedEndpoint = async (role: 'admin' | 'manager') => {

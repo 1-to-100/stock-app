@@ -87,7 +87,18 @@ export default function Page(): React.JSX.Element {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: any): User => {
+  const transformUser = (apiUser: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string | string[];
+    customerId: number;
+    roleId: number;
+    persona: string;
+    status: string;
+    avatar?: string;
+    activity?: { id: number; browserOs: string; locationTime: string }[];
+  }): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {

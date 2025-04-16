@@ -44,6 +44,7 @@ import { getUsers, getUserById } from "../../../../lib/api/users";
 import { getRoles, Role } from "../../../../lib/api/roles";
 import { getCustomers, Customer } from "../../../../lib/api/customers";
 import Tooltip from "@mui/joy/Tooltip";
+import {ApiUser} from '@/contexts/auth/types';
 
 const RouterLink = Link;
 
@@ -80,7 +81,7 @@ const systemAdminRole: SystemAdminRole = {
   name: "System Admin",
   description:
     "Admins have full access to the platform, just like owners. Reserved for founders and tech ops.",
-  peopleCount: 0, 
+  peopleCount: 0,
 };
 
 const permissions: Permission[] = [
@@ -159,7 +160,7 @@ const SystemAdminSettings: React.FC = () => {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: any): User => {
+  const transformUser = (apiUser: ApiUser): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
@@ -174,7 +175,7 @@ const SystemAdminSettings: React.FC = () => {
       activity: apiUser.activity,
     };
   };
- 
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["users", currentPage, searchTerm, sortColumn, sortDirection, roles, customers],
     queryFn: async () => {

@@ -1,4 +1,6 @@
 import type {User} from '@/types/user';
+import {Customer} from '@/lib/api/customers';
+import {Role} from '@/lib/api/roles';
 
 export interface UserContextValue {
     user: User | null;
@@ -9,4 +11,24 @@ export interface UserContextValue {
     syncUser?: () => void;
     role?: string | null;
     permissions?: string[];
+}
+
+export type ApiUser = {
+    id: number | number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    customerId?: number;
+    customer?: Customer
+    roleId?: number;
+    role?: Role
+    persona?: string;
+    status: string;
+    avatar?: string;
+    createdAt?: string;
+    activity?: {
+        id: number
+        browserOs: string
+        locationTime: string
+    }[]
 }
