@@ -12,15 +12,16 @@ import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
 import Tooltip from "@mui/joy/Tooltip";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
-import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { DotsThreeVertical as DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
+import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
 import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
+import { Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
+import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
+import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
 import UserDetailsPopover from "@/components/dashboard/smart-home/user-details-popover";
@@ -30,9 +31,11 @@ import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import UserManagementFilter from "@/components/dashboard/smart-home/user-management-filter";
 import { Popper } from "@mui/base/Popper";
-import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
 import SearchInput from "@/components/dashboard/layout/search-input";
-import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { useQuery } from "@tanstack/react-query";
+import { getUsers, getUserById } from "../../../lib/api/users";
+import { getRoles, Role } from "./../../../lib/api/roles";
+import { getCustomers, Customer } from "./../../../lib/api/customers";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -50,346 +53,7 @@ interface User {
   activity?: { id: number; browserOs: string; locationTime: string }[];
 }
 
-const initialUsers: User[] = [
-  {
-    id: 1,
-    name: "Jannet Jones",
-    email: "trungkienspktnd@gmail.com",
-    customer: "StockHive",
-    role: "Customer admin",
-    persona: "Education",
-    status: "suspended",
-    avatar:
-      "https://img.freepik.com/free-photo/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair_285396-896.jpg",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Mac OS 10.15.7",
-        locationTime: "California, USA • May 08 10:40AM",
-      },
-      {
-        id: 1,
-        browserOs: "Firefox, Windows 10",
-        locationTime: "Nevada, USA • May 09 2:15PM",
-      },
-      {
-        id: 2,
-        browserOs: "Chrome, Mac OS 10.15.7",
-        locationTime: "California, USA • May 08 10:40AM",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Albert Flores",
-    email: "nvt.isst.nute@gmail.com",
-    customer: "TradeNest",
-    role: "User",
-    persona: "Titles",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Firefox, Windows 11",
-        locationTime: "New York, USA • June 15 3:25PM",
-      },
-      {
-        id: 1,
-        browserOs: "Safari, iOS 16.0",
-        locationTime: "Boston, USA • June 16 9:30AM",
-      },
-      {
-        id: 2,
-        browserOs: "Chrome, Android 12",
-        locationTime: "Chicago, USA • June 17 11:45AM",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Devon Lane",
-    email: "binhan628@gmail.com",
-    customer: "TradeNest",
-    role: "Customer admin",
-    persona: "Experience",
-    status: "active",
-    avatar:
-      "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Safari, iOS 16.2",
-        locationTime: "London, UK • July 20 8:15AM",
-      },
-      {
-        id: 1,
-        browserOs: "Edge, Windows 11",
-        locationTime: "Manchester, UK • July 21 3:00PM",
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: "Floyd Miles",
-    email: "danghoang87hl@gmail.com",
-    customer: "TradeNest",
-    role: "Customer admin",
-    persona: "Responsibilities",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Edge, Windows 10",
-        locationTime: "Tokyo, Japan • August 10 11:30PM",
-      },
-      {
-        id: 1,
-        browserOs: "Chrome, Mac OS 12.0",
-        locationTime: "Osaka, Japan • August 11 10:00AM",
-      },
-    ],
-  },
-  {
-    id: 5,
-    name: "Eleanor Pena",
-    email: "binhan628@gmail.com",
-    customer: "MarketSphere",
-    role: "Customer admin",
-    persona: "Customer admin",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Linux Ubuntu 20.04",
-        locationTime: "Sydney, Australia • September 05 6:45AM",
-      },
-      {
-        id: 1,
-        browserOs: "Firefox, Windows 10",
-        locationTime: "Melbourne, Australia • September 06 1:20PM",
-      },
-      {
-        id: 2,
-        browserOs: "Safari, iOS 15.5",
-        locationTime: "Brisbane, Australia • September 07 4:30PM",
-      },
-    ],
-  },
-  {
-    id: 6,
-    name: "Courtney Henry",
-    email: "tranthuy.nute@gmail.com",
-    customer: "InvestHorizon",
-    role: "User",
-    persona: "User",
-    status: "inactive",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Opera, Mac OS 11.0",
-        locationTime: "Berlin, Germany • October 12 2:10PM",
-      },
-      {
-        id: 1,
-        browserOs: "Chrome, Android 13",
-        locationTime: "Munich, Germany • October 13 9:45AM",
-      },
-    ],
-  },
-  {
-    id: 7,
-    name: "Annette Black",
-    email: "tranthuy.nute@gmail.com",
-    customer: "InvestHorizon",
-    role: "User",
-    persona: "Education",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Windows 10",
-        locationTime: "Paris, France • November 18 9:50AM",
-      },
-      {
-        id: 1,
-        browserOs: "Safari, Mac OS 12.1",
-        locationTime: "Lyon, France • November 19 3:15PM",
-      },
-    ],
-  },
-  {
-    id: 8,
-    name: "Brooklyn Simmons",
-    email: "ckctm12@gmail.com",
-    customer: "EquityVault",
-    role: "User",
-    persona: "Education",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Safari, Mac OS 12.1",
-        locationTime: "Toronto, Canada • December 01 4:20PM",
-      },
-      {
-        id: 1,
-        browserOs: "Firefox, Windows 11",
-        locationTime: "Vancouver, Canada • December 02 11:00AM",
-      },
-      {
-        id: 2,
-        browserOs: "Edge, Windows 10",
-        locationTime: "Montreal, Canada • December 03 2:30PM",
-      },
-    ],
-  },
-  {
-    id: 9,
-    name: "Kristin Watson",
-    email: "vuhaithuongnute@gmail.com",
-    customer: "StockAnchor",
-    role: "User",
-    persona: "Education",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Firefox, Linux Mint 21",
-        locationTime: "Stockholm, Sweden • January 10 11:15AM",
-      },
-      {
-        id: 1,
-        browserOs: "Chrome, Android 13",
-        locationTime: "Gothenburg, Sweden • January 11 5:00PM",
-      },
-    ],
-  },
-  {
-    id: 10,
-    name: "Theresa Webb",
-    email: "nvt.isst.nute@gmail.com",
-    customer: "EquityVault",
-    role: "User",
-    persona: "Experience",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Android 13",
-        locationTime: "Mumbai, India • February 25 7:30PM",
-      },
-      {
-        id: 1,
-        browserOs: "Safari, iOS 16.1",
-        locationTime: "Delhi, India • February 26 10:15AM",
-      },
-    ],
-  },
-  {
-    id: 11,
-    name: "Jane Cooper",
-    email: "tranthuy.nute@gmail.com",
-    customer: "BullBear Hub",
-    role: "User",
-    persona: "Experience",
-    status: "inactive",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Edge, Windows 11",
-        locationTime: "São Paulo, Brazil • March 03 1:45PM",
-      },
-      {
-        id: 1,
-        browserOs: "Chrome, Mac OS 13.0",
-        locationTime: "Rio de Janeiro, Brazil • March 04 9:20AM",
-      },
-      {
-        id: 2,
-        browserOs: "Firefox, Windows 10",
-        locationTime: "Salvador, Brazil • March 05 3:50PM",
-      },
-    ],
-  },
-  {
-    id: 12,
-    name: "Arlene McCoy",
-    email: "manhhackt08@gmail.com",
-    customer: "BullBear Hub",
-    role: "User",
-    persona: "Titles",
-    status: "inactive",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Safari, iOS 15.6",
-        locationTime: "Cape Town, South Africa • April 15 9:10AM",
-      },
-      {
-        id: 1,
-        browserOs: "Chrome, Windows 11",
-        locationTime: "Johannesburg, South Africa • April 16 2:25PM",
-      },
-    ],
-  },
-  {
-    id: 13,
-    name: "Jerome Bell",
-    email: "vuhaithuongnute@gmail.com",
-    customer: "StockAnchor",
-    role: "User",
-    persona: "Titles",
-    status: "inactive",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Mac OS 13.0",
-        locationTime: "Moscow, Russia • May 22 5:55PM",
-      },
-      {
-        id: 1,
-        browserOs: "Firefox, Linux Ubuntu 22.04",
-        locationTime: "St. Petersburg, Russia • May 23 11:30AM",
-      },
-    ],
-  },
-  {
-    id: 14,
-    name: "Marvin McKinney",
-    email: "binhan628@gmail.com",
-    customer: "StockAnchor",
-    role: "User",
-    persona: "Education",
-    status: "inactive",
-    activity: [],
-  },
-  {
-    id: 15,
-    name: "Leslie Alexander",
-    email: "leslie.alex@gmail.com",
-    customer: "MarketPulse",
-    role: "Customer admin",
-    persona: "Responsibilities",
-    status: "active",
-    activity: [
-      {
-        id: 0,
-        browserOs: "Chrome, Ubuntu 22.04",
-        locationTime: "Dubai, UAE • July 12 12:00PM",
-      },
-      {
-        id: 1,
-        browserOs: "Edge, Windows 11",
-        locationTime: "Abu Dhabi, UAE • July 13 4:30PM",
-      },
-    ],
-  },
-];
-
 export default function Page(): React.JSX.Element {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(initialUsers);
-  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -399,33 +63,67 @@ export default function Page(): React.JSX.Element {
   const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [isDeactivating, setIsDeactivating] = useState(false);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
-    null
-  );
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
+  const [userToEditId, setUserToEditId] = useState<number | null>(null);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
-    null
-  );
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
   const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const rowsPerPage = 11;
-  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentUsers = filteredUsers.slice(startIndex, endIndex);
-  const hasResults = filteredUsers.length > 0;
 
-  useEffect(() => {
-    if (!filtersApplied) {
-      setFilteredUsers(users);
-    }
-  }, [users, filtersApplied]);
+  const { data: roles, isLoading: isRolesLoading } = useQuery({
+    queryKey: ["roles"],
+    queryFn: getRoles,
+  });
+
+  const { data: customers, isLoading: isCustomersLoading } = useQuery({
+    queryKey: ["customers"],
+    queryFn: getCustomers,
+  });
+
+  const transformUser = (apiUser: any): User => {
+    const customer = customers?.find((c) => c.id === apiUser.customerId);
+    const role = roles?.find((r) => r.id === apiUser.roleId);
+    return {
+      id: apiUser.id,
+      name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
+      email: apiUser.email,
+      customer: customer ? customer.name : "",
+      role: role ? role.name : "",
+      persona: apiUser.persona || "",
+      status: apiUser.status,
+      avatar: apiUser.avatar || undefined,
+      activity: apiUser.activity,
+    };
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["users", currentPage, searchTerm, sortColumn, sortDirection, roles, customers],
+    queryFn: async () => {
+      const response = await getUsers({
+        page: currentPage,
+        perPage: rowsPerPage,
+        search: searchTerm || undefined,
+        orderBy: sortColumn || undefined,
+        orderDirection: sortDirection,
+      });
+      return {
+        ...response,
+        data: response.data.map(transformUser),
+      };
+    },
+    enabled: !isRolesLoading && !isCustomersLoading,
+  });
+
+  const users = data?.data || [];
+  const totalPages = data?.meta?.lastPage || 1;
+  const hasResults = users.length > 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -440,6 +138,9 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
+  useEffect(() => {
+  }, [popoverAnchorEl, selectedUser]);
+
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
       prev.includes(userId)
@@ -448,12 +149,10 @@ export default function Page(): React.JSX.Element {
     );
   };
 
-  const handleSelectAllChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleSelectAllChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!hasResults) return;
     if (event.target.checked) {
-      setSelectedRows(currentUsers.map((user) => user.id));
+      setSelectedRows(users.map((user) => user.id));
     } else {
       setSelectedRows([]);
     }
@@ -467,16 +166,8 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleDeleteUser = (userId: number) => {
-    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-    if (filtersApplied) {
-      setFilteredUsers((prevFiltered) =>
-        prevFiltered.filter((user) => user.id !== userId)
-      );
-    }
-    if (selectedUser?.id === userId) {
-      setSelectedUser(null);
-    }
-    setPopoverAnchorEl(null);
+    setRowsToDelete([userId]);
+    setOpenDeleteModal(true);
   };
 
   const handleDeleteRow = useCallback((userId: number) => {
@@ -500,45 +191,15 @@ export default function Page(): React.JSX.Element {
   };
 
   const confirmDelete = () => {
-    setUsers((prevUsers) =>
-      prevUsers.filter((user) => !rowsToDelete.includes(user.id))
-    );
-    if (filtersApplied) {
-      setFilteredUsers((prevFiltered) =>
-        prevFiltered.filter((user) => !rowsToDelete.includes(user.id))
-      );
-    }
-    setSelectedRows([]);
-    setRowsToDelete([]);
     setOpenDeleteModal(false);
-    if (filtersApplied) {
-      const newTotalPages = Math.ceil(
-        (filteredUsers.length - rowsToDelete.length) / rowsPerPage
-      );
-      if (currentPage > newTotalPages) {
-        setCurrentPage(newTotalPages || 1);
-      }
-    }
+    setRowsToDelete([]);
+    setSelectedRows([]);
   };
 
   const confirmDeactivate = () => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        rowsToDelete.includes(user.id) ? { ...user, status: "inactive" } : user
-      )
-    );
-    if (filtersApplied) {
-      setFilteredUsers((prevFiltered) =>
-        prevFiltered.map((user) =>
-          rowsToDelete.includes(user.id)
-            ? { ...user, status: "inactive" }
-            : user
-        )
-      );
-    }
-    setSelectedRows([]);
-    setRowsToDelete([]);
     setOpenDeactivateModal(false);
+    setRowsToDelete([]);
+    setSelectedRows([]);
   };
 
   const handleCopyEmail = (email: string) => {
@@ -548,10 +209,7 @@ export default function Page(): React.JSX.Element {
     });
   };
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    index: number
-  ) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setMenuRowIndex(index);
@@ -562,29 +220,32 @@ export default function Page(): React.JSX.Element {
     setMenuRowIndex(null);
   };
 
-  const handleOpenDetail = (
-    event: React.MouseEvent<HTMLElement>,
-    userId: number
-  ) => {
-    event.preventDefault();
-    const user = filteredUsers.find((u) => u.id === userId);
-    if (user) {
-      setSelectedUser(user);
-      setPopoverAnchorEl(event.currentTarget);
-    }
-    handleMenuClose();
-  };
-
   const handleClosePopover = () => {
     setSelectedUser(null);
     setPopoverAnchorEl(null);
   };
 
-  const handleEdit = (userId: number) => {
-    const user = filteredUsers.find((u) => u.id === userId);
-    if (user) {
-      setUserToEdit(user);
+  const handleOpenDetail = async (event: React.MouseEvent<HTMLElement>, userId: number) => {
+    event.preventDefault();
+    event.persist();
+    const targetElement = event.currentTarget;
+    try {
+      const userData = await getUserById(userId);
+      const transformedUser = transformUser(userData);
+      setSelectedUser(transformedUser);
+      setPopoverAnchorEl(targetElement);
+    } catch (err) {
+      // Handle error
+    }
+    handleMenuClose();
+  };
+
+  const handleEdit = async (userId: number) => {
+    try {
+      setUserToEditId(userId);
       setOpenEditModal(true);
+    } catch (err) {
+      // Handle error
     }
     handleMenuClose();
   };
@@ -594,38 +255,8 @@ export default function Page(): React.JSX.Element {
     handleMenuClose();
   };
 
-  const handleSaveUser = (updatedUser: User) => {
-    setUsers((prevUsers) => {
-      const userExists = prevUsers.some((user) => user.id === updatedUser.id);
-      if (userExists) {
-        return prevUsers.map((user) =>
-          user.id === updatedUser.id ? updatedUser : user
-        );
-      } else {
-        return [...prevUsers, updatedUser];
-      }
-    });
-    if (filtersApplied) {
-      setFilteredUsers((prevFiltered) => {
-        const userExists = prevFiltered.some(
-          (user) => user.id === updatedUser.id
-        );
-        if (userExists) {
-          return prevFiltered.map((user) =>
-            user.id === updatedUser.id ? updatedUser : user
-          );
-        } else {
-          return prevFiltered;
-        }
-      });
-    }
-    if (selectedUser && selectedUser.id === updatedUser.id) {
-      setSelectedUser(updatedUser);
-    }
-  };
-
   const handleResetPassword = (userId: number) => {
-    const user = filteredUsers.find((u) => u.id === userId);
+    const user = users.find((u) => u.id === userId);
     if (user) {
       setUserToResetPassword(user);
       setOpenResetPasswordModal(true);
@@ -635,12 +266,11 @@ export default function Page(): React.JSX.Element {
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
-    setUserToEdit(undefined);
+    setUserToEditId(null);
   };
 
   const handleCloseAddUserModal = () => {
     setOpenAddUserModal(false);
-    setUserToEdit(undefined);
   };
 
   const handlePageChange = (page: number) => {
@@ -648,9 +278,7 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
   };
 
-  const handleFilter = (filtered: User[], filtersApplied: boolean) => {
-    setFiltersApplied(filtersApplied);
-    setFilteredUsers(filtered);
+  const handleFilter = (_filtered: User[], _filtersApplied: boolean) => {
     setCurrentPage(1);
   };
 
@@ -659,49 +287,16 @@ export default function Page(): React.JSX.Element {
     const newDirection = isAsc ? "desc" : "asc";
     setSortColumn(column);
     setSortDirection(newDirection);
-
-    const sortedUsers = [...filteredUsers].sort((a, b) => {
-      const valueA = a[column];
-      const valueB = b[column];
-
-      if (typeof valueA === "string" && typeof valueB === "string") {
-        return newDirection === "asc"
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      }
-      return 0;
-    });
-
-    setFilteredUsers(sortedUsers);
   };
 
   const handleSearch = (searchTerm: string) => {
-    const trimmedSearch = searchTerm.trim().toLowerCase();
-
-    if (!trimmedSearch) {
-      setFilteredUsers(users);
-      setFiltersApplied(false);
-      return;
-    }
-
-    const searchedUsers = users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(trimmedSearch) ||
-        (typeof user.email === "string" &&
-          user.email.toLowerCase().includes(trimmedSearch)) ||
-        user.customer.toLowerCase().includes(trimmedSearch) ||
-        user.role.toLowerCase().includes(trimmedSearch) ||
-        user.persona.toLowerCase().includes(trimmedSearch)
-    );
-
-    setFilteredUsers(searchedUsers);
-    setFiltersApplied(true);
+    setSearchTerm(searchTerm);
     setCurrentPage(1);
   };
 
   const usersToDelete = rowsToDelete
     .map((userId) => {
-      const user = filteredUsers.find((u) => u.id === userId);
+      const user = users.find((u) => u.id === userId);
       return user ? user.name : undefined;
     })
     .filter((name): name is string => name !== undefined);
@@ -720,6 +315,14 @@ export default function Page(): React.JSX.Element {
   const iconStyle = {
     marginRight: "14px",
   };
+
+  if (isLoading || isRolesLoading || isCustomersLoading) {
+    return <Typography>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography>Error loading users: {(error as Error).message}</Typography>;
+  }
 
   return (
     <Box sx={{ p: "var(--Content-padding)" }}>
@@ -802,16 +405,16 @@ export default function Page(): React.JSX.Element {
             <thead>
               <tr>
                 <th style={{ width: "5%" }}>
-                <Checkbox
-                  checked={hasResults && selectedRows.length === currentUsers.length}
-                  indeterminate={
-                    hasResults && 
-                    selectedRows.length > 0 && 
-                    selectedRows.length < currentUsers.length
-                  }
-                  onChange={handleSelectAllChange}
-                  disabled={!hasResults}
-                />
+                  <Checkbox
+                    checked={hasResults && selectedRows.length === users.length}
+                    indeterminate={
+                      hasResults &&
+                      selectedRows.length > 0 &&
+                      selectedRows.length < users.length
+                    }
+                    onChange={handleSelectAllChange}
+                    disabled={!hasResults}
+                  />
                 </th>
                 <th style={{ width: "20%" }} onClick={() => handleSort("name")}>
                   <Box
@@ -836,10 +439,7 @@ export default function Page(): React.JSX.Element {
                     />
                   </Box>
                 </th>
-                <th
-                  style={{ width: "25%" }}
-                  onClick={() => handleSort("email")}
-                >
+                <th style={{ width: "25%" }} onClick={() => handleSort("email")}>
                   <Box
                     sx={{
                       display: "flex",
@@ -941,18 +541,7 @@ export default function Page(): React.JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    <Typography level="body-md" color="neutral">
-                      No items found
-                    </Typography>
-                  </td>
-                </tr>
-              ) : currentUsers.length === 0 ? (
+              {users.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -964,7 +553,7 @@ export default function Page(): React.JSX.Element {
                   </td>
                 </tr>
               ) : (
-                currentUsers.map((user, index) => (
+                users.map((user, index) => (
                   <tr
                     key={user.id}
                     onMouseEnter={() => setHoveredRow(index)}
@@ -990,7 +579,9 @@ export default function Page(): React.JSX.Element {
                         ) : (
                           <Avatar sx={{ width: 28, height: 28 }} />
                         )}
-                        <Typography sx={{wordBreak: "break-all"}}>{user.name}</Typography>
+                        <Typography sx={{ wordBreak: "break-all" }}>
+                          {user.name}
+                        </Typography>
                         <Tooltip
                           title={user.status}
                           placement="top"
@@ -1025,10 +616,10 @@ export default function Page(): React.JSX.Element {
                           display: "inline-block",
                           fontWeight: 400,
                           color: "var(--joy-palette-text-secondary)",
-                          wordBreak: "break-all"
+                          wordBreak: "break-all",
                         }}
                       >
-                        {user.email}
+                        {typeof user.email === "string" ? user.email : user.email[0]}
                         {hoveredRow === index && (
                           <Tooltip
                             title="Copy Email"
@@ -1224,22 +815,15 @@ export default function Page(): React.JSX.Element {
         onClose={handleClosePopover}
         anchorEl={popoverAnchorEl}
         user={selectedUser}
-        onSave={handleSaveUser}
-        onDelete={handleDeleteUser}
       />
 
       <AddEditUser
         open={openEditModal}
         onClose={handleCloseEditModal}
-        user={userToEdit}
-        onSave={handleSaveUser}
+        userId={userToEditId}
       />
 
-      <AddEditUser
-        open={openAddUserModal}
-        onClose={handleCloseAddUserModal}
-        onSave={handleSaveUser}
-      />
+      <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
 
       <ResetPasswordUser
         open={openResetPasswordModal}

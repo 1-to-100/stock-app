@@ -13,6 +13,7 @@ import { LocalizationProvider } from '@/components/core/localization-provider';
 import { SettingsButton } from '@/components/core/settings/settings-button';
 import { ThemeProvider } from '@/components/core/theme-provider/theme-provider';
 import { Toaster } from '@/components/core/toaster';
+import { QueryProvider } from '@/components/QueryProvider'; 
 
 export const metadata = { title: config.site.name } satisfies Metadata;
 
@@ -37,9 +38,11 @@ export default async function Layout({ children }: LayoutProps): Promise<React.J
             <UserProvider>
               <SettingsProvider settings={settings}>
                 <ThemeProvider>
-                  {children}
-                  <SettingsButton />
-                  <Toaster position="bottom-right" />
+                  <QueryProvider>
+                    {children}
+                    <SettingsButton />
+                    <Toaster position="bottom-right" />
+                  </QueryProvider>
                 </ThemeProvider>
               </SettingsProvider>
             </UserProvider>

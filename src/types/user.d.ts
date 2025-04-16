@@ -3,6 +3,8 @@ export interface User {
   name?: string;
   avatar?: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
 
   [key: string]: unknown;
 }

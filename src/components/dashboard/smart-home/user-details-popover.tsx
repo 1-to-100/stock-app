@@ -21,7 +21,9 @@ import { useState, useEffect, useRef } from "react";
 import AddEditUser from "../modals/AddEditUser";
 import { Popper } from "@mui/base/Popper";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
-import { useColorScheme } from '@mui/joy/styles';
+import { useColorScheme } from "@mui/joy/styles";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateUser } from "../../../lib/api/users";
 
 interface User {
   id: number;
@@ -34,33 +36,41 @@ interface User {
   avatar?: string;
   activity?: { id: number; browserOs: string; locationTime: string }[];
 }
+
 interface UserDetailsPopoverProps {
   open: boolean;
   onClose: () => void;
-  onSave: (updatedUser: User) => void;
   anchorEl: HTMLElement | null;
   user: User | null;
-  onDelete: (userId: number) => void;
 }
 
 const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   open,
   onClose,
   anchorEl,
-  onSave,
   user,
-  onDelete,
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
   const [openSuspendModal, setOpenSuspendModal] = useState(false);
-  const [userToEdit, setUserToEdit] = useState<User | undefined>(undefined);
   const [openEditModal, setOpenEditModal] = useState(false);
   const popperRef = useRef<HTMLDivElement>(null);
   const { colorScheme } = useColorScheme();
-  const isLightTheme = colorScheme === 'light'
+  const isLightTheme = colorScheme === "light";
+  const queryClient = useQueryClient();
+
+  const updateUserMutation = useMutation({
+    mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["user", user?.id] });
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
+    },
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,23 +95,22 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     };
   }, [menuAnchorEl]);
 
-  if (!open || !anchorEl || !user) return null;
+  if (!open || !anchorEl || !user) {
+    return null;
+  }
 
   const emails = Array.isArray(user.email) ? user.email : [user.email];
 
   const confirmDelete = () => {
     setOpenDeleteModal(false);
-    if (user) {
-      onDelete(user.id);
-    }
+    // TODO: Implement delete API call
     onClose();
   };
 
   const confirmDeactivate = () => {
     setOpenDeactivateModal(false);
     if (user) {
-      const updatedUser = { ...user, status: "inactive" };
-      onSave(updatedUser);
+      updateUserMutation.mutate({ id: user.id, status: "inactive" });
     }
   };
 
@@ -114,17 +123,13 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     setMenuAnchorEl(null);
   };
 
-  const handleEdit = (user: User) => {
-    if (user) {
-      setUserToEdit(user);
-      setOpenEditModal(true);
-    }
+  const handleEdit = () => {
+    setOpenEditModal(true);
     handleMenuClose();
   };
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
-    setUserToEdit(undefined);
   };
 
   const handleDeactivate = () => {
@@ -144,8 +149,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
 
   const handleConfirmSuspend = () => {
     if (user) {
-      const updatedUser = { ...user, status: "suspended" };
-      onSave(updatedUser);
+      updateUserMutation.mutate({ id: user.id, status: "inactive" });
       setOpenSuspendModal(false);
     }
   };
@@ -206,11 +210,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               User Details
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Button
-                variant="plain"
-                size="sm"
-                onClick={onClose}
-              >
+              <Button variant="plain" size="sm" onClick={onClose}>
                 <XIcon fontSize="20px" weight="bold" />
               </Button>
             </Stack>
@@ -313,10 +313,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   width: "100%",
                 }}
               >
-                <Warning size={20} color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"}/>
+                <Warning size={20} color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"} />
                 <Typography
                   level="body-sm"
-                  sx={{ fontSize: "14px", color: isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)", fontWeight: 300 }}
+                  sx={{
+                    fontSize: "14px",
+                    color: isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)",
+                    fontWeight: 300,
+                  }}
                 >
                   Account suspended by suspicious activity
                 </Typography>
@@ -340,7 +344,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             <Box
               onMouseDown={(event) => {
                 event.preventDefault();
-                handleEdit(user);
+                handleEdit();
               }}
               sx={menuItemStyle}
             >
@@ -469,7 +473,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             <Stack
               direction="row"
               spacing={2}
-              sx={{ borderBottom: "1px solid var(--joy-palette-divider)", paddingBottom: 2 }}
+              sx={{
+                borderBottom: "1px solid var(--joy-palette-divider)",
+                paddingBottom: 2,
+              }}
             >
               <Typography
                 level="body-sm"
@@ -490,7 +497,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             <Stack
               direction="row"
               spacing={2}
-              sx={{ borderBottom: "1px solid var(--joy-palette-divider)", paddingBottom: 2 }}
+              sx={{
+                borderBottom: "1px solid var(--joy-palette-divider)",
+                paddingBottom: 2,
+              }}
             >
               <Typography
                 level="body-sm"
@@ -523,7 +533,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     Covered by MarketSphere
                   </a>
                 </Typography>
-                <Typography level="body-sm" sx={{ color: "var(--joy-palette-text-primary)" }}>
+                <Typography
+                  level="body-sm"
+                  sx={{ color: "var(--joy-palette-text-primary)" }}
+                >
                   2,000 users
                 </Typography>
               </Stack>
@@ -576,21 +589,22 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             </Stack>
           </Stack>
         </Box>
-        <DeleteDeactivateUserModal
-          open={openDeleteModal}
-          onClose={() => setOpenDeleteModal(false)}
-          onConfirm={confirmDelete}
-          usersToDelete={[user.name]}
-        />
-
-        <DeleteDeactivateUserModal
-          open={openDeactivateModal}
-          onClose={() => setOpenDeactivateModal(false)}
-          onConfirm={confirmDeactivate}
-          isDeactivate={true}
-          usersToDelete={[user.name]}
-        />
       </Sheet>
+
+      <DeleteDeactivateUserModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={confirmDelete}
+        usersToDelete={[user.name]}
+      />
+
+      <DeleteDeactivateUserModal
+        open={openDeactivateModal}
+        onClose={() => setOpenDeactivateModal(false)}
+        onConfirm={confirmDeactivate}
+        isDeactivate={true}
+        usersToDelete={[user.name]}
+      />
 
       <ResetPasswordUserModal
         open={openResetPasswordModal}
@@ -612,8 +626,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
       <AddEditUser
         open={openEditModal}
         onClose={handleCloseEditModal}
-        user={userToEdit}
-        onSave={onSave}
+        userId={user.id}
       />
     </>
   );
