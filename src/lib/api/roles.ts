@@ -1,18 +1,20 @@
 import { apiFetch } from "./api-fetch";
 
+interface RolePermission {
+  permissionId: number;
+  permission: {
+    name: string;
+    label: string;
+    description?: string;
+  };
+}
+
 export interface Role {
     id: number;
     name: string;
     description: string | null; 
     abbreviation?: string;
-    permissions?: Array<{
-      permissionId: string | number;
-      permission: {
-        name: string;
-        label: string;
-        description?: string;
-      };
-    }>;
+    permissions: RolePermission[];
   }
   
   interface CreateRolePayload {

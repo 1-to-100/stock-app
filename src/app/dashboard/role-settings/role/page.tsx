@@ -46,6 +46,7 @@ import { getRoles, Role } from "../../../../lib/api/roles";
 import { getCustomers, Customer } from "../../../../lib/api/customers";
 import { getRoleById } from "../../../../lib/api/roles";
 import Tooltip from "@mui/joy/Tooltip";
+import { ApiUser } from "@/contexts/auth/types";
 
 const RouterLink = Link;
 
@@ -67,6 +68,15 @@ interface Permission {
   label: string;
   description?: string;
   access: "Full access" | "Limited access" | "No access";
+}
+
+interface RolePermission {
+  permissionId: number;
+  permission: {
+    name: string;
+    label: string;
+    description?: string;
+  };
 }
 
 interface SystemAdminRole {
@@ -122,7 +132,7 @@ const SystemAdminSettings: React.FC = () => {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: any): User => {
+  const transformUser = (apiUser: ApiUser): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
@@ -177,13 +187,13 @@ const SystemAdminSettings: React.FC = () => {
     };
 
 
-const permissions: Permission[] = roleData?.permissions?.map((perm: any) => ({
-  id: perm.permissionId.toString(),
-  name: perm.permission.name,
-  label: perm.permission.label,
-  description: perm.permission.description || perm.permission.label,
-  access: "Full access",
-})) || [];
+    const permissions: Permission[] = roleData?.permissions?.map((perm: RolePermission) => ({
+      id: perm.permissionId.toString(),
+      name: perm.permission.name,
+      label: perm.permission.label,
+      description: perm.permission.description || perm.permission.label,
+      access: "Full access",
+    })) || [];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
