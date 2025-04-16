@@ -3,7 +3,7 @@ import { Customer } from '@/lib/api/customers';
 import { Role } from '@/lib/api/roles';
 
 export interface ApiUser {
-  managerId: any;
+  managerId: number;
   id: number;
   firstName: string;
   lastName: string;
