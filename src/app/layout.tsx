@@ -13,7 +13,8 @@ import { LocalizationProvider } from '@/components/core/localization-provider';
 import { SettingsButton } from '@/components/core/settings/settings-button';
 import { ThemeProvider } from '@/components/core/theme-provider/theme-provider';
 import { Toaster } from '@/components/core/toaster';
-import { QueryProvider } from '@/components/QueryProvider'; 
+import { QueryProvider } from '@/components/QueryProvider';
+import {TestApiKey} from '@/components/test-api-key';
 
 export const metadata = { title: config.site.name } satisfies Metadata;
 
@@ -48,6 +49,7 @@ export default async function Layout({ children }: LayoutProps): Promise<React.J
             </UserProvider>
           </LocalizationProvider>
         </Analytics>
+      <TestApiKey />
       </body>
     </html>
   );
