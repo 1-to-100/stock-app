@@ -46,6 +46,7 @@ jobs:
       - name: 'Build and push Docker image'
         # docker pull required as otherwise oidc federation does not allow to pull
         run: |
+          cp .env.main .env
           docker pull us-central1-docker.pkg.dev/shared-0c2710c/main/shared-deps:latest
           docker build -t ${{ env.ARTIFACT_REGISTRY }}:${{ github.ref_name }} .
           docker push ${{ env.ARTIFACT_REGISTRY }}:${{ github.ref_name }}
