@@ -1,4 +1,7 @@
 import { getAuth } from "firebase/auth";
+interface CustomError extends Error {
+  response?: { data: unknown };
+}
 
 export async function apiFetch<T>(
   path: string,
@@ -31,8 +34,8 @@ export async function apiFetch<T>(
     } catch (e) {
       data = {};
     }
-    const error = new Error(`HTTP error! status: ${response.status}`);
-    (error as any).response = { data };
+    const error: CustomError = new Error(`HTTP error! status: ${response.status}`);
+    error.response = { data };
     throw error;
   }
 
