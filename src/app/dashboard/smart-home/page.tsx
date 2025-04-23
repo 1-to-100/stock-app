@@ -39,6 +39,12 @@ import { getCustomers, Customer } from "./../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 
+interface HttpError extends Error {
+  response?: {
+    status: number;
+  };
+}
+
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
@@ -338,8 +344,35 @@ export default function Page(): React.JSX.Element {
   };
 
   if (error) {
+    const httpError = error as HttpError;
+    if (httpError.response?.status === 403) {
+      return (
+        <Box sx={{ textAlign: "center", mt: 20 }}>
+        <Typography
+          sx={{
+            fontSize: "24px",
+            fontWeight: "600",
+            color: "var(--joy-palette-text-primary)",
+          }}
+        >
+          Access Denied
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: "14px",
+            fontWeight: "300",
+            color: "var(--joy-palette-text-secondary)",
+            mt: 1,
+          }}
+        >
+          You do not have the required permissions to view this page. <br />{" "}
+          Please contact your administrator if you believe this is a mistake.
+        </Typography>
+      </Box>
+      );
+    }
     return (
-      <Typography>Error loading users: {(error as Error).message}</Typography>
+      <Typography>Error loading users: {error.message}</Typography>
     );
   }
 
@@ -804,42 +837,6 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" style={iconStyle} />
                                 Edit
                               </Box>
-                              {/* <Box sx={menuItemStyle}>
-                  <ArrowRightIcon fontSize="20px" style={iconStyle} />
-                  Impersonate user
-                </Box>
-                <Box
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    handleDeactivate(user.id);
-                    handleMenuClose();
-                  }}
-                  sx={menuItemStyle}
-                >
-                  <ToggleLeft fontSize="20px" style={iconStyle} />
-                  Deactivate
-                </Box>
-                <Box
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    handleResetPassword(user.id);
-                  }}
-                  sx={menuItemStyle}
-                >
-                  <Password fontSize="20px" style={iconStyle} />
-                  Reset password
-                </Box>
-                <Box
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    handleDeleteRow(user.id);
-                    handleMenuClose();
-                  }}
-                  sx={{ ...menuItemStyle, color: "#EF4444" }}
-                >
-                  <TrashIcon fontSize="20px" style={iconStyle} />
-                  Delete
-                </Box> */}
                             </Popper>
                           </td>
                         </tr>

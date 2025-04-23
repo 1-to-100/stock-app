@@ -22,7 +22,7 @@ import {
   editRole,
   getRoleById,
 } from "../../../lib/api/roles";
-import { Box } from "@mui/joy";
+import { Box, CircularProgress } from "@mui/joy";
 
 interface Permission {
   enabled: boolean;
@@ -329,7 +329,16 @@ export default function AddRoleModal({
           {roleData ? "Edit Role" : "Add Role"}
         </Typography>
         {isModulesLoading || isRoleLoading ? (
-          <Typography>Loading...</Typography>
+          <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "45vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
         ) : (
           <Stack spacing={2}>
             <Stack>

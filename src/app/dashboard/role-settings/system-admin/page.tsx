@@ -188,7 +188,7 @@ const SystemAdminSettings: React.FC = () => {
       });
       return {
         ...response,
-        data: response.data.map(transformUser), // Transform ApiUser to User
+        data: response.data.map(transformUser), 
       };
     },
     enabled: !isRolesLoading && !isCustomersLoading,

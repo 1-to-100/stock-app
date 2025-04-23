@@ -18,7 +18,6 @@ import Switch from "@mui/joy/Switch";
 import Tooltip from "@mui/joy/Tooltip";
 import FormHelperText from "@mui/joy/FormHelperText";
 import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
-import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import { Box } from "@mui/joy";
@@ -28,8 +27,7 @@ import { getRoles, Role } from "./../../../lib/api/roles";
 import { getCustomers, Customer } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
 import { ApiUser } from "@/contexts/auth/types";
-
-
+import { toast } from '@/components/core/toaster';
 
 interface User {
   id: number;
@@ -72,7 +70,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<FormErrors | null>(null);
   const [emailWarnings, setEmailWarnings] = useState<string[]>([]);
   const { colorScheme } = useColorScheme();
   const isLightTheme = colorScheme === "light";
@@ -96,24 +94,24 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
   const { data: userData, isLoading: isUserLoading } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => getUserById(userId!),
-    enabled: !!userId,
+    enabled: !!userId && open,
   });
 
-   const transformUser = (apiUser: ApiUser): User => {
-      const customer = customers?.find((c) => c.id === apiUser.customerId);
-      const role = roles?.find((r) => r.id === apiUser.roleId);
-      return {
-        id: apiUser.id,
-        name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-        email: apiUser.email,
-        customer: customer ? customer.name : "",
-        role: role ? role.name : "",
-        persona: apiUser.persona || "",
-        status: apiUser.status,
-        avatar: apiUser.avatar || undefined,
-        activity: apiUser.activity,
-      };
+  const transformUser = (apiUser: ApiUser): User => {
+    const customer = customers?.find((c) => c.id === apiUser.customerId);
+    const role = roles?.find((r) => r.id === apiUser.roleId);
+    return {
+      id: apiUser.id,
+      name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
+      email: apiUser.email,
+      customer: customer ? customer.name : "",
+      role: role ? role.name : "",
+      persona: apiUser.persona || "",
+      status: apiUser.status,
+      avatar: apiUser.avatar || undefined,
+      activity: apiUser.activity,
     };
+  };
 
   useEffect(() => {
     if (userId && userData && open) {
@@ -132,7 +130,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       );
       setAvatarPreview(user.avatar || null);
       setIsActive(user.status === "active");
-      setErrors({});
+      setErrors(null);
       setEmailWarnings([]);
     } else if (!userId && open) {
       setFormData({
@@ -146,8 +144,8 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       });
       setAdditionalEmails([]);
       setAvatarPreview(null);
-      setIsActive(true);
-      setErrors({});
+      setIsActive(false); 
+      setErrors(null);
       setEmailWarnings([]);
     }
   }, [userId, userData, open]);
@@ -157,9 +155,13 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       onClose();
+      toast.success("User created successfully.");
     },
-    onError: (error) => {
-      console.error("Error creating user:", error);
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      }
     },
   });
 
@@ -167,22 +169,51 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     mutationFn: updateUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
       onClose();
+      toast.success("User updated successfully.");
     },
-    onError: (error) => {
-      console.error("Error updating user:", error);
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      }
     },
   });
 
-  const validateEmail = (email: string): boolean => {
+  const validateEmail = (email: string): string | null => {
+    if (!email.trim()) {
+      return "Email is required";
+    }
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    if (!emailRegex.test(email)) {
+      return "Invalid email format";
+    }
+    
+    if (email.startsWith(".") || email.endsWith(".")) {
+      return "Email cannot start or end with a dot";
+    }
+   
+    if (email.includes("..")) {
+      return "Email cannot contain consecutive dots";
+    }
+   
+    if (email.includes("/")) {
+      return "Email cannot contain the '/' character";
+    }
+    
+    const atIndex = email.indexOf("@");
+    if (email[atIndex - 1] === ".") {
+      return "Email cannot have a dot immediately before '@'";
+    }
+  
+    return null; 
   };
 
   const checkEmailUniqueness = async (email: string, index?: number): Promise<boolean> => {
     if (!email || !validateEmail(email)) return false;
     try {
-
       setEmailWarnings((prev) => {
         const newWarnings = [...prev];
         if (index !== undefined) {
@@ -201,76 +232,75 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
 
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Invalid email format";
+    
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
     }
-    if (!formData.customer) newErrors.customer = "Customer is required";
-    if (!formData.role) newErrors.role = "Role is required";
-
-    const additionalEmailErrors = additionalEmails.map((email, index) => {
-      if (email && !validateEmail(email)) {
-        return "Invalid email format";
+  
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+  
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+    
+    if (!formData.customer) {
+      newErrors.customer = "Customer is required";
+    }
+   
+    if (!formData.role) {
+      newErrors.role = "Role is required";
+    }
+   
+    const additionalEmailErrors = additionalEmails.map((email) => {
+      if (email) {
+        return validateEmail(email) || "";
       }
       return "";
     });
+  
     if (additionalEmailErrors.some((error) => error)) {
       newErrors.additionalEmails = additionalEmailErrors;
     }
-
+  
     return newErrors;
   };
 
   const handleInputChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-
-    const newErrors: FormErrors = { ...errors };
-    if (field === "firstName") {
-      newErrors.firstName = value.trim() ? undefined : "First name is required";
-    } else if (field === "lastName") {
-      newErrors.lastName = value.trim() ? undefined : "Last name is required";
-    } else if (field === "email") {
-      if (!value.trim()) {
-        newErrors.email = "Email is required";
-      } else if (!validateEmail(value)) {
-        newErrors.email = "Invalid email format";
-      } else {
-        newErrors.email = undefined;
-        await checkEmailUniqueness(value);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+      additionalEmails: field === "email" ? undefined : prev?.additionalEmails,
+    }));
+   
+    if (field === "email" && value) {
+      const emailError = validateEmail(value);
+      if (emailError) {
+        setErrors((prev) => ({ ...prev, email: emailError }));
       }
-    } else if (field === "customer") {
-      newErrors.customer = value ? undefined : "Customer is required";
-    } else if (field === "role") {
-      newErrors.role = value ? undefined : "Role is required";
-    }
-    setErrors(newErrors);
-  };
-
-  const handleAddEmail = () => {
-    if (additionalEmails.length < 2) {
-      setAdditionalEmails([...additionalEmails, ""]);
-      setEmailWarnings([...emailWarnings, ""]);
     }
   };
-
+  
   const handleAdditionalEmailChange = async (index: number, value: string) => {
     const updatedEmails = [...additionalEmails];
     updatedEmails[index] = value;
     setAdditionalEmails(updatedEmails);
-
-    const newErrors = [...(errors.additionalEmails || [])];
-    if (value && !validateEmail(value)) {
-      newErrors[index] = "Invalid email format";
-    } else {
-      newErrors[index] = "";
-      if (value) {
-        await checkEmailUniqueness(value, index);
+  
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (!newErrors.additionalEmails) {
+        newErrors.additionalEmails = [];
       }
+      newErrors.additionalEmails[index] = value ? validateEmail(value) || "" : "";
+      return newErrors;
+    });
+  
+    if (value) {
+      await checkEmailUniqueness(value, index);
     }
-    setErrors((prev) => ({ ...prev, additionalEmails: newErrors }));
   };
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -330,22 +360,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     return customer ? customer.id : 0;
   };
 
-  const getCustomerName = (customerId: number): string => {
-    if (!customers) return "";
-    const customer = customers.find((c) => c.id === customerId);
-    return customer ? customer.name : "";
-  };
-
   const getRoleId = (roleName: string): number => {
     if (!roles) return 0;
     const role = roles.find((r) => r.name === roleName);
     return role ? role.id : 0;
-  };
-
-  const getRoleName = (roleId: number): string => {
-    if (!roles) return "";
-    const role = roles.find((r) => r.id === roleId);
-    return role ? role.name : "";
   };
 
   return (
@@ -505,13 +523,14 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 placeholder="Enter first name"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
-                error={!!errors.firstName}
+                error={!!errors?.firstName}
+                slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
                 }}
               />
-              {errors.firstName && (
+              {errors?.firstName && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.firstName}
                 </FormHelperText>
@@ -533,13 +552,14 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 placeholder="Enter last name"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
-                error={!!errors.lastName}
+                error={!!errors?.lastName}
+                slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
                 }}
               />
-              {errors.lastName && (
+              {errors?.lastName && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.lastName}
                 </FormHelperText>
@@ -562,15 +582,17 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               </Typography>
               <Input
                 placeholder="Enter email"
+                type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                error={!!errors.email}
+                error={!!errors?.email}
+                slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
                 }}
               />
-              {errors.email && (
+              {errors?.email && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.email}
                 </FormHelperText>
@@ -602,7 +624,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
-                  border: errors.customer ? "1px solid var(--joy-palette-danger-500)" : undefined,
+                  border: errors?.customer ? "1px solid var(--joy-palette-danger-500)" : undefined,
                 }}
               >
                 {customers?.map((customer) => (
@@ -611,7 +633,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                   </Option>
                 ))}
               </Select>
-              {errors.customer && (
+              {errors?.customer && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.customer}
                 </FormHelperText>
@@ -638,13 +660,13 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 onChange={(e) =>
                   handleAdditionalEmailChange(index, e.target.value)
                 }
-                error={!!errors.additionalEmails?.[index]}
+                error={!!errors?.additionalEmails?.[index]}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
                 }}
               />
-              {errors.additionalEmails?.[index] && (
+              {errors?.additionalEmails?.[index] && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.additionalEmails[index]}
                 </FormHelperText>
@@ -679,7 +701,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
-                  border: errors.role ? "1px solid var(--joy-palette-danger-500)" : undefined,
+                  border: errors?.role ? "1px solid var(--joy-palette-danger-500)" : undefined,
                 }}
               >
                 {roles?.map((role) => (
@@ -688,7 +710,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                   </Option>
                 ))}
               </Select>
-              {errors.role && (
+              {errors?.role && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
                   {errors.role}
                 </FormHelperText>
@@ -740,10 +762,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 ))}
               </Select>
             </Stack>
-         
           </Stack>
-
-          
 
           {/* <Button
             variant="plain"
