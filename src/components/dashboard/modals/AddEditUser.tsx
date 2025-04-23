@@ -29,6 +29,14 @@ import { getManagers, Manager } from "./../../../lib/api/managers";
 import { ApiUser } from "@/contexts/auth/types";
 import { toast } from '@/components/core/toaster';
 
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 interface User {
   id: number;
   name: string;
@@ -157,10 +165,12 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       onClose();
       toast.success("User created successfully.");
     },
-    onError: (error: any) => {
+    onError: (error: HttpError) => {
       const errorMessage = error.response?.data?.message;
       if (errorMessage) {
         toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while creating the user.");
       }
     },
   });
@@ -173,10 +183,12 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       onClose();
       toast.success("User updated successfully.");
     },
-    onError: (error: any) => {
+    onError: (error: HttpError) => {
       const errorMessage = error.response?.data?.message;
       if (errorMessage) {
         toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while updating the user.");
       }
     },
   });
