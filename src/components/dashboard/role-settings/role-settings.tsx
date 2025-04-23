@@ -1,4 +1,5 @@
-// RoleSettings.tsx
+"use client";
+
 import * as React from "react";
 import Box from "@mui/joy/Box";
 import Card from "@mui/joy/Card";
@@ -7,30 +8,82 @@ import { DotsThree } from "@phosphor-icons/react/dist/ssr/DotsThree";
 import { IconButton } from "@mui/joy";
 import { useRouter } from "next/navigation";
 import { paths } from "@/paths";
-import { getRoleById } from "../../../lib/api/roles";
+import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { useState } from "react";
+import { Popper } from "@mui/base/Popper";
+import AddRoleModal from "../modals/AddRoleModal";
 
 export interface Role {
   id: string;
   abbreviation: string;
   name: string;
   description: string;
-  peopleCount: number;
+  _count: {
+    users: number;
+  };
 }
 
 interface RoleSettingsProps {
   roles: Role[];
+  fetchRoles: () => void;
 }
 
-const RoleSettings: React.FC<RoleSettingsProps> = ({ roles }) => {
+const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
   const router = useRouter();
-
+  const [activeRoleId, setActiveRoleId] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [openEditRoleModal, setOpenEditRoleModal] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
   const handleCardClick = async (roleId: string) => {
     try {
-      router.push(`${paths.dashboard.roleSettings.systemAdmin}?roleId=${roleId}`);
+      router.push(
+        `${paths.dashboard.roleSettings.systemAdmin}?roleId=${roleId}`
+      );
     } catch (error) {
       console.error("Error fetching role:", error);
     }
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    roleId: string
+  ) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setActiveRoleId(roleId);
+  };
+
+  const handleEditRole = (roleId: string) => {
+    setSelectedRoleId(roleId);
+    setOpenEditRoleModal(true);
+    handleMenuClose();
+  };
+
+  const handleCloseEditRoleModal = () => {
+    setOpenEditRoleModal(false);
+    setSelectedRoleId(null);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setActiveRoleId(null);
+  };
+
+  const menuItemStyle = {
+    padding: "8px 16px",
+    fontSize: "16px",
+    fontWeight: "400",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    color: "var(--joy-palette-text-primary)",
+    "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
+  };
+
+  const iconStyle = {
+    marginRight: "14px",
   };
 
   return (
@@ -112,7 +165,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles }) => {
                   color: "var(--joy-palette-text-primary)",
                 }}
               >
-                {role.name}
+                {role.name.slice(0, 59)}
               </Typography>
               <Typography
                 level="body-xs"
@@ -126,13 +179,49 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles }) => {
                 Default role
               </Typography>
             </Box>
-            <IconButton size="sm">
+            <IconButton
+              size="sm"
+              onClick={(event) => handleMenuOpen(event, role.id)}
+            >
               <DotsThree
                 weight="bold"
                 size={22}
                 color="var(--joy-palette-text-secondary)"
               />
             </IconButton>
+            <Popper
+              open={activeRoleId === role.id && Boolean(anchorEl)}
+              anchorEl={anchorEl}
+              placement="bottom-start"
+              style={{
+                minWidth: "150px",
+                borderRadius: "8px",
+                backgroundColor: "var(--joy-palette-background-surface)",
+                zIndex: 1300,
+                border: "1px solid var(--joy-palette-divider)",
+              }}
+            >
+              <Box
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleEditRole(role.id);
+                }}
+                sx={menuItemStyle}
+              >
+                <PencilIcon fontSize="20px" style={iconStyle} />
+                Edit
+              </Box>
+              <Box
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleMenuClose();
+                }}
+                sx={{ ...menuItemStyle, color: "#EF4444" }}
+              >
+                <TrashIcon fontSize="20px" style={iconStyle} />
+                Delete
+              </Box>
+            </Popper>
           </Box>
           <Box
             sx={{
@@ -149,7 +238,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles }) => {
                 lineHeight: "1.5",
               }}
             >
-              {role.description}
+              {role.description.slice(0, 89)}
             </Typography>
           </Box>
           <Typography
@@ -163,10 +252,16 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles }) => {
               mt: "auto",
             }}
           >
-            {role.peopleCount} people
+            {role._count.users} people
           </Typography>
         </Card>
       ))}
+      <AddRoleModal
+        open={openEditRoleModal}
+        onClose={handleCloseEditRoleModal}
+        roleId={selectedRoleId ? Number(selectedRoleId) : undefined}
+        onRoleCreated={fetchRoles}
+      />
     </Box>
   );
 };

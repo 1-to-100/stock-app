@@ -37,6 +37,7 @@ import { getUsers, getUserById } from "../../../lib/api/users";
 import { getRoles, Role } from "./../../../lib/api/roles";
 import { getCustomers, Customer } from "./../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
+import CircularProgress from "@mui/joy/CircularProgress";
 
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
@@ -64,19 +65,23 @@ export default function Page(): React.JSX.Element {
   const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [isDeactivating, setIsDeactivating] = useState(false);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+    null
+  );
   const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const rowsPerPage = 11;
+  const rowsPerPage = 10;
 
   const { data: roles, isLoading: isRolesLoading } = useQuery({
     queryKey: ["roles"],
@@ -88,7 +93,7 @@ export default function Page(): React.JSX.Element {
     queryFn: getCustomers,
   });
 
- const transformUser = (apiUser: ApiUser): User => {
+  const transformUser = (apiUser: ApiUser): User => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
@@ -105,7 +110,15 @@ export default function Page(): React.JSX.Element {
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["users", currentPage, searchTerm, sortColumn, sortDirection, roles, customers],
+    queryKey: [
+      "users",
+      currentPage,
+      searchTerm,
+      sortColumn,
+      sortDirection,
+      roles,
+      customers,
+    ],
     queryFn: async () => {
       const response = await getUsers({
         page: currentPage,
@@ -139,8 +152,7 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
-  useEffect(() => {
-  }, [popoverAnchorEl, selectedUser]);
+  useEffect(() => {}, [popoverAnchorEl, selectedUser]);
 
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
@@ -150,7 +162,9 @@ export default function Page(): React.JSX.Element {
     );
   };
 
-  const handleSelectAllChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAllChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (!hasResults) return;
     if (event.target.checked) {
       setSelectedRows(users.map((user) => user.id));
@@ -210,7 +224,10 @@ export default function Page(): React.JSX.Element {
     });
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    index: number
+  ) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setMenuRowIndex(index);
@@ -226,7 +243,10 @@ export default function Page(): React.JSX.Element {
     setPopoverAnchorEl(null);
   };
 
-  const handleOpenDetail = async (event: React.MouseEvent<HTMLElement>, userId: number) => {
+  const handleOpenDetail = async (
+    event: React.MouseEvent<HTMLElement>,
+    userId: number
+  ) => {
     event.preventDefault();
     event.persist();
     const targetElement = event.currentTarget;
@@ -317,12 +337,10 @@ export default function Page(): React.JSX.Element {
     marginRight: "14px",
   };
 
-  if (isLoading || isRolesLoading || isCustomersLoading) {
-    return <Typography>Loading...</Typography>;
-  }
-
   if (error) {
-    return <Typography>Error loading users: {(error as Error).message}</Typography>;
+    return (
+      <Typography>Error loading users: {(error as Error).message}</Typography>
+    );
   }
 
   return (
@@ -401,399 +419,444 @@ export default function Page(): React.JSX.Element {
           </Stack>
         </Stack>
 
-        <Box sx={{ overflowX: "auto" }}>
-          <Table aria-label="user management table">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }}>
-                  <Checkbox
-                    checked={hasResults && selectedRows.length === users.length}
-                    indeterminate={
-                      hasResults &&
-                      selectedRows.length > 0 &&
-                      selectedRows.length < users.length
-                    }
-                    onChange={handleSelectAllChange}
-                    disabled={!hasResults}
-                  />
-                </th>
-                <th style={{ width: "20%" }} onClick={() => handleSort("name")}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      "& .sort-icon": {
-                        opacity: 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      },
-                      "&:hover .sort-icon": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    User name
-                    <SortIcon
-                      className="sort-icon"
-                      fontSize="16"
-                      color="var(--joy-palette-text-secondary)"
-                    />
-                  </Box>
-                </th>
-                <th style={{ width: "25%" }} onClick={() => handleSort("email")}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      "& .sort-icon": {
-                        opacity: 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      },
-                      "&:hover .sort-icon": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    Email
-                    <SortIcon
-                      className="sort-icon"
-                      fontSize="16"
-                      color="var(--joy-palette-text-secondary)"
-                    />
-                  </Box>
-                </th>
-                <th
-                  style={{ width: "20%" }}
-                  onClick={() => handleSort("customer")}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      "& .sort-icon": {
-                        opacity: 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      },
-                      "&:hover .sort-icon": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    Customer
-                    <SortIcon
-                      className="sort-icon"
-                      fontSize="16"
-                      color="var(--joy-palette-text-secondary)"
-                    />
-                  </Box>
-                </th>
-                <th style={{ width: "15%" }} onClick={() => handleSort("role")}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      "& .sort-icon": {
-                        opacity: 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      },
-                      "&:hover .sort-icon": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    Role
-                    <SortIcon
-                      className="sort-icon"
-                      fontSize="16"
-                      color="var(--joy-palette-text-secondary)"
-                    />
-                  </Box>
-                </th>
-                <th
-                  style={{ width: "15%" }}
-                  onClick={() => handleSort("persona")}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      "& .sort-icon": {
-                        opacity: 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      },
-                      "&:hover .sort-icon": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    Persona
-                    <SortIcon
-                      className="sort-icon"
-                      fontSize="16"
-                      color="var(--joy-palette-text-secondary)"
-                    />
-                  </Box>
-                </th>
-                <th style={{ width: "5%" }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    <Typography level="body-md" color="neutral">
-                      No items found
-                    </Typography>
-                  </td>
-                </tr>
-              ) : (
-                users.map((user, index) => (
-                  <tr
-                    key={user.id}
-                    onMouseEnter={() => setHoveredRow(index)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                  >
-                    <td>
-                      <Checkbox
-                        checked={selectedRows.includes(user.id)}
-                        onChange={() => handleRowCheckboxChange(user.id)}
-                      />
-                    </td>
-                    <td>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{ alignItems: "center" }}
-                      >
-                        {user.avatar ? (
-                          <Avatar
-                            src={user.avatar}
-                            sx={{ width: 28, height: 28 }}
-                          />
-                        ) : (
-                          <Avatar sx={{ width: 28, height: 28 }} />
-                        )}
-                        <Typography sx={{ wordBreak: "break-all" }}>
-                          {user.name}
-                        </Typography>
-                        <Tooltip
-                          title={user.status}
-                          placement="top"
-                          sx={{
-                            background: "#DAD8FD",
-                            color: "#3D37DD",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              bgcolor:
-                                user.status === "active"
-                                  ? "#1A7D36"
-                                  : user.status === "inactive"
-                                  ? "#D3232F"
-                                  : "#FAE17D",
-                              borderRadius: "50%",
-                              width: "10px",
-                              minWidth: "10px",
-                              height: "10px",
-                              display: "inline-block",
-                            }}
-                          />
-                        </Tooltip>
-                      </Stack>
-                    </td>
-                    <td>
-                      <Box
-                        sx={{
-                          position: "relative",
-                          display: "inline-block",
-                          fontWeight: 400,
-                          color: "var(--joy-palette-text-secondary)",
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {typeof user.email === "string" ? user.email : user.email[0]}
-                        {hoveredRow === index && (
-                          <Tooltip
-                            title="Copy Email"
-                            placement="top"
-                            sx={{
-                              background: "#DAD8FD",
-                              color: "#3D37DD",
-                              textTransform: "capitalize",
-                            }}
-                          >
-                            <IconButton
-                              size="sm"
-                              onClick={() => {
-                                if (typeof user.email === "string") {
-                                  handleCopyEmail(user.email);
-                                }
-                              }}
-                              sx={{
-                                position: "absolute",
-                                right: "-30px",
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                bgcolor: "transparent",
-                                "&:hover": {
-                                  bgcolor: "transparent",
-                                },
-                              }}
-                            >
-                              <CopyIcon fontSize="var(--Icon-fontSize)" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {copiedEmail === user.email && (
-                          <Box
-                            sx={{
-                              position: "fixed",
-                              bottom: "20px",
-                              left: "50%",
-                              transform: "translateX(-50%)",
-                              bgcolor: "#DCFCE7",
-                              color: "#16A34A",
-                              padding: "4px 6px",
-                              borderRadius: "10px",
-                              fontSize: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              zIndex: 1000,
-                            }}
-                          >
-                            Copied to clipboard
-                            <IconButton
-                              size="sm"
-                              onClick={() => setCopiedEmail(null)}
-                              sx={{ color: "#16A34A" }}
-                            >
-                              <X fontSize="var(--Icon-fontSize)" />
-                            </IconButton>
-                          </Box>
-                        )}
-                      </Box>
-                    </td>
-                    <td
-                      style={{
-                        fontWeight: 400,
-                        color: "var(--joy-palette-text-secondary)",
-                      }}
-                    >
-                      {user.customer}
-                    </td>
-                    <td style={{ color: "var(--joy-palette-text-secondary)" }}>
-                      {user.role}
-                    </td>
-                    <td style={{ color: "var(--joy-palette-text-secondary)" }}>
-                      {user.persona}
-                    </td>
-                    <td>
-                      <IconButton
-                        size="sm"
-                        onClick={(event) => {
-                          handleMenuOpen(event, index);
-                        }}
-                      >
-                        <DotsThreeVertical
-                          weight="bold"
-                          size={22}
-                          color="var(--joy-palette-text-secondary)"
+        {isLoading || isRolesLoading || isCustomersLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "50vh",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            <Box
+              sx={{
+                justifyContent: "space-between",
+                display: "flex",
+                flexDirection: "column",
+                height: "75vh",
+              }}
+            >
+              <Box>
+                <Table aria-label="user management table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "5%" }}>
+                        <Checkbox
+                          checked={
+                            hasResults && selectedRows.length === users.length
+                          }
+                          indeterminate={
+                            hasResults &&
+                            selectedRows.length > 0 &&
+                            selectedRows.length < users.length
+                          }
+                          onChange={handleSelectAllChange}
+                          disabled={!hasResults}
                         />
-                      </IconButton>
-                      <Popper
-                        open={menuRowIndex === index && Boolean(anchorEl)}
-                        anchorEl={anchorEl}
-                        placement="bottom-start"
-                        style={{
-                          minWidth: "150px",
-                          borderRadius: "8px",
-                          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                          backgroundColor:
-                            "var(--joy-palette-background-surface)",
-                          zIndex: 1300,
-                          border: "1px solid var(--joy-palette-divider)",
-                        }}
+                      </th>
+                      <th
+                        style={{ width: "20%" }}
+                        onClick={() => handleSort("name")}
                       >
                         <Box
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleOpenDetail(event, user.id);
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": {
+                              opacity: 1,
+                            },
                           }}
-                          sx={menuItemStyle}
                         >
-                          <EyeIcon fontSize="20px" style={iconStyle} />
-                          Open detail
+                          User name
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
                         </Box>
+                      </th>
+                      <th
+                        style={{ width: "25%" }}
+                        onClick={() => handleSort("email")}
+                      >
                         <Box
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleEdit(user.id);
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": {
+                              opacity: 1,
+                            },
                           }}
-                          sx={menuItemStyle}
                         >
-                          <PencilIcon fontSize="20px" style={iconStyle} />
-                          Edit
+                          Email
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
                         </Box>
-                        <Box sx={menuItemStyle}>
-                          <ArrowRightIcon fontSize="20px" style={iconStyle} />
-                          Impersonate user
-                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "20%" }}
+                        onClick={() => handleSort("customer")}
+                      >
                         <Box
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleDeactivate(user.id);
-                            handleMenuClose();
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": {
+                              opacity: 1,
+                            },
                           }}
-                          sx={menuItemStyle}
                         >
-                          <ToggleLeft fontSize="20px" style={iconStyle} />
-                          Deactivate
+                          Customer
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
                         </Box>
+                      </th>
+                      <th
+                        style={{ width: "15%" }}
+                        onClick={() => handleSort("role")}
+                      >
                         <Box
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleResetPassword(user.id);
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": {
+                              opacity: 1,
+                            },
                           }}
-                          sx={menuItemStyle}
                         >
-                          <Password fontSize="20px" style={iconStyle} />
-                          Reset password
+                          Role
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
                         </Box>
+                      </th>
+                      <th
+                        style={{ width: "15%" }}
+                        onClick={() => handleSort("persona")}
+                      >
                         <Box
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            handleDeleteRow(user.id);
-                            handleMenuClose();
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": {
+                              opacity: 1,
+                            },
                           }}
-                          sx={{ ...menuItemStyle, color: "#EF4444" }}
                         >
-                          <TrashIcon fontSize="20px" style={iconStyle} />
-                          Delete
+                          Persona
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
                         </Box>
-                      </Popper>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
-        </Box>
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          disabled={!hasResults}
-        />
+                      </th>
+                      <th style={{ width: "5%" }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          style={{ textAlign: "center", padding: "20px" }}
+                        >
+                          <Typography level="body-md" color="neutral">
+                            No items found
+                          </Typography>
+                        </td>
+                      </tr>
+                    ) : (
+                      users.map((user, index) => (
+                        <tr
+                          key={user.id}
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
+                          <td>
+                            <Checkbox
+                              checked={selectedRows.includes(user.id)}
+                              onChange={() => handleRowCheckboxChange(user.id)}
+                            />
+                          </td>
+                          <td>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{ alignItems: "center" }}
+                            >
+                              {user.avatar ? (
+                                <Avatar
+                                  src={user.avatar}
+                                  sx={{ width: 28, height: 28 }}
+                                />
+                              ) : (
+                                <Avatar sx={{ width: 28, height: 28 }} />
+                              )}
+                              <Typography sx={{ wordBreak: "break-all" }}>
+                                {user.name}
+                              </Typography>
+                              <Tooltip
+                                title={user.status}
+                                placement="top"
+                                sx={{
+                                  background: "#DAD8FD",
+                                  color: "#3D37DD",
+                                  textTransform: "capitalize",
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    bgcolor:
+                                      user.status === "active"
+                                        ? "#1A7D36"
+                                        : user.status === "inactive"
+                                        ? "#D3232F"
+                                        : "#FAE17D",
+                                    borderRadius: "50%",
+                                    width: "10px",
+                                    minWidth: "10px",
+                                    height: "10px",
+                                    display: "inline-block",
+                                  }}
+                                />
+                              </Tooltip>
+                            </Stack>
+                          </td>
+                          <td>
+                            <Box
+                              sx={{
+                                position: "relative",
+                                display: "inline-block",
+                                fontWeight: 400,
+                                color: "var(--joy-palette-text-secondary)",
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {typeof user.email === "string"
+                                ? user.email
+                                : user.email[0]}
+                              {hoveredRow === index && (
+                                <Tooltip
+                                  title="Copy Email"
+                                  placement="top"
+                                  sx={{
+                                    background: "#DAD8FD",
+                                    color: "#3D37DD",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => {
+                                      if (typeof user.email === "string") {
+                                        handleCopyEmail(user.email);
+                                      }
+                                    }}
+                                    sx={{
+                                      position: "absolute",
+                                      right: "-30px",
+                                      top: "50%",
+                                      transform: "translateY(-50%)",
+                                      bgcolor: "transparent",
+                                      "&:hover": {
+                                        bgcolor: "transparent",
+                                      },
+                                    }}
+                                  >
+                                    <CopyIcon fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {copiedEmail === user.email && (
+                                <Box
+                                  sx={{
+                                    position: "fixed",
+                                    bottom: "20px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    bgcolor: "#DCFCE7",
+                                    color: "#16A34A",
+                                    padding: "4px 6px",
+                                    borderRadius: "10px",
+                                    fontSize: "12px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    zIndex: 1000,
+                                  }}
+                                >
+                                  Copied to clipboard
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => setCopiedEmail(null)}
+                                    sx={{ color: "#16A34A" }}
+                                  >
+                                    <X fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Box>
+                              )}
+                            </Box>
+                          </td>
+                          <td
+                            style={{
+                              fontWeight: 400,
+                              color: "var(--joy-palette-text-secondary)",
+                            }}
+                          >
+                            {user.customer}
+                          </td>
+                          <td
+                            style={{
+                              color: "var(--joy-palette-text-secondary)",
+                            }}
+                          >
+                            {user.role}
+                          </td>
+                          <td
+                            style={{
+                              color: "var(--joy-palette-text-secondary)",
+                            }}
+                          >
+                            {user.persona}
+                          </td>
+                          <td>
+                            <IconButton
+                              size="sm"
+                              onClick={(event) => {
+                                handleMenuOpen(event, index);
+                              }}
+                            >
+                              <DotsThreeVertical
+                                weight="bold"
+                                size={22}
+                                color="var(--joy-palette-text-secondary)"
+                              />
+                            </IconButton>
+                            <Popper
+                              open={menuRowIndex === index && Boolean(anchorEl)}
+                              anchorEl={anchorEl}
+                              placement="bottom-start"
+                              style={{
+                                minWidth: "150px",
+                                borderRadius: "8px",
+                                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                                backgroundColor:
+                                  "var(--joy-palette-background-surface)",
+                                zIndex: 1300,
+                                border: "1px solid var(--joy-palette-divider)",
+                              }}
+                            >
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleOpenDetail(event, user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <EyeIcon fontSize="20px" style={iconStyle} />
+                                Open detail
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleEdit(user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <PencilIcon fontSize="20px" style={iconStyle} />
+                                Edit
+                              </Box>
+                              {/* <Box sx={menuItemStyle}>
+                  <ArrowRightIcon fontSize="20px" style={iconStyle} />
+                  Impersonate user
+                </Box>
+                <Box
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    handleDeactivate(user.id);
+                    handleMenuClose();
+                  }}
+                  sx={menuItemStyle}
+                >
+                  <ToggleLeft fontSize="20px" style={iconStyle} />
+                  Deactivate
+                </Box>
+                <Box
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    handleResetPassword(user.id);
+                  }}
+                  sx={menuItemStyle}
+                >
+                  <Password fontSize="20px" style={iconStyle} />
+                  Reset password
+                </Box>
+                <Box
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    handleDeleteRow(user.id);
+                    handleMenuClose();
+                  }}
+                  sx={{ ...menuItemStyle, color: "#EF4444" }}
+                >
+                  <TrashIcon fontSize="20px" style={iconStyle} />
+                  Delete
+                </Box> */}
+                            </Popper>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </Box>
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                disabled={!hasResults}
+              />
+            </Box>
+          </>
+        )}
       </Stack>
 
       <DeleteDeactivateUserModal

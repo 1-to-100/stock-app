@@ -100,7 +100,7 @@ const permissions: Permission[] = [
   },
   {
     id: "3",
-    name: "Role & Personas Settings",
+    name: "Role Settings",
     description: "Configure roles and user personas",
     access: "Full access",
   },
@@ -448,11 +448,11 @@ const SystemAdminSettings: React.FC = () => {
       <Breadcrumbs separator={<BreadcrumbsSeparator />}>
         <BreadcrumbsItem href={paths.dashboard.roleSettings.list} type="start" />
         <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
-          Role & Personas Settings
-        </BreadcrumbsItem>
-        <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
           Role Settings
         </BreadcrumbsItem>
+        {/* <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
+          Role Settings
+        </BreadcrumbsItem> */}
         <BreadcrumbsItem type="end">System Admin</BreadcrumbsItem>
       </Breadcrumbs>
 

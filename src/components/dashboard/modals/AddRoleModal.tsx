@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Modal from "@mui/joy/Modal";
 import ModalDialog from "@mui/joy/ModalDialog";
 import ModalClose from "@mui/joy/ModalClose";
@@ -14,370 +14,583 @@ import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
 import Switch from "@mui/joy/Switch";
+import Tooltip from "@mui/joy/Tooltip";
 import { getSystemModules } from "./../../../lib/api/system-modules";
-import { createRole, addRolePermissions } from "../../../lib/api/roles";
-
-interface AddRoleModalProps {
-    open: boolean;
-    onClose: () => void;
-    onRoleCreated?: () => void;
-}
+import {
+  createRole,
+  addRolePermissions,
+  editRole,
+  getRoleById,
+} from "../../../lib/api/roles";
+import { Box } from "@mui/joy";
 
 interface Permission {
-    enabled: boolean;
-    accessLevel: string[];
+  enabled: boolean;
+  accessLevel: string[];
 }
 
 interface FormData {
-    roleName: string;
-    description: string;
-    permissions: { [key: string]: Permission };
-}
-
-export interface Role {
-    id: number;
-    name: string;
-    description: string | null;
-    imageUrl: string | null;
-    createdAt: string;
-    updatedAt: string;
+  roleName: string;
+  description: string;
+  permissions: { [key: string]: Permission };
 }
 
 interface CreateRolePayload {
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 }
 
 interface AddRolePermissionsPayload {
-    id: number;
-    permissionNames: string[];
+  id: number;
+  permissionNames: string[];
 }
 
-export default function AddRoleModal({ open, onClose, onRoleCreated }: AddRoleModalProps) {
-    const [formData, setFormData] = useState<FormData>({
-        roleName: "",
-        description: "",
-        permissions: {},
-    });
+interface Errors {
+  roleName?: string;
+  description?: string;
+  permissions?: string;
+}
 
-    const { data: systemModules, isLoading } = useQuery({
-        queryKey: ["systemModules"],
-        queryFn: getSystemModules,
-    });
+export interface Role {
+  id: number;
+  name: string;
+  description: string | null;
+  permissions?: {
+    [key: string]: { id: number; name: string; label: string }[];
+  };
+}
 
-    useEffect(() => {
-        if (systemModules && open) {
-            const initialPermissions: { [key: string]: Permission } = {};
-            systemModules.forEach((module) => {
-                initialPermissions[module.name] = {
-                    enabled: module.enabled ?? false,
-                    accessLevel: [],
-                };
-            });
-            setFormData((prev) => ({
-                ...prev,
-                permissions: initialPermissions,
-            }));
-        }
-    }, [systemModules, open]);
+interface AddRoleModalProps {
+  open: boolean;
+  onClose: () => void;
+  onRoleCreated?: () => void;
+  roleId?: number;
+}
 
-    const handleInputChange = (field: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
+export default function AddRoleModal({
+  open,
+  onClose,
+  onRoleCreated,
+  roleId,
+}: AddRoleModalProps) {
+  const [formData, setFormData] = useState<FormData>({
+    roleName: "",
+    description: "",
+    permissions: {},
+  });
+  const [errors, setErrors] = useState<Errors>({});
+  const queryClient = useQueryClient();
 
-    const handlePermissionToggle = (permissionKey: string) => {
-        setFormData((prev) => {
-            const currentPermission = prev.permissions[permissionKey] || {
-                enabled: false,
-                accessLevel: [],
-            };
-            return {
-                ...prev,
-                permissions: {
-                    ...prev.permissions,
-                    [permissionKey]: {
-                        ...currentPermission,
-                        enabled: !currentPermission.enabled,
-                    },
-                },
-            };
+  const { data: systemModules, isLoading: isModulesLoading } = useQuery({
+    queryKey: ["systemModules"],
+    queryFn: getSystemModules,
+  });
+
+  const {
+    data: roleData,
+    isLoading: isRoleLoading,
+    error: roleError,
+  } = useQuery({
+    queryKey: ["role", roleId],
+    queryFn: async () => {
+      if (!roleId) {
+        return null; 
+      }
+      return getRoleById(roleId);
+    },
+  });
+
+  useEffect(() => {
+    if (open && !isModulesLoading) {
+      const initialPermissions: { [key: string]: Permission } = {};
+      if (systemModules) {
+        systemModules.forEach((module) => {
+          initialPermissions[module.name] = {
+            enabled: false,
+            accessLevel: [],
+          };
         });
-    };
+      }
 
-    const handleAccessLevelChange = (permissionKey: string, value: string[]) => {
-        setFormData((prev) => {
-            const currentPermission = prev.permissions[permissionKey] || {
-                enabled: false,
-                accessLevel: [],
-            };
-            return {
-                ...prev,
-                permissions: {
-                    ...prev.permissions,
-                    [permissionKey]: {
-                        ...currentPermission,
-                        accessLevel: value,
-                    },
-                },
-            };
+      if (roleData && roleId) {
+        setFormData({
+          roleName: roleData.name || "",
+          description: roleData.description || "",
+          permissions: Object.keys(initialPermissions).reduce(
+            (acc, moduleName) => {
+              const modulePermissions =
+                roleData.permissions?.[moduleName] || [];
+              acc[moduleName] = {
+                enabled: modulePermissions.length > 0,
+                accessLevel: modulePermissions.map((perm) => perm.name),
+              };
+              return acc;
+            },
+            initialPermissions
+          ),
         });
-    };
+      } else {
+        setFormData({
+          roleName: "",
+          description: "",
+          permissions: initialPermissions,
+        });
+      }
+      setErrors({});
+    }
+  }, [systemModules, roleData, open, isModulesLoading, roleId]);
 
-    const handleSave = async () => {
-        try {
-            const rolePayload: CreateRolePayload = {
-                name: formData.roleName,
-                description: formData.description,
-            };
-            const createdRole = await createRole(rolePayload);
-        
-            const permissionNames: string[] = [];
-            Object.entries(formData.permissions).forEach(([moduleName, permission]) => {
-                if (permission.enabled && permission.accessLevel.length > 0) {
-                    permission.accessLevel.forEach((perm) => {
-                        const prefix = `${moduleName}:`;
-                        const cleanPerm = perm.startsWith(prefix) ? perm.slice(prefix.length) : perm;
-                        permissionNames.push(`${moduleName}:${cleanPerm}`);
-                    });
-                }
-            });
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
 
-            if (permissionNames.length > 0) {
-                const permissionsPayload: AddRolePermissionsPayload = {
-                    id: createdRole.id,
-                    permissionNames,
-                };
-                await addRolePermissions(permissionsPayload);
-            }
-           
-            if (onRoleCreated) {
-                onRoleCreated();
-            }
-            onClose();
-        } catch (error) {
-            console.error("Error creating role or adding permissions:", error);
+  const handlePermissionToggle = (permissionKey: string) => {
+    setFormData((prev) => {
+      const currentPermission = prev.permissions[permissionKey] || {
+        enabled: false,
+        accessLevel: [],
+      };
+      return {
+        ...prev,
+        permissions: {
+          ...prev.permissions,
+          [permissionKey]: {
+            ...currentPermission,
+            enabled: !currentPermission.enabled,
+            accessLevel: !currentPermission.enabled
+              ? currentPermission.accessLevel
+              : [],
+          },
+        },
+      };
+    });
+    setErrors((prev) => ({ ...prev, permissions: undefined }));
+  };
+
+  const handleAccessLevelChange = (permissionKey: string, value: string[]) => {
+    setFormData((prev) => {
+      const currentPermission = prev.permissions[permissionKey] || {
+        enabled: false,
+        accessLevel: [],
+      };
+      return {
+        ...prev,
+        permissions: {
+          ...prev.permissions,
+          [permissionKey]: {
+            ...currentPermission,
+            enabled: value.length > 0,
+            accessLevel: value,
+          },
+        },
+      };
+    });
+    setErrors((prev) => ({ ...prev, permissions: undefined }));
+  };
+
+  const validateForm = () => {
+    const newErrors: Errors = {};
+    if (!formData.roleName.trim()) {
+      newErrors.roleName = "Role name is required";
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    let hasValidPermissions = false;
+    for (const [moduleName, permission] of Object.entries(
+      formData.permissions
+    )) {
+      if (permission.enabled) {
+        if (permission.accessLevel.length === 0) {
+          newErrors.permissions =
+            "Modules with enabled permissions must have at least one permission selected";
+          break;
+        } else {
+          hasValidPermissions = true;
         }
-    };
+      }
+    }
+    if (!hasValidPermissions && !newErrors.permissions) {
+      newErrors.permissions =
+        "At least one module must have permissions enabled and selected";
+    }
 
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const rolePayload: CreateRolePayload = {
+        name: formData.roleName,
+        description: formData.description,
+      };
+
+      let role: Role;
+      if (roleData && roleId) {
+        role = await editRole(roleId, rolePayload);
+      } else {
+        role = await createRole(rolePayload);
+      }
+
+      const permissionNames: string[] = [];
+      Object.entries(formData.permissions).forEach(
+        ([moduleName, permission]) => {
+          if (permission.enabled && permission.accessLevel.length > 0) {
+            permission.accessLevel.forEach((perm) => {
+              const prefix = `${moduleName}:`;
+              const cleanPerm = perm.startsWith(prefix)
+                ? perm.slice(prefix.length)
+                : perm;
+              permissionNames.push(`${moduleName}:${cleanPerm}`);
+            });
+          }
+        }
+      );
+
+      if (permissionNames.length > 0) {
+        const permissionsPayload: AddRolePermissionsPayload = {
+          id: roleData ? roleData.id : role.id,
+          permissionNames,
+        };
+        await addRolePermissions(permissionsPayload);
+      }
+
+      
+      if (roleId) {
+        await queryClient.invalidateQueries({
+          queryKey: ["role", roleId],
+        });
+      }
+      
+      await queryClient.invalidateQueries({
+        queryKey: ["roles"],
+      });
+
+      if (onRoleCreated) {
+        onRoleCreated();
+      }
+      onClose();
+    } catch (error) {
+      console.error(
+        "Error creating or editing role or adding permissions:",
+        error
+      );
+      setErrors({
+        ...errors,
+        permissions: "Failed to save role. Please try again.",
+      });
+    }
+  };
+
+  if (roleError) {
     return (
-        <Modal open={open} onClose={onClose}>
-            <ModalDialog
-                sx={{
-                    width: 500,
-                    p: 3,
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                }}
-            >
-                <ModalClose sx={{ color: "#6B7280" }} />
-                <Typography
-                    level="h3"
-                    sx={{
-                        fontSize: "24px",
-                        fontWeight: 600,
-                        color: "var(--joy-palette-text-primary)",
-                        mb: 2,
-                    }}
-                >
-                    Add Role
-                </Typography>
-                <Stack spacing={2}>
-                    <Stack>
-                        <Typography
-                            level="body-sm"
-                            sx={{
-                                fontSize: "14px",
-                                color: "var(--joy-palette-text-primary)",
-                                mb: 0.5,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Role name
-                        </Typography>
-                        <Input
-                            placeholder="Enter role name"
-                            value={formData.roleName}
-                            onChange={(e) => handleInputChange("roleName", e.target.value)}
-                            sx={{
-                                borderRadius: "6px",
-                                fontSize: "14px",
-                            }}
-                        />
-                    </Stack>
-
-                    <Stack>
-                        <Typography
-                            level="body-sm"
-                            sx={{
-                                fontSize: "14px",
-                                color: "var(--joy-palette-text-primary)",
-                                mb: 0.5,
-                                fontWeight: 500,
-                            }}
-                        >
-                            About
-                        </Typography>
-                        <Textarea
-                            placeholder="Describe this role’s permissions and responsibilities"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange("description", e.target.value)}
-                            minRows={3}
-                            sx={{
-                                borderRadius: "6px",
-                                fontSize: "14px",
-                            }}
-                        />
-                    </Stack>
-
-                    <Stack spacing={1}>
-                        <Typography
-                            level="body-sm"
-                            sx={{
-                                fontSize: "14px",
-                                color: "var(--joy-palette-text-secondary)",
-                                mb: 0.5,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Permission
-                        </Typography>
-                        {isLoading ? (
-                            <Typography>Loading permissions...</Typography>
-                        ) : (
-                            systemModules?.map((module) => {
-                                const selectedPermissions =
-                                    formData.permissions[module.name]?.accessLevel || [];
-                                return (
-                                    <Stack key={module.name} spacing={1}>
-                                        <Stack direction="row" spacing={2} alignItems="center">
-                                            <Switch
-                                                checked={
-                                                    formData.permissions[module.name]?.enabled || false
-                                                }
-                                                onChange={() => handlePermissionToggle(module.name)}
-                                            />
-                                            <Typography
-                                                level="body-sm"
-                                                sx={{ fontSize: "14px", color: "#6B7280", flex: 1 }}
-                                            >
-                                                {module.label}
-                                            </Typography>
-                                            <Select
-                                                multiple
-                                                value={selectedPermissions}
-                                                onChange={(e, newValue) =>
-                                                    handleAccessLevelChange(module.name, newValue as string[])
-                                                }
-                                                placeholder="Select permissions"
-                                                disabled={!formData.permissions[module.name]?.enabled}
-                                                renderValue={(selected) => {
-                                                    if (selected.length === 0) {
-                                                        return (
-                                                            <Typography
-                                                                sx={{
-                                                                    color: "var(--joy-palette-text-primary)",
-                                                                    fontSize: "14px",
-                                                                }}
-                                                            >
-                                                                Select permissions
-                                                            </Typography>
-                                                        );
-                                                    }
-                                                    return (
-                                                        <Typography
-                                                            sx={{
-                                                                color: "var(--joy-palette-text-primary)",
-                                                                fontSize: "14px",
-                                                            }}
-                                                        >
-                                                            Selected permissions: {selected.length}
-                                                        </Typography>
-                                                    );
-                                                }}
-                                                sx={{
-                                                    borderRadius: "6px",
-                                                    fontSize: "14px",
-                                                    minWidth: "120px",
-                                                    "& .MuiSelect-placeholder": {
-                                                        fontSize: "14px",
-                                                        color: "var(--joy-palette-text-primary)",
-                                                    },
-                                                }}
-                                                slotProps={{
-                                                    listbox: {
-                                                        sx: {
-                                                            fontSize: "13px",
-                                                            "& .MuiOption-root.Mui-selected": {
-                                                                fontSize: "12px",
-                                                                color: "var(--joy-palette-text-primary)",
-                                                                "&:after": {
-                                                                    content: '"✓"',
-                                                                    marginRight: "8px",
-                                                                    color: "#4F46E5",
-                                                                },
-                                                            },
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                {module.permissions
-                                                    .sort((a, b) => a.order - b.order)
-                                                    .map((permission) => (
-                                                        <Option key={permission.name} value={permission.name}>
-                                                            {permission.label}
-                                                        </Option>
-                                                    ))}
-                                            </Select>
-                                        </Stack>
-                                        {selectedPermissions.length > 0 && (
-                                            <Stack spacing={0.5} sx={{ ml: "auto" }}>
-                                                {selectedPermissions.map((permName) => {
-                                                    const permission = module.permissions.find(
-                                                        (p) => p.name === permName
-                                                    );
-                                                    return (
-                                                        <Typography
-                                                            key={permName}
-                                                            level="body-sm"
-                                                            sx={{
-                                                                fontSize: "14px",
-                                                                color: "#4F46E5",
-                                                            }}
-                                                        >
-                                                            {permission?.label || permName}
-                                                        </Typography>
-                                                    );
-                                                })}
-                                            </Stack>
-                                        )}
-                                    </Stack>
-                                );
-                            })
-                        )}
-                    </Stack>
-
-                    <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
-                        <Button variant="outlined" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="solid"
-                            onClick={handleSave}
-                            sx={{
-                                borderRadius: "20px",
-                                bgcolor: "#4F46E5",
-                                color: "#FFFFFF",
-                                fontWeight: 500,
-                                px: 3,
-                                py: 1,
-                                "&:hover": { bgcolor: "#4338CA" },
-                            }}
-                        >
-                            Create role
-                        </Button>
-                    </Stack>
-                </Stack>
-            </ModalDialog>
-        </Modal>
+      <Modal open={open} onClose={onClose}>
+        <ModalDialog
+          sx={{
+            width: 500,
+            p: 3,
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Typography color="danger">Error: {roleError.message}</Typography>
+        </ModalDialog>
+      </Modal>
     );
+  }
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <ModalDialog
+        sx={{
+          width: 500,
+          p: 3,
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <ModalClose sx={{ color: "#6B7280" }} />
+        <Typography
+          level="h3"
+          sx={{
+            fontSize: "24px",
+            fontWeight: 600,
+            color: "var(--joy-palette-text-primary)",
+            mb: 2,
+          }}
+        >
+          {roleData ? "Edit Role" : "Add Role"}
+        </Typography>
+        {isModulesLoading || isRoleLoading ? (
+          <Typography>Loading...</Typography>
+        ) : (
+          <Stack spacing={2}>
+            <Stack>
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "14px",
+                  color: "var(--joy-palette-text-primary)",
+                  mb: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Role name
+              </Typography>
+              <Input
+                placeholder="Enter role name"
+                value={formData.roleName}
+                onChange={(e) => handleInputChange("roleName", e.target.value)}
+                error={!!errors.roleName}
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  borderColor: errors.roleName ? "red" : undefined,
+                  "&:focus-within": {
+                    borderColor: errors.roleName ? "red" : undefined,
+                  },
+                }}
+              />
+              {errors.roleName && (
+                <Typography
+                  level="body-sm"
+                  sx={{ fontSize: "12px", color: "red", mt: 0.5 }}
+                >
+                  {errors.roleName}
+                </Typography>
+              )}
+            </Stack>
+
+            <Stack>
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "14px",
+                  color: "var(--joy-palette-text-primary)",
+                  mb: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                About
+              </Typography>
+              <Textarea
+                placeholder="Describe this role’s permissions and responsibilities"
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                minRows={3}
+                error={!!errors.description}
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  borderColor: errors.description ? "red" : undefined,
+                  "&:focus-within": {
+                    borderColor: errors.description ? "red" : undefined,
+                  },
+                }}
+              />
+              {errors.description && (
+                <Typography
+                  level="body-sm"
+                  sx={{ fontSize: "12px", color: "red", mt: 0.5 }}
+                >
+                  {errors.description}
+                </Typography>
+              )}
+            </Stack>
+
+            <Stack spacing={1}>
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "14px",
+                  color: "var(--joy-palette-text-secondary)",
+                  mb: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Permission
+              </Typography>
+              {errors.permissions && (
+                <Typography
+                  level="body-sm"
+                  sx={{ fontSize: "12px", color: "red", mb: 1 }}
+                >
+                  {errors.permissions}
+                </Typography>
+              )}
+              {systemModules?.map((module) => {
+                const selectedPermissions =
+                  formData.permissions[module.name]?.accessLevel || [];
+                return (
+                  <Stack key={module.name} spacing={1}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Tooltip
+                        title="Enable or disable this permission group for the role"
+                        placement="top"
+                        sx={{
+                          background: "#DAD8FD",
+                          color: "#3D37DD",
+                        }}
+                      >
+                        <Box sx={{ background: "transparent", display: "flex" }}>
+                          <Switch
+                            checked={
+                              formData.permissions[module.name]?.enabled ||
+                              false
+                            }
+                            onChange={() => handlePermissionToggle(module.name)}
+                          />
+                        </Box>
+                      </Tooltip>
+                      <Typography
+                        level="body-sm"
+                        sx={{ fontSize: "14px", color: "#6B7280", flex: 1 }}
+                      >
+                        {module.label}
+                      </Typography>
+                      <Select
+                        multiple
+                        value={selectedPermissions}
+                        onChange={(e, newValue) =>
+                          handleAccessLevelChange(
+                            module.name,
+                            newValue as string[]
+                          )
+                        }
+                        placeholder="Select permissions"
+                        disabled={!formData.permissions[module.name]?.enabled}
+                        renderValue={(selected) => {
+                          if (selected.length === 0) {
+                            return (
+                              <Typography
+                                sx={{
+                                  color: "var(--joy-palette-text-primary)",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                Select permissions
+                              </Typography>
+                            );
+                          }
+                          return (
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-primary)",
+                                fontSize: "14px",
+                              }}
+                            >
+                              Selected permissions: {selected.length}
+                            </Typography>
+                          );
+                        }}
+                        sx={{
+                          borderRadius: "6px",
+                          fontSize: "14px",
+                          minWidth: "120px",
+                          "& .MuiSelect-placeholder": {
+                            fontSize: "14px",
+                            color: "var(--joy-palette-text-primary)",
+                          },
+                        }}
+                        slotProps={{
+                          listbox: {
+                            sx: {
+                              fontSize: "13px",
+                              "& .MuiOption-root.Mui-selected": {
+                                fontSize: "12px",
+                                color: "var(--joy-palette-text-primary)",
+                                "&:after": {
+                                  content: '"✓"',
+                                  marginRight: "8px",
+                                  color: "#4F46E5",
+                                },
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        {module.permissions
+                          .sort((a, b) => a.order - b.order)
+                          .map((permission) => (
+                            <Option
+                              key={permission.name}
+                              value={permission.name}
+                            >
+                              {permission.label}
+                            </Option>
+                          ))}
+                      </Select>
+                    </Stack>
+                    {selectedPermissions.length > 0 && (
+                      <Stack
+                        spacing={0.5}
+                        sx={{
+                          maxHeight: "100px",
+                          overflowY: "auto",
+                          display: "flex",
+                          flexWrap: "wrap",
+                          flexDirection: "row",
+                          gap: 1,
+                        }}
+                      >
+                        {selectedPermissions.map((permName) => {
+                          const permission = module.permissions.find(
+                            (p) => p.name === permName
+                          );
+                          return (
+                            <Typography
+                              key={permName}
+                              level="body-sm"
+                              sx={{
+                                fontSize: "12px",
+                                color: "#4F46E5",
+                                borderRadius: "5px",
+                                border: "1px solid #4F46E5",
+                                width: "fit-content",
+                                padding: "3px 5px",
+                              }}
+                            >
+                              {permission?.label || permName}
+                            </Typography>
+                          );
+                        })}
+                      </Stack>
+                    )}
+                  </Stack>
+                );
+              })}
+            </Stack>
+
+            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
+              <Button variant="outlined" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handleSave}
+                sx={{
+                  borderRadius: "20px",
+                  bgcolor: "#4F46E5",
+                  color: "#FFFFFF",
+                  fontWeight: 500,
+                  px: 3,
+                  py: 1,
+                  "&:hover": { bgcolor: "#4338CA" },
+                }}
+              >
+                {roleData ? "Save Changes" : "Create Role"}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </ModalDialog>
+    </Modal>
+  );
 }

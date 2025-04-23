@@ -695,40 +695,6 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               )}
             </Stack>
             <Stack sx={{ flex: 1 }}>
-              <Typography
-                level="body-sm"
-                sx={{
-                  fontSize: "14px",
-                  color: "var(--joy-palette-text-primary)",
-                  mb: 0.5,
-                  fontWeight: 500,
-                }}
-              >
-                Persona
-              </Typography>
-              <Select
-                placeholder="Select persona"
-                value={formData.persona}
-                onChange={(e, newValue) =>
-                  handleInputChange("persona", newValue as string)
-                }
-                sx={{
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                }}
-              >
-                <Option value="Education">Education</Option>
-                <Option value="Titles">Titles</Option>
-                <Option value="Experience">Experience</Option>
-                <Option value="Responsibilities">Responsibilities</Option>
-                <Option value="Customer admin">Customer admin</Option>
-                <Option value="User">User</Option>
-              </Select>
-            </Stack>
-          </Stack>
-
-          <Stack direction="row" spacing={2}>
-            <Stack sx={{ flex: 1 }}>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography
                   level="body-sm"
@@ -774,10 +740,12 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 ))}
               </Select>
             </Stack>
-            <Stack sx={{ flex: 1 }}></Stack>
+         
           </Stack>
 
-          <Button
+          
+
+          {/* <Button
             variant="plain"
             startDecorator={<PlusIcon fontSize="16px" />}
             onClick={handleAddEmail}
@@ -790,7 +758,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
             }}
           >
             Add Email
-          </Button>
+          </Button> */}
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button variant="outlined" onClick={onClose}>

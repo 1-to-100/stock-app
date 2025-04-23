@@ -351,7 +351,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <PencilIcon fontSize="20px" style={iconStyle} />
               Edit
             </Box>
-            <Box sx={menuItemStyle}>
+            {/* <Box sx={menuItemStyle}>
               <ArrowRightIcon fontSize="20px" style={iconStyle} />
               Impersonate user
             </Box>
@@ -394,7 +394,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             >
               <TrashIcon fontSize="20px" style={{ marginRight: "14px" }} />
               Delete
-            </Box>
+            </Box> */}
           </Popper>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>

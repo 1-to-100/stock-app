@@ -1,21 +1,25 @@
 import { apiFetch } from "./api-fetch";
 
-interface RolePermission {
-  permissionId: number;
-  permission: {
-    name: string;
-    label: string;
-    description?: string;
-  };
+export interface ModulePermission {
+  id: number;
+  name: string;
+  label: string;
+}
+
+interface PermissionsByModule {
+  [moduleName: string]: ModulePermission[];
 }
 
 export interface Role {
-    id: number;
-    name: string;
-    description: string | null; 
-    abbreviation?: string;
-    permissions: RolePermission[];
-  }
+  id: number;
+  name: string;
+  description: string | null;
+  abbreviation?: string;
+  permissions: PermissionsByModule; 
+  _count: {
+    users: number;
+  };
+}
   
   interface CreateRolePayload {
     name: string;
@@ -55,5 +59,12 @@ export interface Role {
   export async function getRoleById(id: number): Promise<Role> {
     return apiFetch<Role>(`${API_URL}/roles/${id}`, {
       method: "GET",
+    });
+  }
+
+  export async function editRole(roleId: number, payload: CreateRolePayload): Promise<Role> {
+    return apiFetch<Role>(`${API_URL}/roles/${roleId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
     });
   }

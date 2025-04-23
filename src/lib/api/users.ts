@@ -55,6 +55,7 @@ interface GetUsersParams {
   search?: string;
   orderBy?: string;
   orderDirection?: 'asc' | 'desc';
+  roleId?: number;
 }
 
 interface GetUsersResponse {
@@ -93,6 +94,7 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
   if (params.search) query.set('search', params.search);
   if (params.orderBy) query.set('orderBy', params.orderBy);
   if (params.orderDirection) query.set('orderDirection', params.orderDirection);
+  if (params.roleId) query.set('roleId', params.roleId.toString());
 
   return apiFetch<GetUsersResponse>(`${API_URL}/users?${query.toString()}`, {
     method: 'GET',

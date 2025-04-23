@@ -1,4 +1,3 @@
-// SystemAdminSettings.tsx
 "use client";
 
 import * as React from "react";
@@ -15,7 +14,13 @@ import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { paths } from "@/paths";
-import { Avatar, Breadcrumbs, Checkbox, Stack } from "@mui/joy";
+import {
+  Avatar,
+  Breadcrumbs,
+  Checkbox,
+  CircularProgress,
+  Stack,
+} from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
 import SearchInput from "@/components/dashboard/layout/search-input";
@@ -40,13 +45,14 @@ import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeact
 import Pagination from "@/components/dashboard/layout/pagination";
 import InviteUser from "@/components/dashboard/modals/InviteUserModal";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../../lib/api/users";
-import { getRoles, Role } from "../../../../lib/api/roles";
+import { getRoles, Role, ModulePermission } from "../../../../lib/api/roles";
 import { getCustomers, Customer } from "../../../../lib/api/customers";
 import { getRoleById } from "../../../../lib/api/roles";
 import Tooltip from "@mui/joy/Tooltip";
 import { ApiUser } from "@/contexts/auth/types";
+import AddRoleModal from "@/components/dashboard/modals/AddRoleModal";
 
 const RouterLink = Link;
 
@@ -67,16 +73,6 @@ interface Permission {
   name: string;
   label: string;
   description?: string;
-  access: "Full access" | "Limited access" | "No access";
-}
-
-interface RolePermission {
-  permissionId: number;
-  permission: {
-    name: string;
-    label: string;
-    description?: string;
-  };
 }
 
 interface SystemAdminRole {
@@ -87,6 +83,12 @@ interface SystemAdminRole {
   peopleCount: number;
 }
 
+interface Module {
+  id: string;
+  name: string;
+  permissions: Permission[];
+}
+
 const SystemAdminSettings: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -94,17 +96,23 @@ const SystemAdminSettings: React.FC = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
   const [expandedPermissions, setExpandedPermissions] = useState<string[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
+  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
-  const [openInviteUserModal, setOpenInviteUserModal] = useState(false);
+  const [openEditRoleModal, setOpenEditRoleModal] = useState(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+    null
+  );
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
   const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -112,13 +120,23 @@ const SystemAdminSettings: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const roleId = searchParams.get("roleId");
 
   const rowsPerPage = 10;
- 
-  const { data: roleData, isLoading: isRoleLoading, error: roleError } = useQuery({
+
+  const {
+    data: roleData,
+    isLoading: isRoleLoading,
+    error: roleError,
+  } = useQuery({
     queryKey: ["role", roleId],
-    queryFn: () => getRoleById(Number(roleId)),
+    queryFn: () => {
+      if (!roleId) {
+        throw new Error("Role ID is missing");
+      }
+      return getRoleById(Number(roleId));
+    },
     enabled: !!roleId,
   });
 
@@ -149,7 +167,15 @@ const SystemAdminSettings: React.FC = () => {
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["users", currentPage, searchTerm, sortColumn, sortDirection, roles, customers],
+    queryKey: [
+      "users",
+      currentPage,
+      searchTerm,
+      sortColumn,
+      sortDirection,
+      roleId,
+      customers,
+    ],
     queryFn: async () => {
       const response = await getUsers({
         page: currentPage,
@@ -157,6 +183,7 @@ const SystemAdminSettings: React.FC = () => {
         search: searchTerm || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
+        roleId: roleId ? Number(roleId) : undefined,
       });
       return {
         ...response,
@@ -171,29 +198,36 @@ const SystemAdminSettings: React.FC = () => {
   const hasResults = users.length > 0;
 
   const systemAdminRole: SystemAdminRole = roleData
-  ? {
-      id: String(roleData.id), 
-      abbreviation: roles?.find((r) => r.id === roleData.id)?.abbreviation || "RO",
-      name: roleData.name,
-      description: roleData.description || "No description provided",
-      peopleCount: users.length,
-    }
-  : {
-      id: "0",
-      abbreviation: "RO",
-      name: "Unknown Role",
-      description: "No description provided",
-      peopleCount: 0,
-    };
+    ? {
+        id: String(roleData.id),
+        abbreviation:
+          roles?.find((r) => r.id === roleData.id)?.abbreviation || "RO",
+        name: roleData.name,
+        description: roleData.description || "No description provided",
+        peopleCount: users.length,
+      }
+    : {
+        id: "0",
+        abbreviation: "RO",
+        name: "",
+        description: "No description provided",
+        peopleCount: 0,
+      };
 
-
-    const permissions: Permission[] = roleData?.permissions?.map((perm: RolePermission) => ({
-      id: perm.permissionId.toString(),
-      name: perm.permission.name,
-      label: perm.permission.label,
-      description: perm.permission.description || perm.permission.label,
-      access: "Full access",
-    })) || [];
+  const permissionsByModule: Module[] = roleData?.permissions
+    ? Object.keys(roleData.permissions).map((moduleName) => ({
+        id: moduleName,
+        name: moduleName,
+        permissions: (roleData.permissions[moduleName] || []).map(
+          (perm: ModulePermission) => ({
+            id: perm.id.toString(),
+            name: perm.name,
+            label: perm.label,
+            description: perm.label,
+          })
+        ),
+      }))
+    : [];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -222,7 +256,10 @@ const SystemAdminSettings: React.FC = () => {
     );
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    index: number
+  ) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setMenuRowIndex(index);
@@ -241,7 +278,10 @@ const SystemAdminSettings: React.FC = () => {
     setMenuRowIndex(null);
   };
 
-  const handleOpenDetail = async (event: React.MouseEvent<HTMLElement>, userId: number) => {
+  const handleOpenDetail = async (
+    event: React.MouseEvent<HTMLElement>,
+    userId: number
+  ) => {
     event.preventDefault();
     event.persist();
     const targetElement = event.currentTarget;
@@ -272,9 +312,8 @@ const SystemAdminSettings: React.FC = () => {
     handleAddUserMenuClose();
   };
 
-  const handleInviteUser = () => {
-    setOpenInviteUserModal(true);
-    handleAddUserMenuClose();
+  const handleEditRole = () => {
+    setOpenEditRoleModal(true);
   };
 
   const handleResetPassword = (userId: number) => {
@@ -313,8 +352,16 @@ const SystemAdminSettings: React.FC = () => {
     setOpenAddUserModal(false);
   };
 
-  const handleCloseInviteUserModal = () => {
-    setOpenInviteUserModal(false);
+  const handleCloseEditRoleModal = () => {
+    setOpenEditRoleModal(false);
+  };
+
+  const handleRoleEdited = async () => {
+    if (roleId) {
+      await queryClient.invalidateQueries({
+        queryKey: ["role", roleId],
+      });
+    }
   };
 
   const handleRowCheckboxChange = (userId: number) => {
@@ -325,7 +372,9 @@ const SystemAdminSettings: React.FC = () => {
     );
   };
 
-  const handleSelectAllChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAllChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (!hasResults) return;
     if (event.target.checked) {
       setSelectedRows(users.map((user) => user.id));
@@ -375,10 +424,6 @@ const SystemAdminSettings: React.FC = () => {
     marginRight: "14px",
   };
 
-  if (isRoleLoading || isRolesLoading || isCustomersLoading || isLoading) {
-    return <Typography>Loading...</Typography>;
-  }
-
   if (roleError || error) {
     return <Typography>Error: {(roleError || error)?.message}</Typography>;
   }
@@ -402,52 +447,36 @@ const SystemAdminSettings: React.FC = () => {
         </Typography>
         <Box sx={{ position: "relative" }}>
           <Button
-            startDecorator={<PlusIcon weight="bold" />}
-            onClick={handleAddUserMenuOpen}
-            sx={{
-              backgroundColor: "#3E43DE",
-              color: "white",
-              borderRadius: "8px",
-              "&:hover": { backgroundColor: "#3437B3" },
-              fontSize: "14px",
-              fontWeight: "500",
-            }}
+            sx={{ marginRight: "8px" }}
+            variant="outlined"
+            color="primary"
+            onClick={handleEditRole}
+            startDecorator={<PencilIcon fontSize="var(--Icon-fontSize)" />}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="solid"
+            color="primary"
+            onClick={handleAddUser}
+            startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
           >
             Add user
           </Button>
-          <Popper
-            open={Boolean(addUserAnchorEl)}
-            anchorEl={addUserAnchorEl}
-            placement="bottom-end"
-            style={{
-              minWidth: "150px",
-              borderRadius: "8px",
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "var(--joy-palette-background-surface)",
-              zIndex: 1300,
-              border: "1px solid var(--joy-palette-divider)",
-            }}
-          >
-            <Box onClick={handleAddUser} sx={menuItemStyle}>
-              <PlusIcon fontSize="20px" style={iconStyle} />
-              Add user
-            </Box>
-            <Box onClick={handleInviteUser} sx={menuItemStyle}>
-              <UserIcon fontSize="20px" style={iconStyle} />
-              Invite user
-            </Box>
-          </Popper>
         </Box>
       </Box>
 
       <Breadcrumbs separator={<BreadcrumbsSeparator />}>
-        <BreadcrumbsItem href={paths.dashboard.roleSettings.list} type="start" />
-        <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
-          Role & Personas Settings
-        </BreadcrumbsItem>
+        <BreadcrumbsItem
+          href={paths.dashboard.roleSettings.list}
+          type="start"
+        />
         <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
           Role Settings
         </BreadcrumbsItem>
+        {/* <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
+          Role Settings
+        </BreadcrumbsItem> */}
         <BreadcrumbsItem type="end">{systemAdminRole.name}</BreadcrumbsItem>
       </Breadcrumbs>
 
@@ -515,7 +544,9 @@ const SystemAdminSettings: React.FC = () => {
             </Stack>
             <Tabs
               value={viewMode}
-              onChange={(event, newValue) => setViewMode(newValue as "list" | "grid")}
+              onChange={(event, newValue) =>
+                setViewMode(newValue as "list" | "grid")
+              }
               variant="custom"
             >
               <TabList
@@ -538,7 +569,10 @@ const SystemAdminSettings: React.FC = () => {
               >
                 <svg width="0" height="0">
                   <defs>
-                    <linearGradient id="tab-gradient" gradientTransform="rotate(120)">
+                    <linearGradient
+                      id="tab-gradient"
+                      gradientTransform="rotate(120)"
+                    >
                       <stop offset="0%" stopColor="#282490" />
                       <stop offset="100%" stopColor="#3F4DCF" />
                     </linearGradient>
@@ -554,134 +588,127 @@ const SystemAdminSettings: React.FC = () => {
             </Tabs>
           </Box>
 
-          <Box>
-            {viewMode === "list" ? (
-              <Table aria-label="system admin users table">
-                <thead>
-                  <tr>
-                    <th style={{ width: "5%" }}>
-                      <Checkbox
-                        checked={hasResults && selectedRows.length === users.length}
-                        indeterminate={
-                          hasResults &&
-                          selectedRows.length > 0 &&
-                          selectedRows.length < users.length
-                        }
-                        onChange={handleSelectAllChange}
-                        disabled={!hasResults}
-                      />
-                    </th>
-                    <th style={{ width: "60px" }}></th>
-                    <th onClick={() => handleSort("name")}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          "& .sort-icon": {
-                            opacity: 0,
-                            transition: "opacity 0.2s ease-in-out",
-                          },
-                          "&:hover .sort-icon": { opacity: 1 },
-                        }}
-                      >
-                        Name
-                      </Box>
-                    </th>
-                    <th onClick={() => handleSort("email")}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          "& .sort-icon": {
-                            opacity: 0,
-                            transition: "opacity 0.2s ease-in-out",
-                          },
-                          "&:hover .sort-icon": { opacity: 1 },
-                        }}
-                      >
-                        Email
-                      </Box>
-                    </th>
-                    <th style={{ width: "60px" }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.length === 0 ? (
+          {isLoading ||
+          isRoleLoading ||
+          isRolesLoading ||
+          isCustomersLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "50vh",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box>
+              {viewMode === "list" ? (
+                <Table aria-label="system admin users table">
+                  <thead>
                     <tr>
-                      <td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>
-                        <Typography level="body-md" color="neutral">
-                          No items found
-                        </Typography>
-                      </td>
+                      <th style={{ width: "5%" }}>
+                        <Checkbox
+                          checked={
+                            hasResults && selectedRows.length === users.length
+                          }
+                          indeterminate={
+                            hasResults &&
+                            selectedRows.length > 0 &&
+                            selectedRows.length < users.length
+                          }
+                          onChange={handleSelectAllChange}
+                          disabled={!hasResults}
+                        />
+                      </th>
+                      <th style={{ width: "60px" }}></th>
+                      <th onClick={() => handleSort("name")}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Name
+                        </Box>
+                      </th>
+                      <th onClick={() => handleSort("email")}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Email
+                        </Box>
+                      </th>
+                      <th style={{ width: "60px" }}></th>
                     </tr>
-                  ) : (
-                    users.map((user, index) => (
-                      <tr
-                        key={user.id}
-                        onMouseEnter={() => setHoveredRow(index)}
-                        onMouseLeave={() => setHoveredRow(null)}
-                      >
-                        <td>
-                          <Checkbox
-                            checked={selectedRows.includes(user.id)}
-                            onChange={() => handleRowCheckboxChange(user.id)}
-                          />
+                  </thead>
+                  <tbody>
+                    {users.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          style={{ textAlign: "center", padding: "20px" }}
+                        >
+                          <Typography level="body-md" color="neutral">
+                            No items found
+                          </Typography>
                         </td>
-                        <td>
-                          {user.avatar ? (
-                            <Avatar src={user.avatar} sx={{ width: 28, height: 28 }} />
-                          ) : (
-                            <Avatar sx={{ width: 28, height: 28 }}>
-                              {user.name.split(" ").map((n) => n[0]).join("")}
-                            </Avatar>
-                          )}
-                        </td>
-                        <td>
-                          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                            <Typography sx={{ wordBreak: "break-all" }}>{user.name}</Typography>
-                            <Tooltip
-                              title={user.status}
-                              placement="top"
-                              sx={{
-                                background: "#DAD8FD",
-                                color: "#3D37DD",
-                                textTransform: "capitalize",
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  bgcolor:
-                                    user.status === "active"
-                                      ? "#1A7D36"
-                                      : user.status === "inactive"
-                                      ? "#D3232F"
-                                      : "#FAE17D",
-                                  borderRadius: "50%",
-                                  width: "10px",
-                                  minWidth: "10px",
-                                  height: "10px",
-                                  display: "inline-block",
-                                }}
+                      </tr>
+                    ) : (
+                      users.map((user, index) => (
+                        <tr
+                          key={user.id}
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
+                          <td>
+                            <Checkbox
+                              checked={selectedRows.includes(user.id)}
+                              onChange={() => handleRowCheckboxChange(user.id)}
+                            />
+                          </td>
+                          <td>
+                            {user.avatar ? (
+                              <Avatar
+                                src={user.avatar}
+                                sx={{ width: 28, height: 28 }}
                               />
-                            </Tooltip>
-                          </Stack>
-                        </td>
-                        <td>
-                          <Box
-                            sx={{
-                              position: "relative",
-                              display: "inline-block",
-                              fontWeight: 400,
-                              color: "var(--joy-palette-text-secondary)",
-                              wordBreak: "break-all",
-                            }}
-                          >
-                            {typeof user.email === "string" ? user.email : user.email[0]}
-                            {hoveredRow === index && (
+                            ) : (
+                              <Avatar sx={{ width: 28, height: 28 }}>
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </Avatar>
+                            )}
+                          </td>
+                          <td>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{ alignItems: "center" }}
+                            >
+                              <Typography sx={{ wordBreak: "break-all" }}>
+                                {user.name}
+                              </Typography>
                               <Tooltip
-                                title="Copy Email"
+                                title={user.status}
                                 placement="top"
                                 sx={{
                                   background: "#DAD8FD",
@@ -689,269 +716,323 @@ const SystemAdminSettings: React.FC = () => {
                                   textTransform: "capitalize",
                                 }}
                               >
-                                <IconButton
-                                  size="sm"
-                                  onClick={() => {
-                                    if (typeof user.email === "string") {
-                                      handleCopyEmail(user.email);
-                                    }
-                                  }}
+                                <Box
                                   sx={{
-                                    position: "absolute",
-                                    right: "-30px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    bgcolor: "transparent",
-                                    "&:hover": { bgcolor: "transparent" },
+                                    bgcolor:
+                                      user.status === "active"
+                                        ? "#1A7D36"
+                                        : user.status === "inactive"
+                                        ? "#D3232F"
+                                        : "#FAE17D",
+                                    borderRadius: "50%",
+                                    width: "10px",
+                                    minWidth: "10px",
+                                    height: "10px",
+                                    display: "inline-block",
+                                  }}
+                                />
+                              </Tooltip>
+                            </Stack>
+                          </td>
+                          <td>
+                            <Box
+                              sx={{
+                                position: "relative",
+                                display: "inline-block",
+                                fontWeight: 400,
+                                color: "var(--joy-palette-text-secondary)",
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {typeof user.email === "string"
+                                ? user.email
+                                : user.email[0]}
+                              {hoveredRow === index && (
+                                <Tooltip
+                                  title="Copy Email"
+                                  placement="top"
+                                  sx={{
+                                    background: "#DAD8FD",
+                                    color: "#3D37DD",
+                                    textTransform: "capitalize",
                                   }}
                                 >
-                                  <CopyIcon fontSize="var(--Icon-fontSize)" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {copiedEmail === user.email && (
-                              <Box
-                                sx={{
-                                  position: "fixed",
-                                  bottom: "20px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  bgcolor: "#DCFCE7",
-                                  color: "#16A34A",
-                                  padding: "4px 6px",
-                                  borderRadius: "10px",
-                                  fontSize: "12px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                  zIndex: 1000,
-                                }}
-                              >
-                                Copied to clipboard
-                                <IconButton
-                                  size="sm"
-                                  onClick={() => setCopiedEmail(null)}
-                                  sx={{ color: "#16A34A" }}
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => {
+                                      if (typeof user.email === "string") {
+                                        handleCopyEmail(user.email);
+                                      }
+                                    }}
+                                    sx={{
+                                      position: "absolute",
+                                      right: "-30px",
+                                      top: "50%",
+                                      transform: "translateY(-50%)",
+                                      bgcolor: "transparent",
+                                      "&:hover": { bgcolor: "transparent" },
+                                    }}
+                                  >
+                                    <CopyIcon fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {copiedEmail === user.email && (
+                                <Box
+                                  sx={{
+                                    position: "fixed",
+                                    bottom: "20px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    bgcolor: "#DCFCE7",
+                                    color: "#16A34A",
+                                    padding: "4px 6px",
+                                    borderRadius: "10px",
+                                    fontSize: "12px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    zIndex: 1000,
+                                  }}
                                 >
-                                  <X fontSize="var(--Icon-fontSize)" />
-                                </IconButton>
+                                  Copied to clipboard
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => setCopiedEmail(null)}
+                                    sx={{ color: "#16A34A" }}
+                                  >
+                                    <X fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Box>
+                              )}
+                            </Box>
+                          </td>
+                          <td>
+                            <IconButton
+                              size="sm"
+                              onClick={(event) => handleMenuOpen(event, index)}
+                            >
+                              <DotsThreeVertical
+                                weight="bold"
+                                size={22}
+                                color="var(--joy-palette-text-secondary)"
+                              />
+                            </IconButton>
+                            <Popper
+                              open={menuRowIndex === index && Boolean(anchorEl)}
+                              anchorEl={anchorEl}
+                              placement="bottom-start"
+                              style={{
+                                minWidth: "150px",
+                                borderRadius: "8px",
+                                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                                backgroundColor:
+                                  "var(--joy-palette-background-surface)",
+                                zIndex: 1300,
+                                border: "1px solid var(--joy-palette-divider)",
+                              }}
+                            >
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleOpenDetail(event, user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <EyeIcon fontSize="20px" style={iconStyle} />
+                                Open detail
                               </Box>
-                            )}
-                          </Box>
-                        </td>
-                        <td>
-                          <IconButton
-                            size="sm"
-                            onClick={(event) => handleMenuOpen(event, index)}
-                          >
-                            <DotsThreeVertical
-                              weight="bold"
-                              size={22}
-                              color="var(--joy-palette-text-secondary)"
-                            />
-                          </IconButton>
-                          <Popper
-                            open={menuRowIndex === index && Boolean(anchorEl)}
-                            anchorEl={anchorEl}
-                            placement="bottom-start"
-                            style={{
-                              minWidth: "150px",
-                              borderRadius: "8px",
-                              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                              backgroundColor: "var(--joy-palette-background-surface)",
-                              zIndex: 1300,
-                              border: "1px solid var(--joy-palette-divider)",
-                            }}
-                          >
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleOpenDetail(event, user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <EyeIcon fontSize="20px" style={iconStyle} />
-                              Open detail
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleEdit(user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <PencilIcon fontSize="20px" style={iconStyle} />
-                              Edit
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleResetPassword(user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <Password fontSize="20px" style={iconStyle} />
-                              Reset password
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleDeleteRow(user.id);
-                                handleMenuClose();
-                              }}
-                              sx={{ ...menuItemStyle, color: "#EF4444" }}
-                            >
-                              <TrashIcon fontSize="20px" style={iconStyle} />
-                              Delete
-                            </Box>
-                          </Popper>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </Table>
-            ) : (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
-                  gap: 2,
-                }}
-              >
-                {users.map((user, index) => (
-                  <Card
-                    key={user.id}
-                    sx={{
-                      mb: 0,
-                      p: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box sx={{ position: "relative", display: "inline-block" }}>
-                      {user.avatar ? (
-                        <Avatar src={user.avatar} sx={{ width: 48, height: 48 }} />
-                      ) : (
-                        <Avatar sx={{ width: 48, height: 48 }}>
-                          {user.name.split(" ").map((n) => n[0]).join("")}
-                        </Avatar>
-                      )}
-                      <Box
-                        sx={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          backgroundColor:
-                            user.status === "active"
-                              ? "#1A7D36"
-                              : user.status === "inactive"
-                              ? "#D3232F"
-                              : "#FAE17D",
-                          position: "absolute",
-                          bottom: 0,
-                          right: 0,
-                          border: "2px solid white",
-                        }}
-                      />
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography
-                        sx={{
-                          fontWeight: "300",
-                          fontSize: "14px",
-                          color: "var(--joy-palette-text-primary)",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {user.name}
-                      </Typography>
-                      <Typography
-                        level="body-sm"
-                        sx={{
-                          color: "var(--joy-palette-text-secondary)",
-                          fontWeight: "400",
-                          fontSize: "12px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {typeof user.email === "string" ? user.email : user.email[0]}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      size="sm"
-                      onClick={(event) => handleMenuOpen(event, index)}
-                    >
-                      <DotsThreeVertical
-                        weight="bold"
-                        size={22}
-                        color="var(--joy-palette-text-secondary)"
-                      />
-                    </IconButton>
-                    <Popper
-                      open={menuRowIndex === index && Boolean(anchorEl)}
-                      anchorEl={anchorEl}
-                      placement="bottom-start"
-                      style={{
-                        minWidth: "150px",
-                        borderRadius: "8px",
-                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                        backgroundColor: "var(--joy-palette-background-surface)",
-                        zIndex: 1300,
-                        border: "1px solid var(--joy-palette-divider)",
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleEdit(user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <PencilIcon fontSize="20px" style={iconStyle} />
+                                Edit
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleResetPassword(user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <Password fontSize="20px" style={iconStyle} />
+                                Reset password
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleDeleteRow(user.id);
+                                  handleMenuClose();
+                                }}
+                                sx={{ ...menuItemStyle, color: "#EF4444" }}
+                              >
+                                <TrashIcon fontSize="20px" style={iconStyle} />
+                                Delete
+                              </Box>
+                            </Popper>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              ) : (
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+                    gap: 2,
+                  }}
+                >
+                  {users.map((user, index) => (
+                    <Card
+                      key={user.id}
+                      sx={{
+                        mb: 0,
+                        p: "16px",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
                       <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleOpenDetail(event, user.id);
-                        }}
-                        sx={menuItemStyle}
+                        sx={{ position: "relative", display: "inline-block" }}
                       >
-                        <EyeIcon fontSize="20px" style={iconStyle} />
-                        Open detail
+                        {user.avatar ? (
+                          <Avatar
+                            src={user.avatar}
+                            sx={{ width: 48, height: 48 }}
+                          />
+                        ) : (
+                          <Avatar sx={{ width: 48, height: 48 }}>
+                            {user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </Avatar>
+                        )}
+                        <Box
+                          sx={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: "50%",
+                            backgroundColor:
+                              user.status === "active"
+                                ? "#1A7D36"
+                                : user.status === "inactive"
+                                ? "#D3232F"
+                                : "#FAE17D",
+                            position: "absolute",
+                            bottom: 0,
+                            right: 0,
+                            border: "2px solid white",
+                          }}
+                        />
                       </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleEdit(user.id);
-                        }}
-                        sx={menuItemStyle}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          sx={{
+                            fontWeight: "300",
+                            fontSize: "14px",
+                            color: "var(--joy-palette-text-primary)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {user.name}
+                        </Typography>
+                        <Typography
+                          level="body-sm"
+                          sx={{
+                            color: "var(--joy-palette-text-secondary)",
+                            fontWeight: "400",
+                            fontSize: "12px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {typeof user.email === "string"
+                            ? user.email
+                            : user.email[0]}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        size="sm"
+                        onClick={(event) => handleMenuOpen(event, index)}
                       >
-                        <PencilIcon fontSize="20px" style={iconStyle} />
-                        Edit
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleResetPassword(user.id);
+                        <DotsThreeVertical
+                          weight="bold"
+                          size={22}
+                          color="var(--joy-palette-text-secondary)"
+                        />
+                      </IconButton>
+                      <Popper
+                        open={menuRowIndex === index && Boolean(anchorEl)}
+                        anchorEl={anchorEl}
+                        placement="bottom-start"
+                        style={{
+                          minWidth: "150px",
+                          borderRadius: "8px",
+                          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                          backgroundColor:
+                            "var(--joy-palette-background-surface)",
+                          zIndex: 1300,
+                          border: "1px solid var(--joy-palette-divider)",
                         }}
-                        sx={menuItemStyle}
                       >
-                        <Password fontSize="20px" style={iconStyle} />
-                        Reset password
-                      </Box>
-                      <Box
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          handleDeleteRow(user.id);
-                          handleMenuClose();
-                        }}
-                        sx={{ ...menuItemStyle, color: "#EF4444" }}
-                      >
-                        <TrashIcon fontSize="20px" style={iconStyle} />
-                        Delete
-                      </Box>
-                    </Popper>
-                  </Card>
-                ))}
-              </Box>
-            )}
-          </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleOpenDetail(event, user.id);
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <EyeIcon fontSize="20px" style={iconStyle} />
+                          Open detail
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleEdit(user.id);
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <PencilIcon fontSize="20px" style={iconStyle} />
+                          Edit
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleResetPassword(user.id);
+                          }}
+                          sx={menuItemStyle}
+                        >
+                          <Password fontSize="20px" style={iconStyle} />
+                          Reset password
+                        </Box>
+                        <Box
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            handleDeleteRow(user.id);
+                            handleMenuClose();
+                          }}
+                          sx={{ ...menuItemStyle, color: "#EF4444" }}
+                        >
+                          <TrashIcon fontSize="20px" style={iconStyle} />
+                          Delete
+                        </Box>
+                      </Popper>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ flex: 0.7, mt: 2 }}>
@@ -995,7 +1076,7 @@ const SystemAdminSettings: React.FC = () => {
             Permission
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {permissions.length === 0 ? (
+            {permissionsByModule.length === 0 ? (
               <Typography
                 sx={{
                   color: "var(--joy-palette-text-secondary)",
@@ -1006,11 +1087,11 @@ const SystemAdminSettings: React.FC = () => {
                 No permissions assigned
               </Typography>
             ) : (
-              permissions.map((perm) => {
-                const isExpanded = expandedPermissions.includes(perm.id);
+              permissionsByModule.map((module) => {
+                const isExpanded = expandedPermissions.includes(module.id);
                 return (
                   <Card
-                    key={perm.id}
+                    key={module.id}
                     variant="outlined"
                     sx={{
                       p: "12px",
@@ -1020,7 +1101,7 @@ const SystemAdminSettings: React.FC = () => {
                       display: "flex",
                       flexDirection: "column",
                     }}
-                    onClick={() => togglePermission(perm.id)}
+                    onClick={() => togglePermission(module.id)}
                   >
                     <Box
                       style={{
@@ -1030,7 +1111,13 @@ const SystemAdminSettings: React.FC = () => {
                         width: "100%",
                       }}
                     >
-                      <Box style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      <Box
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
+                      >
                         <Typography
                           sx={{
                             fontWeight: "300",
@@ -1038,7 +1125,7 @@ const SystemAdminSettings: React.FC = () => {
                             color: "var(--joy-palette-text-primary)",
                           }}
                         >
-                          {perm.label}
+                          {module.name}
                         </Typography>
                         <Typography
                           sx={{
@@ -1048,7 +1135,7 @@ const SystemAdminSettings: React.FC = () => {
                             mr: 1,
                           }}
                         >
-                          {perm.access}
+                          {/* Full access */}
                         </Typography>
                       </Box>
                       <Box sx={{ ml: "auto" }}>
@@ -1066,23 +1153,34 @@ const SystemAdminSettings: React.FC = () => {
                           pt: 1.5,
                         }}
                       >
-                        <Box sx={{ display: "flex", alignItems: "start", gap: 1 }}>
-                          <CheckCircle
-                            size={20}
-                            weight="bold"
-                            color="#1A7D36"
-                            style={{ minWidth: "20px" }}
-                          />
-                          <Typography
+                        {module.permissions.map((perm) => (
+                          <Box
+                            key={perm.id}
                             sx={{
-                              color: "var(--joy-palette-text-secondary)",
-                              fontWeight: "400",
-                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "start",
+                              gap: 1,
+                              mb: 1,
                             }}
                           >
-                            {perm.description}
-                          </Typography>
-                        </Box>
+                            <CheckCircle
+                              size={20}
+                              weight="bold"
+                              color="#1A7D36"
+                              style={{ minWidth: "20px" }}
+                            />
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontWeight: "400",
+                                fontSize: "12px",
+                              }}
+                            >
+                              {perm.label}{" "}
+                              {/* Відображаємо label для кожного права */}
+                            </Typography>
+                          </Box>
+                        ))}
                       </Box>
                     )}
                   </Card>
@@ -1093,12 +1191,25 @@ const SystemAdminSettings: React.FC = () => {
         </Box>
       </Box>
 
-      <Pagination
-        totalPages={totalPages}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-        disabled={!hasResults}
-      />
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: '30px',
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          padding: "12px 24px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          disabled={!hasResults}
+        />
+      </Box>
 
       <DeleteDeactivateUserModal
         open={openDeleteModal}
@@ -1113,18 +1224,13 @@ const SystemAdminSettings: React.FC = () => {
         userId={userToEditId}
       />
 
-      <AddEditUser
-        open={openAddUserModal}
-        onClose={handleCloseAddUserModal}
-      />
+      <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
 
-      <InviteUser
-        open={openInviteUserModal}
-        onClose={handleCloseInviteUserModal}
-        userName=""
-        onConfirm={(reason: string, customReason?: string) => {
-          console.log(`Inviting user with reason: ${reason}, custom: ${customReason}`);
-        }}
+      <AddRoleModal
+        open={openEditRoleModal}
+        onClose={handleCloseEditRoleModal}
+        roleId={roleData?.id}
+        onRoleCreated={handleRoleEdited}
       />
 
       <ResetPasswordUser
