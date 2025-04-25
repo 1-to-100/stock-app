@@ -69,7 +69,7 @@ export default function Pagination({
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "16px", gap: "16px" }}>
+    <div style={{ display: "flex", justifyContent: "center", marginTop: "40px", gap: "16px" }}>
       <Button
         variant="outlined"
         onClick={handleFirstPage}

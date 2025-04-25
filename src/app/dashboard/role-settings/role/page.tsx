@@ -77,7 +77,6 @@ interface Permission {
 
 interface SystemAdminRole {
   id: string;
-  abbreviation: string;
   name: string;
   description: string;
   peopleCount: number;
@@ -196,23 +195,7 @@ const SystemAdminSettings: React.FC = () => {
   const users = data?.data || [];
   const totalPages = data?.meta?.lastPage || 1;
   const hasResults = users.length > 0;
-
-  const systemAdminRole: SystemAdminRole = roleData
-    ? {
-        id: String(roleData.id),
-        abbreviation:
-          roles?.find((r) => r.id === roleData.id)?.abbreviation || "RO",
-        name: roleData.name,
-        description: roleData.description || "No description provided",
-        peopleCount: users.length,
-      }
-    : {
-        id: "0",
-        abbreviation: "RO",
-        name: "",
-        description: "No description provided",
-        peopleCount: 0,
-      };
+  
 
   const permissionsByModule: Module[] = roleData?.permissions
     ? Object.keys(roleData.permissions).map((moduleName) => ({
@@ -443,7 +426,7 @@ const SystemAdminSettings: React.FC = () => {
         }}
       >
         <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
-          {systemAdminRole.name}
+          {roleData?.name}
         </Typography>
         <Box sx={{ position: "relative" }}>
           <Button
@@ -477,7 +460,7 @@ const SystemAdminSettings: React.FC = () => {
         {/* <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
           Role Settings
         </BreadcrumbsItem> */}
-        <BreadcrumbsItem type="end">{systemAdminRole.name}</BreadcrumbsItem>
+        <BreadcrumbsItem type="end">{roleData?.name}</BreadcrumbsItem>
       </Breadcrumbs>
 
       <Box
@@ -951,13 +934,13 @@ const SystemAdminSettings: React.FC = () => {
                             color: "var(--joy-palette-text-secondary)",
                             fontWeight: "400",
                             fontSize: "12px",
-                            whiteSpace: "nowrap",
+                            whiteSpace: "wrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                           }}
                         >
                           {typeof user.email === "string"
-                            ? user.email
+                            ? user.email.slice(0, 55)
                             : user.email[0]}
                         </Typography>
                       </Box>
@@ -1061,7 +1044,7 @@ const SystemAdminSettings: React.FC = () => {
                 fontSize: "14px",
               }}
             >
-              {systemAdminRole.description}
+              {roleData?.description}
             </Typography>
           </Box>
 

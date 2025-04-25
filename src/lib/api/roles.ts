@@ -14,7 +14,6 @@ export interface Role {
   id: number;
   name: string;
   description: string | null;
-  abbreviation?: string;
   permissions: PermissionsByModule; 
   _count: {
     users: number;

@@ -31,7 +31,6 @@ export interface Role {
 
 export interface RoleSettingsRole {
   id: string;
-  abbreviation: string;
   name: string;
   description: string;
   _count: {
@@ -50,7 +49,6 @@ export default function Page(): React.JSX.Element {
       const fetchedRoles: Role[] = await getRoles();
       const transformedRoles: RoleSettingsRole[] = fetchedRoles.map((role) => ({
         id: role.id.toString(),
-        abbreviation: role.name.slice(0, 2).toUpperCase(),
         name: role.name,
         description: role.description || "No description provided",
         _count: {

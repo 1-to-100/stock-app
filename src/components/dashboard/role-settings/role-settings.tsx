@@ -4,6 +4,7 @@ import * as React from "react";
 import Box from "@mui/joy/Box";
 import Card from "@mui/joy/Card";
 import Typography from "@mui/joy/Typography";
+import Avatar from "@mui/joy/Avatar";
 import { DotsThree } from "@phosphor-icons/react/dist/ssr/DotsThree";
 import { IconButton } from "@mui/joy";
 import { useRouter } from "next/navigation";
@@ -13,10 +14,10 @@ import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { useState } from "react";
 import { Popper } from "@mui/base/Popper";
 import AddRoleModal from "../modals/AddRoleModal";
+import type { ColorPaletteProp, VariantProp } from "@mui/joy";
 
 export interface Role {
   id: string;
-  abbreviation: string;
   name: string;
   description: string;
   _count: {
@@ -86,6 +87,27 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
     marginRight: "14px",
   };
 
+ 
+  const avatarColors: ColorPaletteProp[] = [
+    "primary",
+    "neutral",
+    "danger",
+    "warning",
+    "success",
+  ];
+  
+  const getAvatarProps = (name: string) => {
+    const hash = Array.from(name).reduce(
+      (acc: number, char: string) => acc + char.charCodeAt(0),
+      0
+    );
+    const colorIndex = hash % avatarColors.length;
+    return {
+      color: avatarColors[colorIndex],
+      variant: "soft" as VariantProp,
+    };
+  };
+
   return (
     <Box
       sx={{
@@ -122,40 +144,17 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
+            <Avatar
               sx={{
                 width: 40,
                 height: 40,
-                borderRadius: "50%",
-                backgroundColor:
-                  role.abbreviation === "SA"
-                    ? "#DAD8FD"
-                    : role.abbreviation === "CS"
-                    ? "#DDE7EE"
-                    : role.abbreviation === "CA"
-                    ? "#FFE9E8"
-                    : role.abbreviation === "MA"
-                    ? "#FFF8C5"
-                    : "#FFE9E8",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
                 fontWeight: "bold",
                 fontSize: "16px",
-                color:
-                  role.abbreviation === "SA"
-                    ? "#443DF6"
-                    : role.abbreviation === "CS"
-                    ? "#555E68"
-                    : role.abbreviation === "CA"
-                    ? "#9C1818"
-                    : role.abbreviation === "MA"
-                    ? "#7D4E00"
-                    : "#D3232F",
               }}
+              {...getAvatarProps(role.name)}
             >
-              {role.abbreviation}
-            </Box>
+              {role.name.slice(0, 2).toUpperCase()}
+            </Avatar>
             <Box sx={{ flex: 1 }}>
               <Typography
                 level="title-md"

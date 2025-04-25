@@ -470,7 +470,6 @@ export default function Page(): React.JSX.Element {
                 justifyContent: "space-between",
                 display: "flex",
                 flexDirection: "column",
-                height: "75vh",
               }}
             >
               <Box>
@@ -492,7 +491,7 @@ export default function Page(): React.JSX.Element {
                         />
                       </th>
                       <th
-                        style={{ width: "20%" }}
+                        style={{ width: "30%" }}
                         onClick={() => handleSort("name")}
                       >
                         <Box
@@ -570,7 +569,7 @@ export default function Page(): React.JSX.Element {
                         </Box>
                       </th>
                       <th
-                        style={{ width: "15%" }}
+                        style={{ width: "20%" }}
                         onClick={() => handleSort("role")}
                       >
                         <Box
@@ -588,32 +587,6 @@ export default function Page(): React.JSX.Element {
                           }}
                         >
                           Role
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th
-                        style={{ width: "15%" }}
-                        onClick={() => handleSort("persona")}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
-                          }}
-                        >
-                          Persona
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -664,7 +637,7 @@ export default function Page(): React.JSX.Element {
                                 <Avatar sx={{ width: 28, height: 28 }} />
                               )}
                               <Typography sx={{ wordBreak: "break-all" }}>
-                                {user.name}
+                                {user.name.slice(0, 85)}
                               </Typography>
                               <Tooltip
                                 title={user.status}
@@ -704,7 +677,7 @@ export default function Page(): React.JSX.Element {
                               }}
                             >
                               {typeof user.email === "string"
-                                ? user.email
+                                ? user.email.slice(0, 75)
                                 : user.email[0]}
                               {hoveredRow === index && (
                                 <Tooltip
@@ -782,13 +755,6 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             {user.role}
-                          </td>
-                          <td
-                            style={{
-                              color: "var(--joy-palette-text-secondary)",
-                            }}
-                          >
-                            {user.persona}
                           </td>
                           <td>
                             <IconButton
