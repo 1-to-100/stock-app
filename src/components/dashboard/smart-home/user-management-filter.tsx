@@ -11,22 +11,12 @@ import Checkbox from "@mui/joy/Checkbox";
 import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { X as X } from "@phosphor-icons/react/dist/ssr/X";
+import { ApiUser } from "@/contexts/auth/types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 interface UserManagementFilterProps {
-  users: User[];
-  onFilter: (filteredUsers: User[], filtersApplied: boolean) => void;
+  users: ApiUser[];
+  onFilter: (filteredUsers: ApiUser[], filtersApplied: boolean) => void;
 }
 
 const UserManagementFilter = ({
@@ -113,11 +103,6 @@ const UserManagementFilter = ({
     }
     if (selectedRoles.length > 0) {
       filtered = filtered.filter((user) => selectedRoles.includes(user.role));
-    }
-    if (selectedPersonas.length > 0) {
-      filtered = filtered.filter((user) =>
-        selectedPersonas.includes(user.persona)
-      );
     }
 
     onFilter(filtered, filtersApplied);
@@ -391,31 +376,6 @@ const UserManagementFilter = ({
                             }}
                           >
                             {role.charAt(0).toUpperCase() + role.slice(1)}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "Persona" &&
-                      uniquePersonas.map((persona) => (
-                        <Box
-                          key={persona}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedPersonas.includes(persona)}
-                            onChange={() => handlePersonaChange(persona)}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: "14px",
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {persona.charAt(0).toUpperCase() + persona.slice(1)}
                           </Typography>
                         </Box>
                       ))}

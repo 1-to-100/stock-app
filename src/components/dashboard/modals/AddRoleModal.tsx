@@ -23,6 +23,7 @@ import {
   getRoleById,
 } from "../../../lib/api/roles";
 import { Box, CircularProgress } from "@mui/joy";
+import { Role } from "@/contexts/auth/types";
 
 interface Permission {
   enabled: boolean;
@@ -49,15 +50,6 @@ interface Errors {
   roleName?: string;
   description?: string;
   permissions?: string;
-}
-
-export interface Role {
-  id: number;
-  name: string;
-  description: string | null;
-  permissions?: {
-    [key: string]: { id: number; name: string; label: string }[];
-  };
 }
 
 interface AddRoleModalProps {
@@ -122,7 +114,7 @@ export default function AddRoleModal({
                 roleData.permissions?.[moduleName] || [];
               acc[moduleName] = {
                 enabled: modulePermissions.length > 0,
-                accessLevel: modulePermissions.map((perm) => perm.name),
+                accessLevel: modulePermissions.map((perm: { name: string }) => perm.name),
               };
               return acc;
             },

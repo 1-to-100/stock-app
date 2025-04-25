@@ -23,10 +23,10 @@ import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/W
 import { Box } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { createUser, updateUser, getUserById } from "./../../../lib/api/users";
-import { getRoles, Role } from "./../../../lib/api/roles";
-import { getCustomers, Customer } from "./../../../lib/api/customers";
+import { getRoles } from "./../../../lib/api/roles";
+import { getCustomers } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
-import { ApiUser } from "@/contexts/auth/types";
+import { ApiUser, Role, Customer } from "@/contexts/auth/types";
 import { toast } from '@/components/core/toaster';
 
 interface HttpError {
@@ -35,18 +35,6 @@ interface HttpError {
       message?: string;
     };
   };
-}
-
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
 }
 
 interface AddEditUserProps {
@@ -105,21 +93,27 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     enabled: !!userId && open,
   });
 
-  const transformUser = (apiUser: ApiUser): User => {
-    const customer = customers?.find((c) => c.id === apiUser.customerId);
-    const role = roles?.find((r) => r.id === apiUser.roleId);
-    return {
-      id: apiUser.id,
-      name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-      email: apiUser.email,
-      customer: customer ? customer.name : "",
-      role: role ? role.name : "",
-      persona: apiUser.persona || "",
-      status: apiUser.status,
-      avatar: apiUser.avatar || undefined,
-      activity: apiUser.activity,
+  const transformUser = (apiUser: ApiUser): ApiUser => {
+      const customer = customers?.find((c) => c.id === apiUser.customerId);
+      const role = roles?.find((r) => r.id === apiUser.roleId);
+      return {
+        managerId: apiUser.managerId,
+        id: apiUser.id,
+        firstName: apiUser.firstName, 
+        lastName: apiUser.lastName, 
+        name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
+        email: apiUser.email,
+        customerId: apiUser.customerId,
+        customer: customer || apiUser.customer,
+        roleId: apiUser.roleId,
+        role: role || apiUser.role,
+        persona: apiUser.persona || "",
+        status: apiUser.status,
+        avatar: apiUser.avatar || undefined,
+        activity: apiUser.activity,
+        createdAt: apiUser.createdAt,
+      };
     };
-  };
 
   useEffect(() => {
     if (userId && userData && open) {
@@ -133,9 +127,9 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
         persona: user.persona || "",
         manager: userData.managerId ? userData.managerId.toString() : "",
       });
-      setAdditionalEmails(
-        Array.isArray(user.email) ? user.email.slice(1).filter(Boolean) : []
-      );
+      // setAdditionalEmails(
+      //   Array.isArray(user.email) ? user.email.slice(1).filter(Boolean) : []
+      // );
       setAvatarPreview(user.avatar || null);
       setIsActive(user.status === "active");
       setErrors(null);
@@ -204,20 +198,20 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     }
     
     if (email.startsWith(".") || email.endsWith(".")) {
-      return "Email cannot start or end with a dot";
+      return "Invalid email format";
     }
    
     if (email.includes("..")) {
-      return "Email cannot contain consecutive dots";
+      return "Invalid email format";
     }
    
     if (email.includes("/")) {
-      return "Email cannot contain the '/' character";
+      return "Invalid email format";
     }
     
     const atIndex = email.indexOf("@");
     if (email[atIndex - 1] === ".") {
-      return "Email cannot have a dot immediately before '@'";
+      return "Invalid email format";
     }
   
     return null; 

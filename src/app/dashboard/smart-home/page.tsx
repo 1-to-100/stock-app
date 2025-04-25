@@ -34,8 +34,8 @@ import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../lib/api/users";
-import { getRoles, Role } from "./../../../lib/api/roles";
-import { getCustomers, Customer } from "./../../../lib/api/customers";
+import { getRoles } from "./../../../lib/api/roles";
+import { getCustomers } from "./../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 
@@ -49,17 +49,6 @@ const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
 
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 export default function Page(): React.JSX.Element {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -74,15 +63,15 @@ export default function Page(): React.JSX.Element {
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+  const [userToResetPassword, setUserToResetPassword] = useState<ApiUser | null>(
     null
   );
-  const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
+  const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -99,15 +88,20 @@ export default function Page(): React.JSX.Element {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: ApiUser): User => {
+  const transformUser = (apiUser: ApiUser): ApiUser => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
+      managerId: apiUser.managerId,
       id: apiUser.id,
+      firstName: apiUser.firstName,
+      lastName: apiUser.lastName,
       name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
       email: apiUser.email,
-      customer: customer ? customer.name : "",
-      role: role ? role.name : "",
+      customerId: apiUser.customerId,
+      customer: customer || apiUser.customer,
+      roleId: apiUser.roleId,
+      role: role || apiUser.role,
       persona: apiUser.persona || "",
       status: apiUser.status,
       avatar: apiUser.avatar || undefined,
@@ -282,14 +276,14 @@ export default function Page(): React.JSX.Element {
     handleMenuClose();
   };
 
-  const handleResetPassword = (userId: number) => {
-    const user = users.find((u) => u.id === userId);
-    if (user) {
-      setUserToResetPassword(user);
-      setOpenResetPasswordModal(true);
-    }
-    handleMenuClose();
-  };
+  // const handleResetPassword = (userId: number) => {
+  //   const user = users.find((u) => u.id === userId);
+  //   if (user) {
+  //     setUserToResetPassword(user);
+  //     setOpenResetPasswordModal(true);
+  //   }
+  //   handleMenuClose();
+  // };
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
@@ -305,11 +299,11 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
   };
 
-  const handleFilter = (_filtered: User[], _filtersApplied: boolean) => {
+  const handleFilter = (_filtered: ApiUser[], _filtersApplied: boolean) => {
     setCurrentPage(1);
   };
 
-  const handleSort = (column: keyof User) => {
+  const handleSort = (column: keyof ApiUser) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     const newDirection = isAsc ? "desc" : "asc";
     setSortColumn(column);
@@ -747,14 +741,14 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            {user.customer}
+                            {user.customer?.name}
                           </td>
                           <td
                             style={{
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            {user.role}
+                            {user.role?.name}
                           </td>
                           <td>
                             <IconButton

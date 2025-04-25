@@ -13,23 +13,41 @@ export interface UserContextValue {
     permissions?: string[];
 }
 
-export type ApiUser = {
-    id: number | number;
+export interface ApiUser {
+    managerId: number;
+    id: number;
     firstName: string;
     lastName: string;
+    name: string;
     email: string;
     customerId?: number;
-    customer?: Customer
+    customer?: Customer;
     roleId?: number;
-    role?: Role
+    role?: Role;
     persona?: string;
     status: string;
     avatar?: string;
     createdAt?: string;
-    managerId?: number;
     activity?: {
-        id: number
-        browserOs: string
-        locationTime: string
-    }[]
-}
+      id: number;
+      browserOs: string;
+      locationTime: string;
+    }[];
+  }
+
+  export interface Role {
+    id: number;
+    name: string;
+    description: string | null;
+    permissions: PermissionsByModule; 
+    _count: {
+      users: number;
+    };
+  }
+
+  export interface Customer {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  }

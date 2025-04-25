@@ -1,11 +1,5 @@
 import { apiFetch } from "./api-fetch";
-
-export interface Customer {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Customer } from "@/contexts/auth/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

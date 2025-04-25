@@ -1,4 +1,5 @@
 import { apiFetch } from "./api-fetch";
+import { Role } from "@/contexts/auth/types";
 
 export interface ModulePermission {
   id: number;
@@ -8,16 +9,6 @@ export interface ModulePermission {
 
 interface PermissionsByModule {
   [moduleName: string]: ModulePermission[];
-}
-
-export interface Role {
-  id: number;
-  name: string;
-  description: string | null;
-  permissions: PermissionsByModule; 
-  _count: {
-    users: number;
-  };
 }
   
   interface CreateRolePayload {

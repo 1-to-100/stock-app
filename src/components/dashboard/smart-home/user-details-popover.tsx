@@ -24,24 +24,14 @@ import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/Arr
 import { useColorScheme } from "@mui/joy/styles";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUser } from "../../../lib/api/users";
+import { ApiUser } from "@/contexts/auth/types";
 
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 interface UserDetailsPopoverProps {
   open: boolean;
   onClose: () => void;
   anchorEl: HTMLElement | null;
-  user: User | null;
+  user: ApiUser | null;
 }
 
 const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
@@ -449,7 +439,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {user.customer}
+                {user.customer?.name}
               </Typography>
             </Stack>
 
@@ -466,11 +456,11 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {user.role}
+                {user.role?.name}
               </Typography>
             </Stack>
 
-            <Stack
+            {/* <Stack
               direction="row"
               spacing={2}
               sx={{
@@ -492,7 +482,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               >
                 {user.persona}
               </Typography>
-            </Stack>
+            </Stack> */}
 
             <Stack
               direction="row"

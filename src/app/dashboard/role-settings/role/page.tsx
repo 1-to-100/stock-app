@@ -47,8 +47,8 @@ import InviteUser from "@/components/dashboard/modals/InviteUserModal";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../../lib/api/users";
-import { getRoles, Role, ModulePermission } from "../../../../lib/api/roles";
-import { getCustomers, Customer } from "../../../../lib/api/customers";
+import { getRoles, ModulePermission } from "../../../../lib/api/roles";
+import { getCustomers } from "../../../../lib/api/customers";
 import { getRoleById } from "../../../../lib/api/roles";
 import Tooltip from "@mui/joy/Tooltip";
 import { ApiUser } from "@/contexts/auth/types";
@@ -56,30 +56,11 @@ import AddRoleModal from "@/components/dashboard/modals/AddRoleModal";
 
 const RouterLink = Link;
 
-interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
-
 interface Permission {
   id: string;
   name: string;
   label: string;
   description?: string;
-}
-
-interface SystemAdminRole {
-  id: string;
-  name: string;
-  description: string;
-  peopleCount: number;
 }
 
 interface Module {
@@ -102,18 +83,18 @@ const SystemAdminSettings: React.FC = () => {
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [openEditRoleModal, setOpenEditRoleModal] = useState(false);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
+  const [userToResetPassword, setUserToResetPassword] = useState<ApiUser | null>(
     null
   );
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
-  const [sortColumn, setSortColumn] = useState<keyof User | null>(null);
+  const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -149,19 +130,25 @@ const SystemAdminSettings: React.FC = () => {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: ApiUser): User => {
+  const transformUser = (apiUser: ApiUser): ApiUser => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
+      managerId: apiUser.managerId, // Include required managerId
       id: apiUser.id,
+      firstName: apiUser.firstName, // Include required firstName
+      lastName: apiUser.lastName, // Include required lastName
       name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
       email: apiUser.email,
-      customer: customer ? customer.name : "",
-      role: role ? role.name : "",
+      customerId: apiUser.customerId,
+      customer: customer || apiUser.customer,
+      roleId: apiUser.roleId,
+      role: role || apiUser.role,
       persona: apiUser.persona || "",
       status: apiUser.status,
       avatar: apiUser.avatar || undefined,
       activity: apiUser.activity,
+      createdAt: apiUser.createdAt,
     };
   };
 
@@ -302,7 +289,7 @@ const SystemAdminSettings: React.FC = () => {
   const handleResetPassword = (userId: number) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
-      setUserToResetPassword(user);
+      // setUserToResetPassword(user);
       setOpenResetPasswordModal(true);
     }
     handleMenuClose();
@@ -371,7 +358,7 @@ const SystemAdminSettings: React.FC = () => {
     setSelectedRows([]);
   };
 
-  const handleSort = (column: keyof User) => {
+  const handleSort = (column: keyof ApiUser) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     const newDirection = isAsc ? "desc" : "asc";
     setSortColumn(column);

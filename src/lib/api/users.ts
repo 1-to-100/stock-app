@@ -1,39 +1,7 @@
 import { apiFetch } from './api-fetch';
-import { Customer } from '@/lib/api/customers';
-import { Role } from '@/lib/api/roles';
+import { ApiUser } from '@/contexts/auth/types';
 
-export interface ApiUser {
-  managerId: number;
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  customerId?: number;
-  customer?: Customer;
-  roleId?: number;
-  role?: Role;
-  persona?: string;
-  status: string;
-  avatar?: string;
-  createdAt?: string;
-  activity?: {
-    id: number;
-    browserOs: string;
-    locationTime: string;
-  }[];
-}
 
-export interface User {
-  id: number;
-  name: string;
-  email: string | string[];
-  customer: string;
-  role: string;
-  persona: string;
-  status: string;
-  avatar?: string;
-  activity?: { id: number; browserOs: string; locationTime: string }[];
-}
 
 interface CreateUserPayload {
   email: string;
@@ -59,7 +27,7 @@ interface GetUsersParams {
 }
 
 interface GetUsersResponse {
-  data: ApiUser[]; // Changed from User[] to ApiUser[]
+  data: ApiUser[]; 
   meta: {
     total: number;
     page: number;
