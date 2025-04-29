@@ -10,7 +10,7 @@ export interface Manager {
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getManagers(): Promise<Manager[]> {
-  return apiFetch<Manager[]>(`${API_URL}/managers`, {
+  return apiFetch<Manager[]>(`${API_URL}/taxonomies/managers`, {
     method: "GET",
     headers: {
       accept: "*/*",

@@ -24,18 +24,18 @@ import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsD
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
-import UserDetailsPopover from "@/components/dashboard/smart-home/user-details-popover";
+import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
-import UserManagementFilter from "@/components/dashboard/smart-home/user-management-filter";
+import UserManagementFilter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../lib/api/users";
-import { getRoles } from "./../../../lib/api/roles";
-import { getCustomers } from "./../../../lib/api/customers";
+import { getRoles } from "../../../lib/api/roles";
+import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 
@@ -75,6 +75,15 @@ export default function Page(): React.JSX.Element {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filters, setFilters] = useState<{
+    statusId: string[];
+    customerId: number[];
+    roleId: number[];
+  }>({
+    statusId: [],
+    customerId: [],
+    roleId: [],
+  });
 
   const rowsPerPage = 10;
 
@@ -116,8 +125,9 @@ export default function Page(): React.JSX.Element {
       searchTerm,
       sortColumn,
       sortDirection,
-      roles,
-      customers,
+      filters.statusId,
+      filters.customerId,
+      filters.roleId,
     ],
     queryFn: async () => {
       const response = await getUsers({
@@ -126,6 +136,9 @@ export default function Page(): React.JSX.Element {
         search: searchTerm || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
+        statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
+        customerId: filters.customerId.length > 0 ? filters.customerId : undefined,
+        roleId: filters.roleId.length > 0 ? filters.roleId : undefined,
       });
       return {
         ...response,
@@ -299,7 +312,12 @@ export default function Page(): React.JSX.Element {
     setSelectedRows([]);
   };
 
-  const handleFilter = (_filtered: ApiUser[], _filtersApplied: boolean) => {
+  const handleFilter = (filters: {
+    statusId: string[];
+    customerId: number[];
+    roleId: number[];
+  }) => {
+    setFilters(filters);
     setCurrentPage(1);
   };
 
@@ -365,9 +383,6 @@ export default function Page(): React.JSX.Element {
       </Box>
       );
     }
-    return (
-      <Typography>Error loading users: {error.message}</Typography>
-    );
   }
 
   return (

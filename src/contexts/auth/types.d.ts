@@ -48,6 +48,17 @@ export interface ApiUser {
   export interface Customer {
     id: number;
     name: string;
-    createdAt: string;
-    updatedAt: string;
+    email: string,
+    subscriptionId: number,
+    managerId: number,
+    numberOfUsers?: number,
+    status: string,
+    subscriptionName: string,
+    manager: {
+      id: number;
+      name: string;
+      email: string;
+    }
   }
+
+  export type Status = 'active' | 'inactive' | 'suspended';

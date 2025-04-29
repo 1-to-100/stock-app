@@ -24,6 +24,15 @@ interface PermissionsByModule {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
   export async function getRoles(): Promise<Role[]> {
+    return apiFetch<Role[]>(`${API_URL}/taxonomies/roles`, {
+      method: "GET",
+      headers: {
+        accept: "*/*",
+      },
+    });
+  }
+
+  export async function getRolesList(): Promise<Role[]> {
     return apiFetch<Role[]>(`${API_URL}/roles`, {
       method: "GET",
       headers: {

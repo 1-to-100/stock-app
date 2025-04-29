@@ -90,6 +90,7 @@ export default function AddRoleModal({
       }
       return getRoleById(roleId);
     },
+    enabled: !!roleId && open,
   });
 
   useEffect(() => {

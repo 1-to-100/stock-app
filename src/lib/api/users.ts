@@ -1,5 +1,5 @@
 import { apiFetch } from './api-fetch';
-import { ApiUser } from '@/contexts/auth/types';
+import { ApiUser, Status } from '@/contexts/auth/types';
 
 
 
@@ -23,7 +23,9 @@ interface GetUsersParams {
   search?: string;
   orderBy?: string;
   orderDirection?: 'asc' | 'desc';
-  roleId?: number;
+  roleId?: number[];
+  customerId?: number[];
+  statusId?: string[];
 }
 
 interface GetUsersResponse {
@@ -62,7 +64,16 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
   if (params.search) query.set('search', params.search);
   if (params.orderBy) query.set('orderBy', params.orderBy);
   if (params.orderDirection) query.set('orderDirection', params.orderDirection);
-  if (params.roleId) query.set('roleId', params.roleId.toString());
+  
+  if (params.roleId && params.roleId.length > 0) {
+    params.roleId.forEach(id => query.append('roleId', id.toString()));
+  }
+  if (params.customerId && params.customerId.length > 0) {
+    params.customerId.forEach(id => query.append('customerId', id.toString()));
+  }
+  if (params.statusId && params.statusId.length > 0) {
+    params.statusId.forEach(status => query.append('status', status));
+  }
 
   return apiFetch<GetUsersResponse>(`${API_URL}/users?${query.toString()}`, {
     method: 'GET',
@@ -72,5 +83,14 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
 export async function getUserById(id: number): Promise<ApiUser> {
   return apiFetch<ApiUser>(`${API_URL}/users/${id}`, {
     method: 'GET',
+  });
+}
+
+export async function getStatuses(): Promise<Status[]> {
+  return apiFetch<Status[]>(`${API_URL}/taxonomies/statuses`, {
+    method: "GET",
+    headers: {
+      accept: "*/*",
+    },
   });
 }

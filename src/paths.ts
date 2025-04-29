@@ -41,18 +41,22 @@ export const paths = {
     },
   },
   dashboard: {
-    overview: '/dashboard/smart-home',
-    analytics: '/dashboard/analytics',
+    overview: '/dashboard/user-management',
+    customerManagement: {
+      list: '/dashboard/customer-management',
+      details: (customerId: string) => `/dashboard/customer-management/${customerId}`,
+    },
     crypto: '/dashboard/crypto',
     roleSettings: {
       list: '/dashboard/role-settings',
+      details: (roleId: string) => `/dashboard/role-settings/${roleId}`,
       systemAdmin: '/dashboard/role-settings/role',
       customerSuccess: '/dashboard/role-settings/customer-success',
       customerAdmin: '/dashboard/role-settings/customer-admin',
       manager: '/dashboard/role-settings/manager',
       user: '/dashboard/role-settings/user',
     },
-    smartHome: '/dashboard/smart-home',
+    userManagement: '/dashboard/user-management',
     tasks: '/dashboard/tasks',
     blank: '/dashboard/blank',
     customers: {

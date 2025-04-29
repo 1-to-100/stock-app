@@ -39,9 +39,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
 
   const handleCardClick = async (roleId: string) => {
     try {
-      router.push(
-        `${paths.dashboard.roleSettings.systemAdmin}?roleId=${roleId}`
-      );
+      router.push(paths.dashboard.roleSettings.details(roleId.toString()));
     } catch (error) {
       console.error("Error fetching role:", error);
     }

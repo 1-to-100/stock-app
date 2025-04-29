@@ -8,7 +8,7 @@ import Typography from "@mui/joy/Typography";
 import RoleSettings from "@/components/dashboard/role-settings/role-settings";
 import UserPersonas from "@/components/dashboard/role-settings/user-personas";
 import SearchInput from "@/components/dashboard/layout/search-input";
-import { getRoles } from "../../../lib/api/roles";
+import { getRolesList } from "../../../lib/api/roles";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import Button from "@mui/joy/Button";
 import AddRoleModal from "../../../components/dashboard/modals/AddRoleModal";
@@ -46,7 +46,7 @@ export default function Page(): React.JSX.Element {
 
   const fetchRoles = async () => {
     try {
-      const fetchedRoles: Role[] = await getRoles();
+      const fetchedRoles: Role[] = await getRolesList();
       const transformedRoles: RoleSettingsRole[] = fetchedRoles.map((role) => ({
         id: role.id.toString(),
         name: role.name,

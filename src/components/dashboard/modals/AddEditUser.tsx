@@ -633,9 +633,9 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                   border: errors?.customer ? "1px solid var(--joy-palette-danger-500)" : undefined,
                 }}
               >
-                {customers?.map((customer) => (
+                {customers && customers?.map((customer) => (
                   <Option key={customer.id} value={customer.name}>
-                    {customer.name}
+                    {customer?.name}
                   </Option>
                 ))}
               </Select>
