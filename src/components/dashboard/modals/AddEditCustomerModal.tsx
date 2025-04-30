@@ -267,7 +267,7 @@ export default function AddEditCustomer({
       const payload = {
         email: formData.email,
         name: formData.name,
-        status: isActive ? "active" : ("inactive" as "active" | "inactive"),
+        status: formData.status,
         managerId: formData.managerId ?? undefined,
         subscriptionId: formData.subscriptionId ?? undefined,
       };

@@ -162,7 +162,7 @@ const Filter = ({ users, customers, onFilter, onFilterCustomers }: FilterProps) 
     if (customers && onFilterCustomers) {
       onFilterCustomers({ managerId: [], subscriptionId: [], statusId: [] });
     }
-    handleClose();
+    // handleClose();
   };
 
   const totalFiltersApplied =

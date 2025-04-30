@@ -19,7 +19,9 @@ import {
   Breadcrumbs,
   Checkbox,
   CircularProgress,
+  ColorPaletteProp,
   Stack,
+  VariantProp,
 } from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
@@ -348,6 +350,26 @@ const Customer: React.FC = () => {
     marginRight: "14px",
   };
 
+  const avatarColors: ColorPaletteProp[] = [
+    "primary",
+    "neutral",
+    "danger",
+    "warning",
+    "success",
+  ];
+
+  const getAvatarProps = (name: string) => {
+    const hash = Array.from(name).reduce(
+      (acc: number, char: string) => acc + char.charCodeAt(0),
+      0
+    );
+    const colorIndex = hash % avatarColors.length;
+    return {
+      color: avatarColors[colorIndex],
+      variant: "soft" as VariantProp,
+    };
+  };
+
   return (
     <Box sx={{ padding: "24px" }}>
       <SearchInput
@@ -394,7 +416,9 @@ const Customer: React.FC = () => {
         <BreadcrumbsItem href={paths.dashboard.customerManagement.list}>
           Customer Management
         </BreadcrumbsItem>
-        <BreadcrumbsItem type="end">{customerData?.name.slice(0, 45)}</BreadcrumbsItem>
+        <BreadcrumbsItem type="end">
+          {customerData?.name.slice(0, 45)}
+        </BreadcrumbsItem>
       </Breadcrumbs>
 
       <Box
@@ -663,7 +687,7 @@ const Customer: React.FC = () => {
                             sx={{ alignItems: "center" }}
                           >
                             <Typography sx={{ wordBreak: "break-all" }}>
-                              {user.name}
+                              {user.name.slice(0, 95)}
                             </Typography>
                             <Tooltip
                               title={user.status}
@@ -703,7 +727,7 @@ const Customer: React.FC = () => {
                             }}
                           >
                             {typeof user.email === "string"
-                              ? user.email
+                              ? user.email.slice(0, 95)
                               : user.email[0]}
                             {hoveredRow === index && (
                               <Tooltip
@@ -853,24 +877,24 @@ const Customer: React.FC = () => {
                         p: "16px",
                         display: "flex",
                         alignItems: "center",
+                        maxWidth: "500px",
                       }}
                     >
                       <Box
                         sx={{ position: "relative", display: "inline-block" }}
                       >
-                        {user.avatar ? (
-                          <Avatar
-                            src={user.avatar}
-                            sx={{ width: 48, height: 48 }}
-                          />
-                        ) : (
-                          <Avatar sx={{ width: 48, height: 48 }}>
-                            {user.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </Avatar>
-                        )}
+                        <Avatar
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            fontWeight: "bold",
+                            fontSize: "16px",
+                          }}
+                          {...getAvatarProps(user.name)}
+                        >
+                          {user.name.slice(0, 2).toUpperCase()}
+                        </Avatar>
+
                         <Box
                           sx={{
                             width: 12,
@@ -900,7 +924,7 @@ const Customer: React.FC = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {user.name}
+                          {user.name.slice(0, 45)}
                         </Typography>
                         <Typography
                           level="body-sm"
@@ -914,7 +938,7 @@ const Customer: React.FC = () => {
                           }}
                         >
                           {typeof user.email === "string"
-                            ? user.email.slice(0, 55)
+                            ? user.email.slice(0, 45)
                             : user.email[0]}
                         </Typography>
                       </Box>

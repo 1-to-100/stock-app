@@ -635,7 +635,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               >
                 {customers && customers?.map((customer) => (
                   <Option key={customer.id} value={customer.name}>
-                    {customer?.name}
+                    {customer?.name.slice(0, 45)}
                   </Option>
                 ))}
               </Select>
