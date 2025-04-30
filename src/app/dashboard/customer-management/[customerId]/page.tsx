@@ -363,7 +363,7 @@ const Customer: React.FC = () => {
         }}
       >
         <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
-          {customerData?.name}
+          {customerData?.name.slice(0, 45)}
         </Typography>
         <Box sx={{ position: "relative" }}>
           <Button
@@ -394,7 +394,7 @@ const Customer: React.FC = () => {
         <BreadcrumbsItem href={paths.dashboard.customerManagement.list}>
           Customer Management
         </BreadcrumbsItem>
-        <BreadcrumbsItem type="end">{customerData?.name}</BreadcrumbsItem>
+        <BreadcrumbsItem type="end">{customerData?.name.slice(0, 45)}</BreadcrumbsItem>
       </Breadcrumbs>
 
       <Box
@@ -1013,7 +1013,7 @@ const Customer: React.FC = () => {
                   }}
                   fontWeight="600"
                 >
-                  {customerData?.name}
+                  {customerData?.name.slice(0, 45)}
                 </Typography>
                 {customerData && customerData.status && (
                   <Typography
@@ -1082,7 +1082,7 @@ const Customer: React.FC = () => {
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {customerData?.name}
+                {customerData?.name.slice(0, 45)}
               </Typography>
             </Stack>
 
@@ -1100,7 +1100,7 @@ const Customer: React.FC = () => {
                   fontWeight="300"
                   sx={{ color: "var(--joy-palette-text-primary)" }}
                 >
-                  {customerData?.email}
+                  {customerData?.email.slice(0, 45)}
                 </Typography>
               </Stack>
             </Stack>
@@ -1118,7 +1118,7 @@ const Customer: React.FC = () => {
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {customerData?.name}
+                {customerData?.name.slice(0, 45)}
               </Typography>
             </Stack>
 
@@ -1135,7 +1135,7 @@ const Customer: React.FC = () => {
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {customerData?.name}
+                {customerData?.name.slice(0, 45)}
               </Typography>
             </Stack>
 
