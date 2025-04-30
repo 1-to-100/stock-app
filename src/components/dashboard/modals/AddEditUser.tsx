@@ -59,7 +59,6 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     email: "",
     customer: "",
     role: "",
-    persona: "",
     manager: "",
   });
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
@@ -93,45 +92,18 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     enabled: !!userId && open,
   });
 
-  const transformUser = (apiUser: ApiUser): ApiUser => {
-      const customer = customers?.find((c) => c.id === apiUser.customerId);
-      const role = roles?.find((r) => r.id === apiUser.roleId);
-      return {
-        managerId: apiUser.managerId,
-        id: apiUser.id,
-        firstName: apiUser.firstName, 
-        lastName: apiUser.lastName, 
-        name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-        email: apiUser.email,
-        customerId: apiUser.customerId,
-        customer: customer || apiUser.customer,
-        roleId: apiUser.roleId,
-        role: role || apiUser.role,
-        persona: apiUser.persona || "",
-        status: apiUser.status,
-        avatar: apiUser.avatar || undefined,
-        activity: apiUser.activity,
-        createdAt: apiUser.createdAt,
-      };
-    };
-
   useEffect(() => {
     if (userId && userData && open) {
-      const user = transformUser(userData);
       setFormData({
         firstName: userData.firstName || "",
         lastName: userData.lastName || "",
-        email: typeof user.email === "string" ? user.email : user.email[0] || "",
-        customer: user.customer || "",
-        role: user.role || "",
-        persona: user.persona || "",
-        manager: userData.managerId ? userData.managerId.toString() : "",
+        email: userData.email || "",
+        customer: userData?.customer?.name || "",
+        role: userData?.role?.name || "",
+        manager: userData?.manager?.id.toString() || "",
       });
-      // setAdditionalEmails(
-      //   Array.isArray(user.email) ? user.email.slice(1).filter(Boolean) : []
-      // );
-      setAvatarPreview(user.avatar || null);
-      setIsActive(user.status === "active");
+      setAvatarPreview(userData.avatar || null);
+      setIsActive(userData.status === "active");
       setErrors(null);
       setEmailWarnings([]);
     } else if (!userId && open) {
@@ -141,12 +113,11 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
         email: "",
         customer: "",
         role: "",
-        persona: "",
         manager: "",
       });
       setAdditionalEmails([]);
       setAvatarPreview(null);
-      setIsActive(false); 
+      setIsActive(false);
       setErrors(null);
       setEmailWarnings([]);
     }
@@ -214,7 +185,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       return "Invalid email format";
     }
   
-    return null; 
+    return null;
   };
 
   const checkEmailUniqueness = async (email: string, index?: number): Promise<boolean> => {
@@ -223,7 +194,9 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       setEmailWarnings((prev) => {
         const newWarnings = [...prev];
         if (index !== undefined) {
-          newWarnings[index] = "";
+          if (index !== undefined && newWarnings[index] !== undefined) {
+            newWarnings[index] = "";
+          }
         } else {
           newWarnings[0] = "";
         }
@@ -332,6 +305,18 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     setShowDeleteConfirmation(false);
   };
 
+  const getCustomerId = (customerName: string): number => {
+    if (!customers) return 0;
+    const customer = customers.find((c) => c.name === customerName);
+    return customer ? customer.id : 0;
+  };
+
+  const getRoleId = (roleName: string): number => {
+    if (!roles) return 0;
+    const role = roles.find((r) => r.name === roleName);
+    return role ? role.id : 0;
+  };
+
   const handleSave = async () => {
     const validationErrors = validateForm();
     setErrors(validationErrors);
@@ -358,18 +343,6 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
         createUserMutation.mutate(payload);
       }
     }
-  };
-
-  const getCustomerId = (customerName: string): number => {
-    if (!customers) return 0;
-    const customer = customers.find((c) => c.name === customerName);
-    return customer ? customer.id : 0;
-  };
-
-  const getRoleId = (roleName: string): number => {
-    if (!roles) return 0;
-    const role = roles.find((r) => r.name === roleName);
-    return role ? role.id : 0;
   };
 
   return (
@@ -647,7 +620,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
             </Stack>
           </Stack>
 
-          {additionalEmails.map((email, index) => (
+          {/* {additionalEmails.map((email, index) => (
             <Stack key={index}>
               <Typography
                 level="body-sm"
@@ -683,7 +656,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 </FormHelperText>
               )}
             </Stack>
-          ))}
+          ))} */}
 
           <Stack direction="row" spacing={2}>
             <Stack sx={{ flex: 1 }}>
@@ -769,21 +742,6 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               </Select>
             </Stack>
           </Stack>
-
-          {/* <Button
-            variant="plain"
-            startDecorator={<PlusIcon fontSize="16px" />}
-            onClick={handleAddEmail}
-            disabled={additionalEmails.length >= 2}
-            sx={{
-              alignSelf: "flex-start",
-              fontSize: "14px",
-              fontWeight: 500,
-              p: 0,
-            }}
-          >
-            Add Email
-          </Button> */}
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button variant="outlined" onClick={onClose}>

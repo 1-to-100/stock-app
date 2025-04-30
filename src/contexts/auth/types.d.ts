@@ -15,6 +15,10 @@ export interface UserContextValue {
 
 export interface ApiUser {
     managerId: number;
+    manager?: {
+      id: number;
+      name: string;
+    }
     id: number;
     firstName: string;
     lastName: string;

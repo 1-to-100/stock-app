@@ -1235,7 +1235,7 @@ const SystemAdminSettings: React.FC = () => {
         open={Boolean(popoverAnchorEl)}
         onClose={handleClosePopover}
         anchorEl={popoverAnchorEl}
-        user={selectedUser}
+        userId={selectedUser?.id ?? 0}
       />
     </Box>
   );

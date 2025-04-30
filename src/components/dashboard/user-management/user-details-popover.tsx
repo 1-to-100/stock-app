@@ -22,23 +22,22 @@ import AddEditUser from "../modals/AddEditUser";
 import { Popper } from "@mui/base/Popper";
 import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { useColorScheme } from "@mui/joy/styles";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUser } from "../../../lib/api/users";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUserById, updateUser } from "../../../lib/api/users";
 import { ApiUser } from "@/contexts/auth/types";
-
 
 interface UserDetailsPopoverProps {
   open: boolean;
   onClose: () => void;
   anchorEl: HTMLElement | null;
-  user: ApiUser | null;
+  userId: number;
 }
 
 const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   open,
   onClose,
   anchorEl,
-  user,
+  userId,
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -51,11 +50,17 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const isLightTheme = colorScheme === "light";
   const queryClient = useQueryClient();
 
+  const { data: userData, isLoading: isUserLoading } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => getUserById(userId),
+    enabled: !!userId && open,
+  });
+
   const updateUserMutation = useMutation({
     mutationFn: updateUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["user", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
     },
     onError: (error) => {
       console.error("Error updating user:", error);
@@ -85,12 +90,6 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     };
   }, [menuAnchorEl]);
 
-  if (!open || !anchorEl || !user) {
-    return null;
-  }
-
-  const emails = Array.isArray(user.email) ? user.email : [user.email];
-
   const confirmDelete = () => {
     setOpenDeleteModal(false);
     // TODO: Implement delete API call
@@ -99,8 +98,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
 
   const confirmDeactivate = () => {
     setOpenDeactivateModal(false);
-    if (user) {
-      updateUserMutation.mutate({ id: user.id, status: "inactive" });
+    if (userData) {
+      updateUserMutation.mutate({ id: userData.id, status: "inactive" });
     }
   };
 
@@ -138,8 +137,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   };
 
   const handleConfirmSuspend = () => {
-    if (user) {
-      updateUserMutation.mutate({ id: user.id, status: "inactive" });
+    if (userData) {
+      updateUserMutation.mutate({ id: userData.id, status: "inactive" });
       setOpenSuspendModal(false);
     }
   };
@@ -164,6 +163,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     marginRight: "14px",
     color: "var(--joy-palette-text-primary)",
   };
+
+  if (!open || !anchorEl || !userId) {
+    return null;
+  }
 
   return (
     <>
@@ -223,8 +226,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                {user.avatar ? (
-                  <Avatar src={user.avatar} sx={{ width: 64, height: 64 }} />
+                {userData?.avatar ? (
+                  <Avatar src={userData.avatar} sx={{ width: 64, height: 64 }} />
                 ) : (
                   <Avatar sx={{ width: 64, height: 64 }} />
                 )}
@@ -237,21 +240,21 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     }}
                     fontWeight="600"
                   >
-                    {user.name}
+                    {userData?.firstName} {userData?.lastName}
                   </Typography>
                   <Typography
                     level="body-sm"
                     sx={{
                       color:
-                        user.status === "active"
+                        userData?.status === "active"
                           ? "#1A7D36"
-                          : user.status === "suspended"
+                          : userData?.status === "suspended"
                           ? "#4D2D00"
                           : "#D3232F",
                       bgcolor:
-                        user.status === "active"
+                        userData?.status === "active"
                           ? "#DCFCE7"
-                          : user.status === "suspended"
+                          : userData?.status === "suspended"
                           ? "#FFF8C5"
                           : "#FEE2E2",
                       borderRadius: "10px",
@@ -262,7 +265,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                       fontWeight: 500,
                     }}
                   >
-                    {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                    {(userData?.status ?? "").charAt(0).toUpperCase() +
+                      userData?.status?.slice(1)}
                   </Typography>
                 </Stack>
               </Box>
@@ -289,7 +293,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               </Button>
             </Box>
 
-            {user.status === "suspended" && (
+            {userData?.status === "suspended" && (
               <Box
                 sx={{
                   bgcolor: isLightTheme ? "#FFF8C5" : "transparent",
@@ -303,7 +307,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   width: "100%",
                 }}
               >
-                <Warning size={20} color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"} />
+                <Warning
+                  size={20}
+                  color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"}
+                />
                 <Typography
                   level="body-sm"
                   sx={{
@@ -341,7 +348,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <PencilIcon fontSize="20px" style={iconStyle} />
               Edit
             </Box>
-            {/* <Box sx={menuItemStyle}>
+            <Box sx={menuItemStyle}>
               <ArrowRightIcon fontSize="20px" style={iconStyle} />
               Impersonate user
             </Box>
@@ -362,7 +369,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={menuItemStyle}
             >
-              <Warning fontSize="20px" style={{ marginRight: "14px" }} />
+              <Warning fontSize="20px" style={iconStyle} />
               Suspend
             </Box>
             <Box
@@ -382,9 +389,9 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={{ ...menuItemStyle, color: "#EF4444" }}
             >
-              <TrashIcon fontSize="20px" style={{ marginRight: "14px" }} />
+              <TrashIcon fontSize="20px" style={iconStyle} />
               Delete
-            </Box> */}
+            </Box>
           </Popper>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
@@ -400,7 +407,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {user.name}
+                {userData?.firstName} {userData?.lastName}
               </Typography>
             </Stack>
 
@@ -413,16 +420,13 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 Email
               </Typography>
               <Stack spacing={0}>
-                {emails.map((email, index) => (
-                  <Typography
-                    key={index}
-                    level="body-sm"
-                    fontWeight="300"
-                    sx={{ color: "var(--joy-palette-text-primary)" }}
-                  >
-                    {email}
-                  </Typography>
-                ))}
+                <Typography
+                  level="body-sm"
+                  fontWeight="300"
+                  sx={{ color: "var(--joy-palette-text-primary)" }}
+                >
+                  {userData?.email}
+                </Typography>
               </Stack>
             </Stack>
 
@@ -439,7 +443,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {user.customer?.name}
+                {userData?.customer?.name}
               </Typography>
             </Stack>
 
@@ -456,33 +460,9 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {user.role?.name}
+                {userData?.role?.name}
               </Typography>
             </Stack>
-
-            {/* <Stack
-              direction="row"
-              spacing={2}
-              sx={{
-                borderBottom: "1px solid var(--joy-palette-divider)",
-                paddingBottom: 2,
-              }}
-            >
-              <Typography
-                level="body-sm"
-                fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
-              >
-                Persona
-              </Typography>
-              <Typography
-                level="body-sm"
-                fontWeight="300"
-                sx={{ color: "var(--joy-palette-text-primary)" }}
-              >
-                {user.persona}
-              </Typography>
-            </Stack> */}
 
             <Stack
               direction="row"
@@ -541,8 +521,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 Activity
               </Typography>
               <Stack spacing={1}>
-                {user.activity && user.activity.length > 0 ? (
-                  user.activity.map((act) => (
+                {userData?.activity && userData?.activity.length > 0 ? (
+                  userData?.activity.map((act) => (
                     <Stack key={act.id} spacing={0}>
                       <Typography
                         level="body-sm"
@@ -581,11 +561,11 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         </Box>
       </Sheet>
 
-      <DeleteDeactivateUserModal
+      {/* <DeleteDeactivateUserModal
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
-        usersToDelete={[user.name]}
+        usersToDelete={[userData?.name]}
       />
 
       <DeleteDeactivateUserModal
@@ -593,14 +573,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         onClose={() => setOpenDeactivateModal(false)}
         onConfirm={confirmDeactivate}
         isDeactivate={true}
-        usersToDelete={[user.name]}
-      />
+        usersToDelete={[userData?.name]}
+      /> */}
 
-      <ResetPasswordUserModal
+      {/* <ResetPasswordUserModal
         open={openResetPasswordModal}
         onClose={() => setOpenResetPasswordModal(false)}
-        userName={user.name}
-        userEmail={user.email}
+        userName={userData?.name}
+        userEmail={userData?.email}
         onConfirm={(selectedEmail) => {
           console.log(`Resetting password for ${selectedEmail}`);
         }}
@@ -609,14 +589,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
       <SuspendUserModal
         open={openSuspendModal}
         onClose={() => setOpenSuspendModal(false)}
-        userName={user.name}
+        userName={userData?.name}
         onConfirm={handleConfirmSuspend}
-      />
+      /> */}
 
       <AddEditUser
         open={openEditModal}
         onClose={handleCloseEditModal}
-        userId={user.id}
+        userId={userData?.id}
       />
     </>
   );
