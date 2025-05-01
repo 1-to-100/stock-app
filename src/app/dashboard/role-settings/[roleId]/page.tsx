@@ -19,7 +19,9 @@ import {
   Breadcrumbs,
   Checkbox,
   CircularProgress,
+  ColorPaletteProp,
   Stack,
+  VariantProp,
 } from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
@@ -392,6 +394,26 @@ const SystemAdminSettings: React.FC = () => {
     marginRight: "14px",
   };
 
+  const avatarColors: ColorPaletteProp[] = [
+    "primary",
+    "neutral",
+    "danger",
+    "warning",
+    "success",
+  ];
+
+  const getAvatarProps = (name: string) => {
+    const hash = Array.from(name).reduce(
+      (acc: number, char: string) => acc + char.charCodeAt(0),
+      0
+    );
+    const colorIndex = hash % avatarColors.length;
+    return {
+      color: avatarColors[colorIndex],
+      variant: "soft" as VariantProp,
+    };
+  };
+
   if (roleError || error) {
     return <Typography>Error: {(roleError || error)?.message}</Typography>;
   }
@@ -678,7 +700,15 @@ const SystemAdminSettings: React.FC = () => {
                               sx={{ width: 28, height: 28 }}
                             />
                           ) : (
-                            <Avatar sx={{ width: 28, height: 28 }}>
+                            <Avatar
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                              }}
+                              {...getAvatarProps(user.name)}
+                            >
                               {user.name
                                 .split(" ")
                                 .map((n) => n[0])
@@ -894,7 +924,15 @@ const SystemAdminSettings: React.FC = () => {
                             sx={{ width: 48, height: 48 }}
                           />
                         ) : (
-                          <Avatar sx={{ width: 48, height: 48 }}>
+                          <Avatar
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              fontWeight: "bold",
+                              fontSize: "16px",
+                            }}
+                            {...getAvatarProps(user.name)}
+                          >
                             {user.name
                               .split(" ")
                               .map((n) => n[0])

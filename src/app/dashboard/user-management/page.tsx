@@ -29,7 +29,7 @@ import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
-import UserManagementFilter from "@/components/dashboard/filter";
+import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
@@ -38,6 +38,7 @@ import { getRoles } from "../../../lib/api/roles";
 import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
+import { ColorPaletteProp, VariantProp } from "@mui/joy";
 
 interface HttpError extends Error {
   response?: {
@@ -48,7 +49,6 @@ interface HttpError extends Error {
 const metadata = {
   title: `User Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
-
 
 export default function Page(): React.JSX.Element {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -68,9 +68,8 @@ export default function Page(): React.JSX.Element {
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
   const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] = useState<ApiUser | null>(
-    null
-  );
+  const [userToResetPassword, setUserToResetPassword] =
+    useState<ApiUser | null>(null);
   const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,6 +83,7 @@ export default function Page(): React.JSX.Element {
     customerId: [],
     roleId: [],
   });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const rowsPerPage = 10;
 
@@ -137,7 +137,8 @@ export default function Page(): React.JSX.Element {
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
-        customerId: filters.customerId.length > 0 ? filters.customerId : undefined,
+        customerId:
+          filters.customerId.length > 0 ? filters.customerId : undefined,
         roleId: filters.roleId.length > 0 ? filters.roleId : undefined,
       });
       return {
@@ -184,6 +185,15 @@ export default function Page(): React.JSX.Element {
     } else {
       setSelectedRows([]);
     }
+  };
+
+  const handleCloseFilter = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleOpenFilter = () => {
+    setIsFilterOpen(true);
+    handleClosePopover();
   };
 
   const handleDelete = () => {
@@ -268,6 +278,7 @@ export default function Page(): React.JSX.Element {
       const transformedUser = transformUser(userData);
       setSelectedUser(transformedUser);
       setPopoverAnchorEl(targetElement);
+      handleCloseFilter();
     } catch (err) {
       // Handle error
     }
@@ -355,32 +366,52 @@ export default function Page(): React.JSX.Element {
     marginRight: "14px",
   };
 
+  const avatarColors: ColorPaletteProp[] = [
+    "primary",
+    "neutral",
+    "danger",
+    "warning",
+    "success",
+  ];
+
+  const getAvatarProps = (name: string) => {
+    const hash = Array.from(name).reduce(
+      (acc: number, char: string) => acc + char.charCodeAt(0),
+      0
+    );
+    const colorIndex = hash % avatarColors.length;
+    return {
+      color: avatarColors[colorIndex],
+      variant: "soft" as VariantProp,
+    };
+  };
+
   if (error) {
     const httpError = error as HttpError;
     if (httpError.response?.status === 403) {
       return (
         <Box sx={{ textAlign: "center", mt: 20 }}>
-        <Typography
-          sx={{
-            fontSize: "24px",
-            fontWeight: "600",
-            color: "var(--joy-palette-text-primary)",
-          }}
-        >
-          Access Denied
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "300",
-            color: "var(--joy-palette-text-secondary)",
-            mt: 1,
-          }}
-        >
-          You do not have the required permissions to view this page. <br />{" "}
-          Please contact your administrator if you believe this is a mistake.
-        </Typography>
-      </Box>
+          <Typography
+            sx={{
+              fontSize: "24px",
+              fontWeight: "600",
+              color: "var(--joy-palette-text-primary)",
+            }}
+          >
+            Access Denied
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: "300",
+              color: "var(--joy-palette-text-secondary)",
+              mt: 1,
+            }}
+          >
+            You do not have the required permissions to view this page. <br />{" "}
+            Please contact your administrator if you believe this is a mistake.
+          </Typography>
+        </Box>
       );
     }
   }
@@ -449,7 +480,13 @@ export default function Page(): React.JSX.Element {
                 </Box>
               </>
             ) : null}
-            <UserManagementFilter users={users} onFilter={handleFilter} />
+            <Filter
+              users={users}
+              onFilter={handleFilter}
+              onClose={handleCloseFilter}
+              open={isFilterOpen}
+              onOpen={handleOpenFilter}
+            />
             <Button
               variant="solid"
               color="primary"
@@ -637,14 +674,20 @@ export default function Page(): React.JSX.Element {
                               spacing={1}
                               sx={{ alignItems: "center" }}
                             >
-                              {user.avatar ? (
-                                <Avatar
-                                  src={user.avatar}
-                                  sx={{ width: 28, height: 28 }}
-                                />
-                              ) : (
-                                <Avatar sx={{ width: 28, height: 28 }} />
-                              )}
+                              <Avatar
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  fontWeight: "bold",
+                                  fontSize: "13px",
+                                }}
+                                {...getAvatarProps(user.name)}
+                              >
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </Avatar>
                               <Typography sx={{ wordBreak: "break-all" }}>
                                 {user.name.slice(0, 85)}
                               </Typography>

@@ -672,12 +672,20 @@ const Customer: React.FC = () => {
                               sx={{ width: 28, height: 28 }}
                             />
                           ) : (
-                            <Avatar sx={{ width: 28, height: 28 }}>
-                              {user.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </Avatar>
+                            <Avatar
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            fontWeight: "bold",
+                            fontSize: "13px",
+                          }}
+                          {...getAvatarProps(user.name)}
+                        >
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </Avatar>
                           )}
                         </td>
                         <td>
@@ -892,7 +900,10 @@ const Customer: React.FC = () => {
                           }}
                           {...getAvatarProps(user.name)}
                         >
-                          {user.name.slice(0, 2).toUpperCase()}
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </Avatar>
 
                         <Box

@@ -71,6 +71,7 @@ export default function Page(): React.JSX.Element {
     subscriptionId: [],
     statusId: [],
   });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const router = useRouter();
   const rowsPerPage = 10;
@@ -94,7 +95,10 @@ export default function Page(): React.JSX.Element {
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         managerId: filters.managerId.length > 0 ? filters.managerId : undefined,
-        subscriptionId: filters.subscriptionId.length > 0 ? filters.subscriptionId : undefined,
+        subscriptionId:
+          filters.subscriptionId.length > 0
+            ? filters.subscriptionId
+            : undefined,
         statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
       });
       return {
@@ -167,15 +171,13 @@ export default function Page(): React.JSX.Element {
 
   const confirmDelete = async () => {
     try {
-      await Promise.all(
-        rowsToDelete.map((id) => deleteCustomer(id))
-      );
-      
+      await Promise.all(rowsToDelete.map((id) => deleteCustomer(id)));
+
       setOpenDeleteModal(false);
       setRowsToDelete([]);
       setSelectedRows([]);
     } catch (error) {
-      console.error('Failed to delete customers:', error);
+      console.error("Failed to delete customers:", error);
     }
   };
 
@@ -193,6 +195,14 @@ export default function Page(): React.JSX.Element {
     setMenuRowIndex(null);
   };
 
+  const handleCloseFilter = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleOpenFilter = () => {
+    setIsFilterOpen(true);
+  };
+
   const handleOpenDetail = async (
     event: React.MouseEvent<HTMLElement>,
     customerId: number
@@ -203,11 +213,13 @@ export default function Page(): React.JSX.Element {
       paths.dashboard.customerManagement.details(customerId.toString())
     );
     handleMenuClose();
+    handleCloseFilter();
   };
 
   const handleEdit = async (userId: number) => {
     try {
       setCustomerToEditId(userId);
+      handleCloseFilter();
       setOpenEditCustomerModal(true);
     } catch (err) {
       // Handle error
@@ -216,6 +228,7 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleAddUser = () => {
+    handleCloseFilter();
     setopenAddCustomerModal(true);
     handleMenuClose();
   };
@@ -359,7 +372,13 @@ export default function Page(): React.JSX.Element {
                 </Box>
               </>
             ) : null}
-            <Filter customers={customers} onFilterCustomers={handleFilter} />
+            <Filter
+              customers={customers}
+              onFilterCustomers={handleFilter}
+              onClose={handleCloseFilter}
+              open={isFilterOpen}
+              onOpen={handleOpenFilter}
+            />
             <Button
               variant="solid"
               color="primary"
@@ -588,7 +607,8 @@ export default function Page(): React.JSX.Element {
                             >
                               {typeof customer.manager?.name === "string"
                                 ? customer.manager?.name.slice(0, 75)
-                                : customer.manager?.name} <br />
+                                : customer.manager?.name}{" "}
+                              <br />
                               {typeof customer.manager?.email === "string"
                                 ? customer.manager?.email.slice(0, 75)
                                 : customer.manager?.email}
@@ -703,16 +723,16 @@ export default function Page(): React.JSX.Element {
 
         {(customers.length > 0 || isLoading) && (
           <Box
-            // sx={{
-            //   position: "fixed",
-            //   bottom: "30px",
-            //   left: 0,
-            //   right: 0,
-            //   zIndex: 1000,
-            //   padding: "12px 24px",
-            //   display: "flex",
-            //   justifyContent: "center",
-            // }}
+          // sx={{
+          //   position: "fixed",
+          //   bottom: "30px",
+          //   left: 0,
+          //   right: 0,
+          //   zIndex: 1000,
+          //   padding: "12px 24px",
+          //   display: "flex",
+          //   justifyContent: "center",
+          // }}
           >
             <Pagination
               totalPages={totalPages}

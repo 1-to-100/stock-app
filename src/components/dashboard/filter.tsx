@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -22,6 +21,9 @@ import { getStatuses } from "@/lib/api/users";
 interface FilterProps {
   users?: ApiUser[];
   customers?: Customer[];
+  onClose?: () => void;
+  open?: boolean;
+  onOpen?: () => void;
   onFilter?: (filters: {
     statusId: string[];
     customerId: number[];
@@ -34,14 +36,23 @@ interface FilterProps {
   }) => void;
 }
 
-const Filter = ({ users, customers, onFilter, onFilterCustomers }: FilterProps) => {
-  const [open, setOpen] = useState(false);
+const Filter = ({
+  users,
+  customers,
+  onFilter,
+  onFilterCustomers,
+  onClose,
+  open = false,
+  onOpen,
+}: FilterProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<number[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>([]);
-  const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<number[]>([]);
+  const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<
+    number[]
+  >([]);
   const [activeCategory, setActiveCategory] = useState<string | null>("Status");
 
   const { data: customersSelect, isLoading: isCustomersLoading } = useQuery({
@@ -76,13 +87,17 @@ const Filter = ({ users, customers, onFilter, onFilterCustomers }: FilterProps) 
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
-    setOpen(true);
+    if (onOpen) {
+      onOpen();
+    }
   };
 
   const handleClose = () => {
-    setOpen(false);
     setAnchorEl(null);
     setActiveCategory("Status");
+    if (onClose) {
+      onClose();
+    }
   };
 
   const handleCategoryClick = (category: string) => {
@@ -202,7 +217,9 @@ const Filter = ({ users, customers, onFilter, onFilterCustomers }: FilterProps) 
         }}
       >
         {totalFiltersApplied > 0
-          ? `${totalFiltersApplied} filter${totalFiltersApplied !== 1 ? "s" : ""} apply`
+          ? `${totalFiltersApplied} filter${
+              totalFiltersApplied !== 1 ? "s" : ""
+            } apply`
           : "Filter"}
       </Button>
 
@@ -549,8 +566,12 @@ const Filter = ({ users, customers, onFilter, onFilterCustomers }: FilterProps) 
                           }}
                         >
                           <Checkbox
-                            checked={selectedSubscriptionIds.includes(subscription.id)}
-                            onChange={() => handleSubscriptionChange(subscription.id)}
+                            checked={selectedSubscriptionIds.includes(
+                              subscription.id
+                            )}
+                            onChange={() =>
+                              handleSubscriptionChange(subscription.id)
+                            }
                           />
                           <Typography
                             level="body-sm"
