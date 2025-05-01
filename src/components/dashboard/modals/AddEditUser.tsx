@@ -225,9 +225,9 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       newErrors.email = emailError;
     }
     
-    if (!formData.customer) {
-      newErrors.customer = "Customer is required";
-    }
+    // if (!formData.customer) {
+    //   newErrors.customer = "Customer is required";
+    // }
    
     if (!formData.role) {
       newErrors.role = "Role is required";
