@@ -23,9 +23,9 @@ import {
 } from "../../../lib/api/customers";
 import { getManagers } from "@/lib/api/managers";
 import { getSubscriptions } from "../../../lib/api/customers";
-import { Customer } from "@/contexts/auth/types";
+import { ApiUser, Customer } from "@/contexts/auth/types";
 import { toast } from "@/components/core/toaster";
-import { getStatuses } from "@/lib/api/users";
+import { getStatuses, getUsers, GetUsersParams } from "@/lib/api/users";
 
 interface HttpError {
   response?: {
@@ -47,6 +47,7 @@ interface FormErrors {
   managerId?: string;
   subscriptionId?: string;
   status?: string;
+  ownerId?: string;
 }
 
 export default function AddEditCustomer({
@@ -60,12 +61,14 @@ export default function AddEditCustomer({
     managerId: number | null;
     subscriptionId: number | null;
     status: string;
+    ownerId: number | null;
   }>({
     name: "",
     email: "",
     managerId: null,
     subscriptionId: null,
     status: "",
+    ownerId: null,
   });
 
   const [isActive, setIsActive] = useState<boolean>(true);
@@ -101,6 +104,15 @@ export default function AddEditCustomer({
     enabled: open,
   });
 
+  const { data: users, isLoading: isUsersLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: async ({ queryKey }) => {
+      const params: GetUsersParams = {};
+      return getUsers(params);
+    },
+    enabled: open,
+  });
+
   useEffect(() => {
     if (customerId && customerData && open) {
       setFormData({
@@ -110,8 +122,9 @@ export default function AddEditCustomer({
             ? customerData.email
             : customerData.email[0] || "",
         subscriptionId: customerData.subscriptionId ?? null,
-        managerId: customerData.manager.id ?? null,
+        managerId: customerData.manager?.id ?? null,
         status: customerData.status || "",
+        ownerId: customerData.ownerId ?? null,
       });
       setErrors(null);
       setEmailWarnings([]);
@@ -122,6 +135,7 @@ export default function AddEditCustomer({
         managerId: null,
         subscriptionId: null,
         status: "",
+        ownerId: null,
       });
       setIsActive(false);
       setErrors(null);
@@ -233,6 +247,10 @@ export default function AddEditCustomer({
       newErrors.managerId = "Manager is required";
     }
 
+    if (!formData.ownerId) {
+      newErrors.ownerId = "Owner is required";
+    }
+
     if (!formData.subscriptionId) {
       newErrors.subscriptionId = "Subscription is required";
     }
@@ -269,6 +287,7 @@ export default function AddEditCustomer({
         name: formData.name,
         status: formData.status,
         managerId: formData.managerId ?? undefined,
+        ownerId: formData.ownerId ?? undefined,
         subscriptionId: formData.subscriptionId ?? undefined,
       };
 
@@ -509,6 +528,52 @@ export default function AddEditCustomer({
                   }}
                 >
                   {errors.managerId}
+                </FormHelperText>
+              )}
+            </Stack>
+          </Stack>
+
+          <Stack direction="row" spacing={2}>
+            <Stack sx={{ flex: 1 }}>
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "14px",
+                  color: "var(--joy-palette-text-primary)",
+                  mb: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Customer admin
+              </Typography>
+              <Select
+                placeholder="Select user"
+                value={formData.ownerId}
+                onChange={(e, newValue) =>
+                  handleInputChange("ownerId", newValue)
+                }
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  border: errors?.ownerId
+                    ? "1px solid var(--joy-palette-danger-500)"
+                    : undefined,
+                }}
+              >
+                {users?.data?.map((user: ApiUser) => (
+                  <Option key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName}
+                  </Option>
+                ))}
+              </Select>
+              {errors?.ownerId && (
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: "12px",
+                  }}
+                >
+                  {errors.ownerId}
                 </FormHelperText>
               )}
             </Stack>

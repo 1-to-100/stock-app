@@ -32,6 +32,7 @@ interface CreateCustomerPayload {
   email: string;
   subscriptionId?: number;
   managerId?: number;
+  ownerId?: number;
 }
 
 interface UpdateCustomerPayload extends Partial<CreateCustomerPayload> {

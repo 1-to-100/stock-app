@@ -17,7 +17,7 @@ interface UpdateUserPayload extends Partial<CreateUserPayload> {
   id: number;
 }
 
-interface GetUsersParams {
+export interface GetUsersParams {
   page?: number;
   perPage?: number;
   search?: string;

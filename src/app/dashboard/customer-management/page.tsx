@@ -292,9 +292,16 @@ export default function Page(): React.JSX.Element {
 
   if (error) {
     const httpError = error as HttpError;
-    if (httpError.response?.status === 403) {
+    let status: number | undefined = httpError.response?.status;
+    
+    if (!status && httpError.message.includes("status:")) {
+      const match = httpError.message.match(/status: (\d+)/);
+      status = match ? parseInt(match[1] ?? "0", 10) : undefined;
+    }
+  
+    if (status === 403) {
       return (
-        <Box sx={{ textAlign: "center", mt: 20 }}>
+        <Box sx={{ textAlign: "center", mt: 35 }}>
           <Typography
             sx={{
               fontSize: "24px",

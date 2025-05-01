@@ -55,6 +55,7 @@ export interface ApiUser {
     email: string,
     subscriptionId: number,
     managerId: number,
+    ownerId: number,
     numberOfUsers?: number,
     status: string,
     subscriptionName: string,

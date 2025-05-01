@@ -108,7 +108,40 @@ export default function Page(): React.JSX.Element {
   }
 
   if (error) {
-    return <Typography>Error loading roles: {error.message}</Typography>;
+    const httpError = error as HttpError;
+    let status: number | undefined = httpError.response?.status;
+    
+    if (!status && httpError.message.includes("status:")) {
+      const match = httpError.message.match(/status: (\d+)/);
+      status = match ? parseInt(match[1] ?? "0", 10) : undefined;
+    }
+  
+    if (status === 403) {
+      return (
+        <Box sx={{ textAlign: "center", mt: 35 }}>
+          <Typography
+            sx={{
+              fontSize: "24px",
+              fontWeight: "600",
+              color: "var(--joy-palette-text-primary)",
+            }}
+          >
+            Access Denied
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: "300",
+              color: "var(--joy-palette-text-secondary)",
+              mt: 1,
+            }}
+          >
+            You do not have the required permissions to view this page. <br />{" "}
+            Please contact your administrator if you believe this is a mistake.
+          </Typography>
+        </Box>
+      );
+    }
   }
 
   return (
