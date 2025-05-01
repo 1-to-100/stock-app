@@ -229,9 +229,9 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     //   newErrors.customer = "Customer is required";
     // }
    
-    if (!formData.role) {
-      newErrors.role = "Role is required";
-    }
+    // if (!formData.role) {
+    //   newErrors.role = "Role is required";
+    // }
    
     const additionalEmailErrors = additionalEmails.map((email) => {
       if (email) {
