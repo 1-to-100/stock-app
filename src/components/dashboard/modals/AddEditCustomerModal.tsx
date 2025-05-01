@@ -247,9 +247,9 @@ export default function AddEditCustomer({
       newErrors.managerId = "Manager is required";
     }
 
-    if (!formData.ownerId) {
-      newErrors.ownerId = "Owner is required";
-    }
+      // if (!formData.ownerId) {
+      //   newErrors.ownerId = "Owner is required";
+      // }
 
     if (!formData.subscriptionId) {
       newErrors.subscriptionId = "Subscription is required";
