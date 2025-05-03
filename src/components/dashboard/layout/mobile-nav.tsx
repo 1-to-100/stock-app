@@ -50,7 +50,8 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
           '--MobileNav-background': 'var(--Layout-bg)',
           '--MobileNav-color': 'var(--joy-palette-common-white)',
           '--NavItem-color': 'var(--joy-palette-neutral-200)',
-          '--NavItem-active-background': 'var(--joy-palette-primary-solidBg)',
+          "--NavItem-active-background":
+          "var(--joy-palette-background-navActiveBg)",
           '--NavItem-active-color': 'var(--joy-palette-common-white)',
           '--NavItem-active-icon-color': 'var(--joy-palette-common-white)',
           '--NavItem-open-color': 'var(--joy-palette-common-white)',
@@ -69,17 +70,17 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
         },
       }}
     >
-      <Stack spacing={3} sx={{ left: 0, p: '16px', position: 'absolute', top: 0, width: '100%', zIndex: 1 }}>
+      <Stack spacing={3} sx={{ left: 0, p: '16px', pl:0, position: 'absolute', top: 0, width: '100%', zIndex: 1 }}>
         <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-            <Logo color="light" height={16} width={77} />
+            <Logo color="light" height={46} width={120} />
           </Box>
           <IconButton
             onClick={onClose}
             sx={{
               bgcolor: 'transparent',
-              color: 'inherit',
-              '&:hover': { bgcolor: 'var(--joy-palette-neutral-800)', color: 'var(--joy-palette-common-white)' },
+              color: 'var(--joy-palette-text-primary)',
+              '&:hover': { bgcolor: 'transparent', opacity: 0.8 },
             }}
             variant="plain"
           >
@@ -98,14 +99,14 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
           '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
-        <WorkspaceSwitch />
+        {/* <WorkspaceSwitch /> */}
         <Box component="nav" sx={{ flex: '1 1 auto' }}>
           {renderNavGroups({ items, onClose, pathname })}
         </Box>
         <NoSsr>
           <ColorSchemeSwitch />
         </NoSsr>
-        <CurrentUser onNavigate={onClose} />
+        {/* <CurrentUser onNavigate={onClose} /> */}
       </Stack>
     </Drawer>
   );
@@ -129,7 +130,7 @@ function renderNavGroups({
         <ListItemContent>
           {curr.title ? (
             <Box sx={{ py: '12px' }}>
-              <Typography fontSize="xs" fontWeight="lg" textColor="neutral.500">
+              <Typography  fontWeight="lg" textColor="neutral.500">
                 {curr.title}
               </Typography>
             </Box>
@@ -237,36 +238,37 @@ function NavItem({
               })}
           sx={{
             alignItems: 'center',
-            borderRadius: 'var(--joy-radius-sm)',
-            color: 'var(--NavItem-color)',
+            borderRadius: "var(--joy-radius-sm)",
+            color: 'var(--joy-palette-text-primary)',
             cursor: 'pointer',
             display: 'flex',
             gap: 1,
             p: '12px',
+            fontWeight: '300',
             textDecoration: 'none',
             ...(disabled && {
               bgcolor: 'var(--NavItem-disabled-background)',
               color: 'var(--NavItem-disabled-color)',
               cursor: 'not-allowed',
             }),
-            ...(active && { bgcolor: 'var(--NavItem-active-background)', color: 'var(--NavItem-active-color)' }),
+            ...(active && { bgcolor: 'var(--NavItem-active-background)', color: 'var(--joy-palette-text-primary)', fontWeight: '500' }),
             ...(open && { color: 'var(--NavItem-open-color)' }),
-            '&:hover': {
-              ...(!active && { bgcolor: 'var(--NavItem-hover-background)', color: 'var(--NavItem-hover-color)' }),
-            },
+            // '&:hover': {
+            //   ...(!active && { bgcolor: 'var(--NavItem-hover-background)', color: 'var(--NavItem-hover-color)' }),
+            // },
           }}
         >
           {Icon ? (
             <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center' }}>
               <Icon
-                fill={active ? 'var(--NavItem-active-icon-color)' : 'var(--NavItem-icon-color)'}
+                fill={active ? 'var(--joy-palette-text-primary)' : 'var(--joy-palette-text-primary)'}
                 fontSize="var(--joy-fontSize-xl)"
-                weight={forceOpen || active ? 'fill' : 'bold'}
+                weight={forceOpen || active ? 'bold' : 'thin'}
               />
             </Box>
           ) : null}
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography component="span" fontSize="sm" fontWeight="md" textColor="inherit">
+            <Typography component="span" fontSize="sm"  textColor="inherit">
               {title}
             </Typography>
           </Box>

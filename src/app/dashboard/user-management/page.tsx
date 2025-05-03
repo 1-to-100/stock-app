@@ -17,18 +17,15 @@ import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVerti
 import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
 import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
-import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
-import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
@@ -54,7 +51,7 @@ export default function Page(): React.JSX.Element {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorPopper] = useState<null | HTMLElement>(null);
   const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
@@ -67,9 +64,6 @@ export default function Page(): React.JSX.Element {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
-  const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] =
-    useState<ApiUser | null>(null);
   const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -252,12 +246,12 @@ export default function Page(): React.JSX.Element {
     index: number
   ) => {
     event.stopPropagation();
-    setAnchorEl(event.currentTarget);
+    setAnchorPopper(event.currentTarget);
     setMenuRowIndex(index);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
+    setAnchorPopper(null);
     setMenuRowIndex(null);
   };
 
@@ -299,15 +293,6 @@ export default function Page(): React.JSX.Element {
     setOpenAddUserModal(true);
     handleMenuClose();
   };
-
-  // const handleResetPassword = (userId: number) => {
-  //   const user = users.find((u) => u.id === userId);
-  //   if (user) {
-  //     setUserToResetPassword(user);
-  //     setOpenResetPasswordModal(true);
-  //   }
-  //   handleMenuClose();
-  // };
 
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
@@ -352,18 +337,14 @@ export default function Page(): React.JSX.Element {
     .filter((name): name is string => name !== undefined);
 
   const menuItemStyle = {
-    padding: "8px 16px",
-    fontSize: "16px",
+    padding: { xs: "6px 12px", sm: "8px 16px" },
+    fontSize: { xs: "12px", sm: "14px" },
     fontWeight: "400",
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
     color: "var(--joy-palette-text-primary)",
     "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
-  };
-
-  const iconStyle = {
-    marginRight: "14px",
   };
 
   const avatarColors: ColorPaletteProp[] = [
@@ -389,18 +370,18 @@ export default function Page(): React.JSX.Element {
   if (error) {
     const httpError = error as HttpError;
     let status: number | undefined = httpError.response?.status;
-    
+
     if (!status && httpError.message.includes("status:")) {
       const match = httpError.message.match(/status: (\d+)/);
       status = match ? parseInt(match[1] ?? "0", 10) : undefined;
     }
-  
+
     if (status === 403) {
       return (
-        <Box sx={{ textAlign: "center", mt: 35 }}>
+        <Box sx={{ textAlign: "center", mt: { xs: 10, sm: 20, md: 35 } }}>
           <Typography
             sx={{
-              fontSize: "24px",
+              fontSize: { xs: "20px", sm: "24px" },
               fontWeight: "600",
               color: "var(--joy-palette-text-primary)",
             }}
@@ -409,13 +390,13 @@ export default function Page(): React.JSX.Element {
           </Typography>
           <Typography
             sx={{
-              fontSize: "14px",
+              fontSize: { xs: "12px", sm: "14px" },
               fontWeight: "300",
               color: "var(--joy-palette-text-secondary)",
               mt: 1,
             }}
           >
-            You do not have the required permissions to view this page. <br />{" "}
+            You do not have the required permissions to view this page. <br />
             Please contact your administrator if you believe this is a mistake.
           </Typography>
         </Box>
@@ -424,50 +405,69 @@ export default function Page(): React.JSX.Element {
   }
 
   return (
-    <Box sx={{ p: "var(--Content-padding)" }}>
-      <SearchInput
-        onSearch={handleSearch}
-        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
-      />
-      <Stack spacing={3}>
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
+      <Box
+        sx={{
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "1.5%", md: "1.5%", lg: "4%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
+        }}
+      >
+        <SearchInput onSearch={handleSearch} />
+      </Box>
+
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
-          direction={{ lg: "row" }}
-          spacing={3}
-          sx={{ alignItems: "flex-start" }}
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
         >
           <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-            <Typography fontSize={{ xs: "xl3", lg: "xl3" }} level="h1">
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
               User Management
             </Typography>
           </Stack>
 
-          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{
+              alignItems: { xs: "stretch", sm: "center" },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             {selectedRows.length > 0 ? (
-              <>
-                <Box
-                  sx={{
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    paddingRight: "16px",
-                    gap: "12px",
-                  }}
-                >
-                  <Typography level="body-sm">
-                    {selectedRows.length} row
-                    {selectedRows.length > 1 ? "s" : ""} selected
-                  </Typography>
+              <Box
+                sx={{
+                  borderRight: { xs: "none", sm: "1px solid #E5E7EB" },
+                  borderBottom: { xs: "1px solid #E5E7EB", sm: "none" },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: { xs: "space-between", sm: "flex-start" },
+                  padding: { xs: "8px 0", sm: "0 16px 0 0" },
+                  gap: { xs: 1, sm: "12px" },
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography level="body-sm">
+                  {selectedRows.length} row{selectedRows.length > 1 ? "s" : ""}{" "}
+                  selected
+                </Typography>
+                <Stack direction="row" spacing={1}>
                   <IconButton
                     onClick={handleDelete}
                     sx={{
                       bgcolor: "#FEE2E2",
                       color: "#EF4444",
                       borderRadius: "50%",
-                      width: 32,
-                      height: 32,
-                      "&:hover": {
-                        bgcolor: "#FECACA",
-                      },
+                      width: { xs: 28, sm: 32 },
+                      height: { xs: 28, sm: 32 },
+                      "&:hover": { bgcolor: "#FECACA" },
                     }}
                   >
                     <TrashIcon fontSize="var(--Icon-fontSize)" />
@@ -478,14 +478,14 @@ export default function Page(): React.JSX.Element {
                       bgcolor: "var(--joy-palette-background-mainBg)",
                       color: "#636B74",
                       borderRadius: "50%",
-                      width: 32,
-                      height: 32,
+                      width: { xs: 28, sm: 32 },
+                      height: { xs: 28, sm: 32 },
                     }}
                   >
                     <ToggleLeft fontSize="var(--Icon-fontSize)" />
                   </IconButton>
-                </Box>
-              </>
+                </Stack>
+              </Box>
             ) : null}
             <Filter
               users={users}
@@ -499,6 +499,10 @@ export default function Page(): React.JSX.Element {
               color="primary"
               onClick={handleAddUser}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
             >
               Add user
             </Button>
@@ -511,25 +515,43 @@ export default function Page(): React.JSX.Element {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "50vh",
+              height: { xs: "40vh", sm: "50vh" },
             }}
           >
-            <CircularProgress />
+            <CircularProgress size="lg" />
           </Box>
         ) : (
           <>
-            <Box
-              sx={{
-                justifyContent: "space-between",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Box>
-                <Table aria-label="user management table">
+            <Box>
+              <Box
+                sx={{
+                  overflowX: "auto",
+                  width: "100%",
+                  WebkitOverflowScrolling: "touch",
+                  scrollbarWidth: { xs: "thin", sm: "auto" },
+                  "&::-webkit-scrollbar": {
+                    height: { xs: "8px", sm: "12px" },
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "var(--joy-palette-divider)",
+                    borderRadius: "4px",
+                  },
+                }}
+              >
+                <Table
+                  aria-label="user management table"
+                  sx={{
+                    minWidth: "800px",
+                    tableLayout: "fixed",
+                    "& th, & td": {
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                    },
+                  }}
+                >
                   <thead>
                     <tr>
-                      <th style={{ width: "5%" }}>
+                      <th style={{ width: "60px" }}>
                         <Checkbox
                           checked={
                             hasResults && selectedRows.length === users.length
@@ -556,9 +578,7 @@ export default function Page(): React.JSX.Element {
                               opacity: 0,
                               transition: "opacity 0.2s ease-in-out",
                             },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
+                            "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
                           User name
@@ -582,9 +602,7 @@ export default function Page(): React.JSX.Element {
                               opacity: 0,
                               transition: "opacity 0.2s ease-in-out",
                             },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
+                            "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
                           Email
@@ -608,9 +626,7 @@ export default function Page(): React.JSX.Element {
                               opacity: 0,
                               transition: "opacity 0.2s ease-in-out",
                             },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
+                            "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
                           Customer
@@ -622,7 +638,7 @@ export default function Page(): React.JSX.Element {
                         </Box>
                       </th>
                       <th
-                        style={{ width: "20%" }}
+                        style={{ width: "15%" }}
                         onClick={() => handleSort("role")}
                       >
                         <Box
@@ -634,9 +650,7 @@ export default function Page(): React.JSX.Element {
                               opacity: 0,
                               transition: "opacity 0.2s ease-in-out",
                             },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
+                            "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
                           Role
@@ -647,14 +661,14 @@ export default function Page(): React.JSX.Element {
                           />
                         </Box>
                       </th>
-                      <th style={{ width: "5%" }}></th>
+                      <th style={{ width: "60px" }}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={6}
                           style={{ textAlign: "center", padding: "20px" }}
                         >
                           <Typography level="body-md" color="neutral">
@@ -683,10 +697,10 @@ export default function Page(): React.JSX.Element {
                             >
                               <Avatar
                                 sx={{
-                                  width: 28,
-                                  height: 28,
+                                  width: { xs: 24, sm: 28 },
+                                  height: { xs: 24, sm: 28 },
                                   fontWeight: "bold",
-                                  fontSize: "13px",
+                                  fontSize: { xs: "12px", sm: "13px" },
                                 }}
                                 {...getAvatarProps(user.name)}
                               >
@@ -695,7 +709,12 @@ export default function Page(): React.JSX.Element {
                                   .map((n) => n[0])
                                   .join("")}
                               </Avatar>
-                              <Typography sx={{ wordBreak: "break-all" }}>
+                              <Typography
+                                sx={{
+                                  wordBreak: "break-all",
+                                  fontSize: { xs: "12px", sm: "14px" },
+                                }}
+                              >
                                 {user.name.slice(0, 85)}
                               </Typography>
                               <Tooltip
@@ -733,6 +752,7 @@ export default function Page(): React.JSX.Element {
                                 fontWeight: 400,
                                 color: "var(--joy-palette-text-secondary)",
                                 wordBreak: "break-all",
+                                fontSize: { xs: "12px", sm: "14px" },
                               }}
                             >
                               {typeof user.email === "string"
@@ -757,13 +777,11 @@ export default function Page(): React.JSX.Element {
                                     }}
                                     sx={{
                                       position: "absolute",
-                                      right: "-30px",
+                                      right: { xs: "-24px", sm: "-30px" },
                                       top: "50%",
                                       transform: "translateY(-50%)",
                                       bgcolor: "transparent",
-                                      "&:hover": {
-                                        bgcolor: "transparent",
-                                      },
+                                      "&:hover": { bgcolor: "transparent" },
                                     }}
                                   >
                                     <CopyIcon fontSize="var(--Icon-fontSize)" />
@@ -781,7 +799,7 @@ export default function Page(): React.JSX.Element {
                                     color: "#16A34A",
                                     padding: "4px 6px",
                                     borderRadius: "10px",
-                                    fontSize: "12px",
+                                    fontSize: { xs: "10px", sm: "12px" },
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "4px",
@@ -806,21 +824,23 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            {user.customer?.name}
+                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
+                              {user.customer?.name}
+                            </Box>
                           </td>
                           <td
                             style={{
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            {user.role?.name}
+                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
+                              {user.role?.name}
+                            </Box>
                           </td>
                           <td>
                             <IconButton
                               size="sm"
-                              onClick={(event) => {
-                                handleMenuOpen(event, index);
-                              }}
+                              onClick={(event) => handleMenuOpen(event, index)}
                             >
                               <DotsThreeVertical
                                 weight="bold"
@@ -847,9 +867,12 @@ export default function Page(): React.JSX.Element {
                                   event.preventDefault();
                                   handleOpenDetail(event, user.id);
                                 }}
-                                sx={menuItemStyle}
+                                sx={{
+                                  ...menuItemStyle,
+                                  gap: { xs: "10px", sm: "14px" },
+                                }}
                               >
-                                <EyeIcon fontSize="20px" style={iconStyle} />
+                                <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
                               <Box
@@ -857,11 +880,40 @@ export default function Page(): React.JSX.Element {
                                   event.preventDefault();
                                   handleEdit(user.id);
                                 }}
-                                sx={menuItemStyle}
+                                sx={{
+                                  ...menuItemStyle,
+                                  gap: { xs: "10px", sm: "14px" },
+                                }}
                               >
-                                <PencilIcon fontSize="20px" style={iconStyle} />
+                                <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
+                              {/* <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleDeleteUser(user.id);
+                                }}
+                                sx={{
+                                  ...menuItemStyle,
+                                  gap: { xs: "10px", sm: "14px" },
+                                }}
+                              >
+                                <TrashIcon fontSize="20px" />
+                                Delete
+                              </Box> */}
+                              {/* <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleDeactivate(user.id);
+                                }}
+                                sx={{
+                                  ...menuItemStyle,
+                                  gap: { xs: "10px", sm: "14px" },
+                                }}
+                              >
+                                <ToggleLeft fontSize="20px" />
+                                Deactivate
+                              </Box> */}
                             </Popper>
                           </td>
                         </tr>
@@ -870,6 +922,7 @@ export default function Page(): React.JSX.Element {
                   </tbody>
                 </Table>
               </Box>
+
               <Pagination
                 totalPages={totalPages}
                 currentPage={currentPage}
@@ -910,16 +963,6 @@ export default function Page(): React.JSX.Element {
       />
 
       <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
-
-      <ResetPasswordUser
-        open={openResetPasswordModal}
-        onClose={() => setOpenResetPasswordModal(false)}
-        userName={userToResetPassword?.name || ""}
-        userEmail={userToResetPassword?.email || ""}
-        onConfirm={(selectedEmail) => {
-          console.log(`Resetting password for ${selectedEmail}`);
-        }}
-      />
     </Box>
   );
 }

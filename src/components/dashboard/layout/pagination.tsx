@@ -1,5 +1,6 @@
 import * as React from "react";
 import Button from "@mui/joy/Button";
+import { Box } from "@mui/joy";
 import { useState } from "react";
 import { CaretLineLeft as CaretLineLeft } from "@phosphor-icons/react/dist/ssr/CaretLineLeft";
 import { ArrowLeft as ArrowLeft } from "@phosphor-icons/react/dist/ssr/ArrowLeft";
@@ -44,8 +45,8 @@ export default function Pagination({
  
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const maxPagesToShow = 5;
-    let startPage = Math.max(1, currentPage - 2);
+    const maxPagesToShow = window.innerWidth < 600 ? 3 : 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
   
     if (endPage - startPage + 1 < maxPagesToShow) {
@@ -69,42 +70,50 @@ export default function Pagination({
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "40px", gap: "16px" }}>
+    <div style={{ 
+      display: "flex", 
+      flexWrap: "wrap", 
+      justifyContent: "center", 
+      marginTop: "40px", 
+      gap: "8px",
+      padding: "0 8px"
+    }}>
       <Button
         variant="outlined"
         onClick={handleFirstPage}
         disabled={disabled || currentPage === 1}
         sx={{
           borderRadius: "20px",
-          padding: "8px 16px",
+          padding: { xs: "6px 12px", sm: "8px 16px" },
           minWidth: "auto",
-          height: "40px",
-          display: "flex",
+          height: { xs: "32px", sm: "40px" },
+          display: { xs: "none", sm: "flex" },
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
+          fontSize: { xs: "14px", sm: "16px" }
         }}
       >
         <CaretLineLeft />
         <span>First</span>
       </Button>
 
-     
       <Button
         variant="outlined"
         onClick={handlePreviousPage}
         disabled={disabled || currentPage === 1}
         sx={{
           borderRadius: "20px",
-          padding: "8px 16px",
+          padding: { xs: "6px 12px", sm: "8px 16px" },
           minWidth: "auto",
-          height: "40px",
+          height: { xs: "32px", sm: "40px" },
           display: "flex",
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
+          fontSize: { xs: "14px", sm: "16px" }
         }}
       >
         <ArrowLeft />
@@ -119,27 +128,29 @@ export default function Pagination({
             onClick={() => handlePageClick(page)}
             disabled={disabled}
             sx={{
-              borderRadius: "50%", 
-              minWidth: "40px",
-              height: "40px",
+              borderRadius: "50%",
+              minWidth: { xs: "32px", sm: "40px" },
+              height: { xs: "32px", sm: "40px" },
+              fontSize: { xs: "14px", sm: "16px" }
             }}
           >
             {page}
           </Button>
         ) : (
-          <span
+          <Box
             key={index}
-            style={{
+            sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "40px",
-              height: "40px",
+              width: { xs: "32px", sm: "40px" },
+              height: { xs: "32px", sm: "40px" },
               color: disabled ? "var(--joy-palette-text-disabled)" : "gray",
+              fontSize: { xs: "14px", sm: "16px" }
             }}
           >
             {page}
-          </span>
+          </Box>
         )
       )}
      
@@ -149,14 +160,15 @@ export default function Pagination({
         disabled={disabled || currentPage === totalPages}
         sx={{
           borderRadius: "20px",
-          padding: "8px 16px",
+          padding: { xs: "6px 12px", sm: "8px 16px" },
           minWidth: "auto",
-          height: "40px",
+          height: { xs: "32px", sm: "40px" },
           display: "flex",
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
+          fontSize: { xs: "14px", sm: "16px" }
         }}
       >
         <span>Next</span>
@@ -169,14 +181,15 @@ export default function Pagination({
         disabled={disabled || currentPage === totalPages}
         sx={{
           borderRadius: "20px",
-          padding: "8px 16px",
+          padding: { xs: "6px 12px", sm: "8px 16px" },
           minWidth: "auto",
-          height: "40px",
-          display: "flex",
+          height: { xs: "32px", sm: "40px" },
+          display: { xs: "none", sm: "flex" },
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
+          fontSize: { xs: "14px", sm: "16px" }
         }}
       >
         <span>Last</span>

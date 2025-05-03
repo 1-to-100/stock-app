@@ -177,7 +177,6 @@ const Filter = ({
     if (customers && onFilterCustomers) {
       onFilterCustomers({ managerId: [], subscriptionId: [], statusId: [] });
     }
-    // handleClose();
   };
 
   const totalFiltersApplied =
@@ -213,7 +212,9 @@ const Filter = ({
             totalFiltersApplied > 0
               ? "#3D37DD"
               : "var(--joy-palette-text-primary)",
-          padding: "7px 14px",
+          padding: { xs: "6px 12px", sm: "7px 14px" },
+          fontSize: { xs: "12px", sm: "14px" },
+          width: { xs: "100%", sm: "auto" },
         }}
       >
         {totalFiltersApplied > 0
@@ -227,26 +228,35 @@ const Filter = ({
         <Sheet
           sx={{
             position: "absolute",
-            top: anchorEl.getBoundingClientRect().bottom + 5,
-            right: "9.5vw",
-            width: "550px",
+            top: {
+              xs: anchorEl.getBoundingClientRect().bottom + 5,
+              sm: anchorEl.getBoundingClientRect().bottom + 10,
+            },
+            left: { xs: "10px", sm: "auto" },
+            right: { xs: "10px", sm: "9.5vw" },
+            width: { xs: "calc(100% - 20px)", sm: "550px", md: "600px" },
+            maxHeight: { xs: "70vh", sm: "80vh" },
+            overflowY: "auto",
             borderRadius: "8px",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
             border: "1px solid var(--joy-palette-divider)",
             zIndex: 1300,
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             display: "flex",
             flexDirection: "column",
           }}
         >
-          <Stack direction="row" spacing={1}>
-            <Box sx={{ width: "58%", pr: 1 }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 2, sm: 1 }}
+          >
+            <Box sx={{ width: { xs: "100%", sm: "58%" }, pr: { sm: 1 } }}>
               <Typography
                 level="body-sm"
                 sx={{
                   color: "var(--joy-palette-text-secondary)",
-                  fontSize: "12px",
-                  mb: 1.5,
+                  fontSize: { xs: "10px", sm: "12px" },
+                  mb: { xs: 1, sm: 1.5 },
                 }}
               >
                 {totalFiltersApplied} filter
@@ -255,8 +265,8 @@ const Filter = ({
               <Stack
                 spacing={1}
                 sx={{
-                  borderRight: "1px solid var(--joy-palette-divider)",
-                  paddingRight: "20px",
+                  borderRight: { sm: "1px solid var(--joy-palette-divider)" },
+                  paddingRight: { sm: "20px" },
                 }}
               >
                 <Box
@@ -264,7 +274,7 @@ const Filter = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    p: "6px 12px",
+                    p: { xs: "4px 8px", sm: "6px 12px" },
                     bgcolor:
                       activeCategory === "Status"
                         ? "var(--joy-palette-background-mainBg)"
@@ -286,7 +296,7 @@ const Filter = ({
                         activeCategory === "Status"
                           ? "var(--joy-palette-text-primary)"
                           : "#32383E",
-                      fontSize: "16px",
+                      fontSize: { xs: "14px", sm: "16px" },
                     }}
                   >
                     Status
@@ -299,7 +309,7 @@ const Filter = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      p: "6px 12px",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Customer"
                           ? "var(--joy-palette-background-mainBg)"
@@ -321,7 +331,7 @@ const Filter = ({
                           activeCategory === "Customer"
                             ? "var(--joy-palette-text-primary)"
                             : "#32383E",
-                        fontSize: "16px",
+                        fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >
                       Customer
@@ -335,7 +345,7 @@ const Filter = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      p: "6px 12px",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Role"
                           ? "var(--joy-palette-background-mainBg)"
@@ -357,7 +367,7 @@ const Filter = ({
                           activeCategory === "Role"
                             ? "var(--joy-palette-text-primary)"
                             : "#32383E",
-                        fontSize: "16px",
+                        fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >
                       Role
@@ -371,7 +381,7 @@ const Filter = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      p: "6px 12px",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Manager"
                           ? "var(--joy-palette-background-mainBg)"
@@ -393,7 +403,7 @@ const Filter = ({
                           activeCategory === "Manager"
                             ? "var(--joy-palette-text-primary)"
                             : "#32383E",
-                        fontSize: "16px",
+                        fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >
                       Manager
@@ -407,7 +417,7 @@ const Filter = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      p: "6px 12px",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Subscription"
                           ? "var(--joy-palette-background-mainBg)"
@@ -429,7 +439,7 @@ const Filter = ({
                           activeCategory === "Subscription"
                             ? "var(--joy-palette-text-primary)"
                             : "#32383E",
-                        fontSize: "16px",
+                        fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >
                       Subscription
@@ -440,15 +450,15 @@ const Filter = ({
               </Stack>
             </Box>
 
-            <Box sx={{ width: "42%", pl: 1 }}>
+            <Box sx={{ width: { xs: "100%", sm: "42%" }, pl: { sm: 1 } }}>
               {activeCategory && (
                 <>
                   <Typography
                     level="body-md"
                     fontWeight="600"
                     sx={{
-                      fontSize: "12px",
-                      mb: 1.5,
+                      fontSize: { xs: "10px", sm: "12px" },
+                      mb: { xs: 1, sm: 1.5 },
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
@@ -468,11 +478,14 @@ const Filter = ({
                           <Checkbox
                             checked={selectedStatuses.includes(status)}
                             onChange={() => handleStatusChange(status)}
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
                           />
                           <Typography
                             level="body-sm"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: { xs: "12px", sm: "14px" },
                               color: "var(--joy-palette-text-primary)",
                             }}
                           >
@@ -493,11 +506,14 @@ const Filter = ({
                           <Checkbox
                             checked={selectedCustomerIds.includes(customer.id)}
                             onChange={() => handleCustomerChange(customer.id)}
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
                           />
                           <Typography
                             level="body-sm"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: { xs: "12px", sm: "14px" },
                               color: "var(--joy-palette-text-primary)",
                             }}
                           >
@@ -518,11 +534,14 @@ const Filter = ({
                           <Checkbox
                             checked={selectedRoleIds.includes(role.id)}
                             onChange={() => handleRoleChange(role.id)}
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
                           />
                           <Typography
                             level="body-sm"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: { xs: "12px", sm: "14px" },
                               color: "var(--joy-palette-text-primary)",
                             }}
                           >
@@ -543,11 +562,14 @@ const Filter = ({
                           <Checkbox
                             checked={selectedManagerIds.includes(manager.id)}
                             onChange={() => handleManagerChange(manager.id)}
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
                           />
                           <Typography
                             level="body-sm"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: { xs: "12px", sm: "14px" },
                               color: "var(--joy-palette-text-primary)",
                             }}
                           >
@@ -572,11 +594,14 @@ const Filter = ({
                             onChange={() =>
                               handleSubscriptionChange(subscription.id)
                             }
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
                           />
                           <Typography
                             level="body-sm"
                             sx={{
-                              fontSize: "14px",
+                              fontSize: { xs: "12px", sm: "14px" },
                               color: "var(--joy-palette-text-primary)",
                             }}
                           >
@@ -591,19 +616,40 @@ const Filter = ({
           </Stack>
 
           <Stack
-            direction="row"
-            spacing={1}
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 1 }}
             sx={{
-              justifyContent: "space-between",
-              alignItems: "center",
-              mt: 3,
+              justifyContent: { xs: "center", sm: "space-between" },
+              alignItems: { xs: "center", sm: "center" },
+              mt: { xs: 2, sm: 3 },
             }}
           >
-            <Button variant="plain" onClick={handleReset}>
+            <Button
+              variant="plain"
+              onClick={handleReset}
+              sx={{
+                fontSize: { xs: "12px", sm: "14px" },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               Reset filters
             </Button>
-            <Stack direction="row" spacing={1}>
-              <Button variant="outlined" onClick={handleClose}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                justifyContent: { xs: "space-between", sm: "flex-end" },
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleClose}
+                sx={{
+                  fontSize: { xs: "12px", sm: "14px" },
+                  width: { xs: "48%", sm: "auto" },
+                }}
+              >
                 Cancel
               </Button>
               <Button
@@ -613,11 +659,12 @@ const Filter = ({
                   borderRadius: "20px",
                   bgcolor: "#4F46E5",
                   color: "#FFFFFF",
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   fontWeight: 500,
-                  px: 3,
+                  px: { xs: 2, sm: 3 },
                   py: 1,
                   "&:hover": { bgcolor: "#4338CA" },
+                  width: { xs: "48%", sm: "auto" },
                 }}
               >
                 Apply

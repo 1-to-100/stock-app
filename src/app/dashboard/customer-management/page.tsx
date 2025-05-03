@@ -15,13 +15,9 @@ import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
-import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
-import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
-import { useState, useCallback, useEffect } from "react";
 import AddEditCustomer from "@/components/dashboard/modals/AddEditCustomerModal";
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
@@ -33,6 +29,7 @@ import { Customer } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { paths } from "@/paths";
 import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
 
 interface HttpError extends Error {
   response?: {
@@ -50,14 +47,9 @@ export default function Page(): React.JSX.Element {
   const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
-    null
-  );
-  const [selectedUser, setSelectedUser] = useState<Customer | null>(null);
   const [openEditCustomerModal, setOpenEditCustomerModal] = useState(false);
   const [openAddCustomerModal, setopenAddCustomerModal] = useState(false);
   const [customerToEditId, setCustomerToEditId] = useState<number | null>(null);
-
   const [sortColumn, setSortColumn] = useState<keyof Customer | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,8 +123,6 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
-  useEffect(() => {}, [popoverAnchorEl, selectedUser]);
-
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
       prev.includes(userId)
@@ -159,11 +149,6 @@ export default function Page(): React.JSX.Element {
     }
   };
 
-  const handleDeleteUser = (userId: number) => {
-    setRowsToDelete([userId]);
-    setOpenDeleteModal(true);
-  };
-
   const handleDeleteRow = useCallback((customerId: number) => {
     setRowsToDelete([customerId]);
     setOpenDeleteModal(true);
@@ -172,7 +157,6 @@ export default function Page(): React.JSX.Element {
   const confirmDelete = async () => {
     try {
       await Promise.all(rowsToDelete.map((id) => deleteCustomer(id)));
-
       setOpenDeleteModal(false);
       setRowsToDelete([]);
       setSelectedRows([]);
@@ -276,8 +260,8 @@ export default function Page(): React.JSX.Element {
     .filter((name): name is string => name !== undefined);
 
   const menuItemStyle = {
-    padding: "8px 16px",
-    fontSize: "16px",
+    padding: { xs: "6px 12px", sm: "8px 16px" },
+    fontSize: { xs: "14px", sm: "16px" },
     fontWeight: "400",
     display: "flex",
     alignItems: "center",
@@ -287,24 +271,24 @@ export default function Page(): React.JSX.Element {
   };
 
   const iconStyle = {
-    marginRight: "14px",
+    marginRight: { xs: "10px", sm: "14px" },
   };
 
   if (error) {
     const httpError = error as HttpError;
     let status: number | undefined = httpError.response?.status;
-    
+
     if (!status && httpError.message.includes("status:")) {
       const match = httpError.message.match(/status: (\d+)/);
       status = match ? parseInt(match[1] ?? "0", 10) : undefined;
     }
-  
+
     if (status === 403) {
       return (
-        <Box sx={{ textAlign: "center", mt: 35 }}>
+        <Box sx={{ textAlign: "center", mt: { xs: 10, sm: 20, md: 35 } }}>
           <Typography
             sx={{
-              fontSize: "24px",
+              fontSize: { xs: "18px", sm: "22px", md: "24px" },
               fontWeight: "600",
               color: "var(--joy-palette-text-primary)",
             }}
@@ -313,13 +297,13 @@ export default function Page(): React.JSX.Element {
           </Typography>
           <Typography
             sx={{
-              fontSize: "14px",
+              fontSize: { xs: "12px", sm: "13px", md: "14px" },
               fontWeight: "300",
               color: "var(--joy-palette-text-secondary)",
               mt: 1,
             }}
           >
-            You do not have the required permissions to view this page. <br />{" "}
+            You do not have the required permissions to view this page. <br />
             Please contact your administrator if you believe this is a mistake.
           </Typography>
         </Box>
@@ -328,56 +312,77 @@ export default function Page(): React.JSX.Element {
   }
 
   return (
-    <Box sx={{ p: "var(--Content-padding)" }}>
-      <SearchInput
-        onSearch={handleSearch}
-        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
-      />
-      <Stack spacing={3}>
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
+      <Box
+        sx={{
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "1.5%", md: "1.5%", lg: "4%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
+        }}
+      >
+        <SearchInput onSearch={handleSearch} />
+      </Box>
+
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
-          direction={{ lg: "row" }}
-          spacing={3}
-          sx={{ alignItems: "flex-start" }}
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
         >
           <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-            <Typography fontSize={{ xs: "xl3", lg: "xl3" }} level="h1">
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
               Customer Management
             </Typography>
           </Stack>
 
-          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{
+              alignItems: { xs: "stretch", sm: "center" },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             {selectedRows.length > 0 ? (
-              <>
-                <Box
+              <Box
+                sx={{
+                  borderRight: { sm: "1px solid #E5E7EB" },
+                  display: "flex",
+                  alignItems: "center",
+                  paddingRight: { sm: "16px" },
+                  paddingBottom: { xs: "8px", sm: 0 },
+                  gap: { xs: "8px", sm: "12px" },
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography
+                  level="body-sm"
+                  sx={{ fontSize: { xs: "12px", sm: "14px" } }}
+                >
+                  {selectedRows.length} row
+                  {selectedRows.length > 1 ? "s" : ""} selected
+                </Typography>
+                <IconButton
+                  onClick={handleDelete}
                   sx={{
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    paddingRight: "16px",
-                    gap: "12px",
+                    bgcolor: "#FEE2E2",
+                    color: "#EF4444",
+                    borderRadius: "50%",
+                    width: { xs: 28, sm: 32 },
+                    height: { xs: 28, sm: 32 },
+                    "&:hover": {
+                      bgcolor: "#FECACA",
+                    },
                   }}
                 >
-                  <Typography level="body-sm">
-                    {selectedRows.length} row
-                    {selectedRows.length > 1 ? "s" : ""} selected
-                  </Typography>
-                  <IconButton
-                    onClick={handleDelete}
-                    sx={{
-                      bgcolor: "#FEE2E2",
-                      color: "#EF4444",
-                      borderRadius: "50%",
-                      width: 32,
-                      height: 32,
-                      "&:hover": {
-                        bgcolor: "#FECACA",
-                      },
-                    }}
-                  >
-                    <TrashIcon fontSize="var(--Icon-fontSize)" />
-                  </IconButton>
-                </Box>
-              </>
+                  <TrashIcon fontSize="var(--Icon-fontSize)" />
+                </IconButton>
+              </Box>
             ) : null}
             <Filter
               customers={customers}
@@ -391,6 +396,10 @@ export default function Page(): React.JSX.Element {
               color="primary"
               onClick={handleAddUser}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
             >
               Add customer
             </Button>
@@ -403,343 +412,367 @@ export default function Page(): React.JSX.Element {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              height: "50vh",
+              height: { xs: "40vh", sm: "50vh" },
             }}
           >
-            <CircularProgress />
+            <CircularProgress size="lg" />
           </Box>
         ) : (
           <>
             <Box
               sx={{
-                justifyContent: "space-between",
-                display: "flex",
-                flexDirection: "column",
+                overflowX: "auto",
+                width: "100%",
+                "&::-webkit-scrollbar": {
+                  height: "8px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "var(--joy-palette-divider)",
+                  borderRadius: "4px",
+                },
               }}
             >
-              <Box>
-                <Table aria-label="user management table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "5%" }}>
-                        <Checkbox
-                          checked={
-                            hasResults &&
-                            selectedRows.length === customers.length
-                          }
-                          indeterminate={
-                            hasResults &&
-                            selectedRows.length > 0 &&
-                            selectedRows.length < customers.length
-                          }
-                          onChange={handleSelectAllChange}
-                          disabled={!hasResults}
+              <Table
+                aria-label="customer management table"
+                sx={{
+                  minWidth: "800px",
+                  tableLayout: "fixed",
+                  "& th, & td": {
+                    px: { xs: 1, sm: 2 },
+                    py: { xs: 1, sm: 1.5 },
+                  },
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th style={{ width: "5%", minWidth: "40px" }}>
+                      <Checkbox
+                        checked={
+                          hasResults && selectedRows.length === customers.length
+                        }
+                        indeterminate={
+                          hasResults &&
+                          selectedRows.length > 0 &&
+                          selectedRows.length < customers.length
+                        }
+                        onChange={handleSelectAllChange}
+                        disabled={!hasResults}
+                        sx={{ transform: { xs: "scale(0.9)", sm: "scale(1)" } }}
+                      />
+                    </th>
+                    <th
+                      style={{ width: "30%", minWidth: "150px" }}
+                      onClick={() => handleSort("name")}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          "& .sort-icon": {
+                            opacity: 0,
+                            transition: "opacity 0.2s ease-in-out",
+                          },
+                          "&:hover .sort-icon": {
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        Customer
+                        <SortIcon
+                          className="sort-icon"
+                          fontSize="16"
+                          color="var(--joy-palette-text-secondary)"
                         />
-                      </th>
-                      <th
-                        style={{ width: "30%" }}
-                        onClick={() => handleSort("name")}
+                      </Box>
+                    </th>
+                    <th
+                      style={{ width: "25%", minWidth: "120px" }}
+                      onClick={() => handleSort("managerId")}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          "& .sort-icon": {
+                            opacity: 0,
+                            transition: "opacity 0.2s ease-in-out",
+                          },
+                          "&:hover .sort-icon": {
+                            opacity: 1,
+                          },
+                        }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
-                          }}
-                        >
-                          Customer
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th
-                        style={{ width: "25%" }}
-                        onClick={() => handleSort("managerId")}
+                        Manager
+                        <SortIcon
+                          className="sort-icon"
+                          fontSize="16"
+                          color="var(--joy-palette-text-secondary)"
+                        />
+                      </Box>
+                    </th>
+                    <th
+                      style={{ width: "20%", minWidth: "100px" }}
+                      onClick={() => handleSort("numberOfUsers")}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          "& .sort-icon": {
+                            opacity: 0,
+                            transition: "opacity 0.2s ease-in-out",
+                          },
+                          "&:hover .sort-icon": {
+                            opacity: 1,
+                          },
+                        }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
-                          }}
-                        >
-                          Manager
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th
-                        style={{ width: "20%" }}
-                        onClick={() => handleSort("numberOfUsers")}
+                        Users
+                        <SortIcon
+                          className="sort-icon"
+                          fontSize="16"
+                          color="var(--joy-palette-text-secondary)"
+                        />
+                      </Box>
+                    </th>
+                    <th
+                      style={{ width: "20%", minWidth: "100px" }}
+                      onClick={() => handleSort("subscriptionId")}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          "& .sort-icon": {
+                            opacity: 0,
+                            transition: "opacity 0.2s ease-in-out",
+                          },
+                          "&:hover .sort-icon": {
+                            opacity: 1,
+                          },
+                        }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
-                          }}
-                        >
-                          Number of users
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th
-                        style={{ width: "20%" }}
-                        onClick={() => handleSort("subscriptionId")}
+                        Subscription
+                        <SortIcon
+                          className="sort-icon"
+                          fontSize="16"
+                          color="var(--joy-palette-text-secondary)"
+                        />
+                      </Box>
+                    </th>
+                    <th style={{ width: "5%", minWidth: "40px" }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customers.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{ textAlign: "center", padding: "20px" }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": {
-                              opacity: 1,
-                            },
-                          }}
-                        >
-                          Subscription
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th style={{ width: "5%" }}></th>
+                        <Typography level="body-md" color="neutral">
+                          No items found
+                        </Typography>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {customers.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          style={{ textAlign: "center", padding: "20px" }}
-                        >
-                          <Typography level="body-md" color="neutral">
-                            No items found
-                          </Typography>
+                  ) : (
+                    customers.map((customer, index) => (
+                      <tr key={customer.id}>
+                        <td>
+                          <Checkbox
+                            checked={selectedRows.includes(customer.id)}
+                            onChange={() =>
+                              handleRowCheckboxChange(customer.id)
+                            }
+                            sx={{
+                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                            }}
+                          />
                         </td>
-                      </tr>
-                    ) : (
-                      customers.map((customer, index) => (
-                        <tr key={customer.id}>
-                          <td>
-                            <Checkbox
-                              checked={selectedRows.includes(customer.id)}
-                              onChange={() =>
-                                handleRowCheckboxChange(customer.id)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              sx={{ alignItems: "center" }}
-                            >
-                              <Typography sx={{ wordBreak: "break-all" }}>
-                                {customer.name.slice(0, 85)}
-                              </Typography>
-                              <Tooltip
-                                title={customer.status}
-                                placement="top"
-                                sx={{
-                                  background: "#DAD8FD",
-                                  color: "#3D37DD",
-                                  textTransform: "capitalize",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    bgcolor:
-                                      customer.status === "active"
-                                        ? "#1A7D36"
-                                        : customer.status === "inactive"
-                                        ? "#D3232F"
-                                        : "#FAE17D",
-                                    borderRadius: "50%",
-                                    width: "10px",
-                                    minWidth: "10px",
-                                    height: "10px",
-                                    display: "inline-block",
-                                  }}
-                                />
-                              </Tooltip>
-                            </Stack>
-                          </td>
-                          <td>
-                            <Box
+                        <td>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: "center" }}
+                          >
+                            <Typography
                               sx={{
-                                position: "relative",
-                                display: "inline-block",
-                                fontWeight: 400,
-                                color: "var(--joy-palette-text-secondary)",
                                 wordBreak: "break-all",
+                                fontSize: { xs: "12px", sm: "14px" },
+                                maxWidth: { xs: "100px", sm: "none" },
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
                               }}
                             >
-                              {typeof customer.manager?.name === "string"
-                                ? customer.manager?.name.slice(0, 75)
-                                : customer.manager?.name}{" "}
-                              <br />
-                              {typeof customer.manager?.email === "string"
-                                ? customer.manager?.email.slice(0, 75)
-                                : customer.manager?.email}
-                            </Box>
-                          </td>
-                          <td
-                            style={{
+                              {customer.name.slice(0, 85)}
+                            </Typography>
+                            <Tooltip
+                              title={customer.status}
+                              placement="top"
+                              sx={{
+                                background: "#DAD8FD",
+                                color: "#3D37DD",
+                                textTransform: "capitalize",
+                                fontSize: { xs: "10px", sm: "12px" },
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  bgcolor:
+                                    customer.status === "active"
+                                      ? "#1A7D36"
+                                      : customer.status === "inactive"
+                                      ? "#D3232F"
+                                      : "#FAE17D",
+                                  borderRadius: "50%",
+                                  width: { xs: "8px", sm: "10px" },
+                                  minWidth: { xs: "8px", sm: "10px" },
+                                  height: { xs: "8px", sm: "10px" },
+                                  display: "inline-block",
+                                }}
+                              />
+                            </Tooltip>
+                          </Stack>
+                        </td>
+                        <td>
+                          <Box
+                            sx={{
+                              position: "relative",
+                              display: "inline-block",
                               fontWeight: 400,
                               color: "var(--joy-palette-text-secondary)",
+                              wordBreak: "break-all",
+                              fontSize: { xs: "12px", sm: "14px" },
+                              maxWidth: { xs: "80px", sm: "none" },
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {customer?.numberOfUsers}
-                          </td>
-                          <td
+                            {typeof customer.manager?.name === "string"
+                              ? customer.manager?.name.slice(0, 75)
+                              : customer.manager?.name || "N/A"}
+                            <br />
+                            {typeof customer.manager?.email === "string"
+                              ? customer.manager?.email.slice(0, 75)
+                              : customer.manager?.email || "N/A"}
+                          </Box>
+                        </td>
+                        <td
+                          style={{
+                            fontWeight: 400,
+                            color: "var(--joy-palette-text-secondary)",
+                          }}
+                        >
+                          {customer?.numberOfUsers}
+                        </td>
+                        <td
+                          style={{
+                            color: "var(--joy-palette-text-secondary)",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              padding: { xs: "2px 6px", sm: "2px 8px" },
+                              borderRadius: "12px",
+                              fontWeight: 500,
+                              fontSize: { xs: "10px", sm: "12px" },
+                              width: "fit-content",
+                              color:
+                                customer.subscriptionName === "Premium"
+                                  ? "#3D37DD"
+                                  : customer.subscriptionName === "Enterprise"
+                                  ? "#4D2D00"
+                                  : "#272930",
+                              bgcolor:
+                                customer.subscriptionName === "Premium"
+                                  ? "#DAD8FD"
+                                  : customer.subscriptionName === "Enterprise"
+                                  ? "#FFF8C5"
+                                  : "#EEEFF0",
+                            }}
+                          >
+                            {customer?.subscriptionName || "N/A"}
+                          </Box>
+                        </td>
+                        <td>
+                          <IconButton
+                            size="sm"
+                            onClick={(event) => {
+                              handleMenuOpen(event, index);
+                            }}
+                            sx={{ padding: { xs: "4px", sm: "6px" } }}
+                          >
+                            <DotsThreeVertical
+                              weight="bold"
+                              size={18}
+                              color="var(--joy-palette-text-secondary)"
+                            />
+                          </IconButton>
+                          <Popper
+                            open={menuRowIndex === index && Boolean(anchorEl)}
+                            anchorEl={anchorEl}
+                            placement="bottom-start"
                             style={{
-                              color: "var(--joy-palette-text-secondary)",
+                              minWidth: "120px",
+                              borderRadius: "8px",
+                              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                              backgroundColor:
+                                "var(--joy-palette-background-surface)",
+                              zIndex: 1300,
+                              border: "1px solid var(--joy-palette-divider)",
                             }}
                           >
                             <Box
-                              sx={{
-                                padding: "2px 8px",
-                                borderRadius: "12px",
-                                fontWeight: 500,
-                                fontSize: "12px",
-                                width: "fit-content",
-                                color:
-                                  customer.subscriptionName === "Premium"
-                                    ? "#3D37DD"
-                                    : customer.subscriptionName === "Enterprise"
-                                    ? "#4D2D00"
-                                    : "#272930",
-                                bgcolor:
-                                  customer.subscriptionName === "Premium"
-                                    ? "#DAD8FD"
-                                    : customer.subscriptionName === "Enterprise"
-                                    ? "#FFF8C5"
-                                    : "#EEEFF0",
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                                handleEdit(customer.id);
                               }}
+                              sx={menuItemStyle}
                             >
-                              {customer?.subscriptionName}
-                            </Box>
-                          </td>
-                          <td>
-                            <IconButton
-                              size="sm"
-                              onClick={(event) => {
-                                handleMenuOpen(event, index);
-                              }}
-                            >
-                              <DotsThreeVertical
-                                weight="bold"
-                                size={22}
-                                color="var(--joy-palette-text-secondary)"
+                              <PencilIcon
+                                fontSize="16px"
+                                style={{ marginRight: "10px" }}
                               />
-                            </IconButton>
-                            <Popper
-                              open={menuRowIndex === index && Boolean(anchorEl)}
-                              anchorEl={anchorEl}
-                              placement="bottom-start"
-                              style={{
-                                minWidth: "150px",
-                                borderRadius: "8px",
-                                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                                backgroundColor:
-                                  "var(--joy-palette-background-surface)",
-                                zIndex: 1300,
-                                border: "1px solid var(--joy-palette-divider)",
+                              Edit
+                            </Box>
+                            <Box
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                                handleOpenDetail(event, customer.id);
                               }}
+                              sx={menuItemStyle}
                             >
-                              <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleEdit(customer.id);
-                                }}
-                                sx={menuItemStyle}
-                              >
-                                <PencilIcon fontSize="20px" style={iconStyle} />
-                                Edit
-                              </Box>
-                              <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleOpenDetail(event, customer.id);
-                                }}
-                                sx={menuItemStyle}
-                              >
-                                <EyeIcon fontSize="20px" style={iconStyle} />
-                                View details
-                              </Box>
-                              {/* <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleDeleteRow(customer.id);
-                                  handleMenuClose();
-                                }}
-                                sx={{ ...menuItemStyle, color: "#EF4444" }}
-                              >
-                                <TrashIcon fontSize="20px" style={iconStyle} />
-                                Delete
-                              </Box> */}
-                            </Popper>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </Table>
-              </Box>
+                              <EyeIcon
+                                fontSize="16px"
+                                style={{ marginRight: "10px" }}
+                              />
+                              View details
+                            </Box>
+                          </Popper>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
             </Box>
           </>
         )}
 
         {(customers.length > 0 || isLoading) && (
           <Box
-          // sx={{
-          //   position: "fixed",
-          //   bottom: "30px",
-          //   left: 0,
-          //   right: 0,
-          //   zIndex: 1000,
-          //   padding: "12px 24px",
-          //   display: "flex",
-          //   justifyContent: "center",
-          // }}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mt: { xs: 2, sm: 3 },
+              mb: { xs: 2, sm: 0 },
+              position: { xs: "relative", sm: "relative" },
+              zIndex: 1000,
+            }}
           >
             <Pagination
               totalPages={totalPages}

@@ -26,8 +26,8 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
       onChange={handleChange}
       style={style}
       sx={{
-        width: { xs: "100%", sm: "300px" },
-        display: { xs: "none", sm: "flex" },
+        width: { xs: "100%", sm: "200px", md: "300px" },
+        display: { sm: "flex" },
         bgcolor: "var(--NavItem-active-background)",
         borderRadius: "20px",
         border: "1px solid var(--joy-palette-divider)",

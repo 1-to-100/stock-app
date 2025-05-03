@@ -27,7 +27,7 @@ import { getRoles } from "./../../../lib/api/roles";
 import { getCustomers } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
 import { ApiUser, Role, Customer } from "@/contexts/auth/types";
-import { toast } from '@/components/core/toaster';
+import { toast } from "@/components/core/toaster";
 
 interface HttpError {
   response?: {
@@ -52,7 +52,11 @@ interface FormErrors {
   additionalEmails?: string[];
 }
 
-export default function AddEditUser({ open, onClose, userId }: AddEditUserProps) {
+export default function AddEditUser({
+  open,
+  onClose,
+  userId,
+}: AddEditUserProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -64,7 +68,8 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
   const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] =
+    useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors | null>(null);
   const [emailWarnings, setEmailWarnings] = useState<string[]>([]);
   const { colorScheme } = useColorScheme();
@@ -162,33 +167,36 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     if (!email.trim()) {
       return "Email is required";
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return "Invalid email format";
     }
-    
+
     if (email.startsWith(".") || email.endsWith(".")) {
       return "Invalid email format";
     }
-   
+
     if (email.includes("..")) {
       return "Invalid email format";
     }
-   
+
     if (email.includes("/")) {
       return "Invalid email format";
     }
-    
+
     const atIndex = email.indexOf("@");
     if (email[atIndex - 1] === ".") {
       return "Invalid email format";
     }
-  
+
     return null;
   };
 
-  const checkEmailUniqueness = async (email: string, index?: number): Promise<boolean> => {
+  const checkEmailUniqueness = async (
+    email: string,
+    index?: number
+  ): Promise<boolean> => {
     if (!email || !validateEmail(email)) return false;
     try {
       setEmailWarnings((prev) => {
@@ -211,39 +219,31 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
 
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
-    
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
     }
-  
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required";
     }
-  
+
     const emailError = validateEmail(formData.email);
     if (emailError) {
       newErrors.email = emailError;
     }
-    
-    // if (!formData.customer) {
-    //   newErrors.customer = "Customer is required";
-    // }
-   
-    // if (!formData.role) {
-    //   newErrors.role = "Role is required";
-    // }
-   
+
     const additionalEmailErrors = additionalEmails.map((email) => {
       if (email) {
         return validateEmail(email) || "";
       }
       return "";
     });
-  
+
     if (additionalEmailErrors.some((error) => error)) {
       newErrors.additionalEmails = additionalEmailErrors;
     }
-  
+
     return newErrors;
   };
 
@@ -254,7 +254,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       [field]: undefined,
       additionalEmails: field === "email" ? undefined : prev?.additionalEmails,
     }));
-   
+
     if (field === "email" && value) {
       const emailError = validateEmail(value);
       if (emailError) {
@@ -262,21 +262,23 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
       }
     }
   };
-  
+
   const handleAdditionalEmailChange = async (index: number, value: string) => {
     const updatedEmails = [...additionalEmails];
     updatedEmails[index] = value;
     setAdditionalEmails(updatedEmails);
-  
+
     setErrors((prev) => {
       const newErrors = { ...prev };
       if (!newErrors.additionalEmails) {
         newErrors.additionalEmails = [];
       }
-      newErrors.additionalEmails[index] = value ? validateEmail(value) || "" : "";
+      newErrors.additionalEmails[index] = value
+        ? validateEmail(value) || ""
+        : "";
       return newErrors;
     });
-  
+
     if (value) {
       await checkEmailUniqueness(value, index);
     }
@@ -327,8 +329,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        status: isActive ? "active" : "inactive" as "active" | "inactive",
-        customerId: formData.customer ? getCustomerId(formData.customer) : undefined,
+        status: isActive ? "active" : ("inactive" as "active" | "inactive"),
+        customerId: formData.customer
+          ? getCustomerId(formData.customer)
+          : undefined,
         roleId: formData.role ? getRoleId(formData.role) : undefined,
         managerId: formData.manager ? parseInt(formData.manager) : undefined,
         additionalEmails: additionalEmails.filter((email) => email.trim()),
@@ -349,38 +353,50 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
     <Modal open={open} onClose={onClose}>
       <ModalDialog
         sx={{
-          width: 800,
-          p: 3,
+          width: { xs: "90%", sm: 600, md: 800 },
+          maxWidth: "100%",
+          p: { xs: 2, sm: 3 },
           borderRadius: "8px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         <ModalClose sx={{ color: "#6B7280" }} />
         <Typography
           level="h3"
           sx={{
-            fontSize: "24px",
+            fontSize: { xs: "20px", sm: "22px", md: "24px" },
             fontWeight: 600,
             color: "var(--joy-palette-text-primary)",
-            mb: 2,
+            mb: { xs: 1.5, sm: 2 },
           }}
         >
           {userId ? "Edit user" : "Add user"}
         </Typography>
-        <Stack spacing={2}>
+        <Stack spacing={{ xs: 1.5, sm: 2 }}>
           <Stack spacing={1}>
             <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
+              direction={{ xs: "row", sm: "row" }}
+              spacing={{ xs: 1, sm: 2 }}
+              alignItems={{ xs: "flex-start", sm: "center" }}
               mb={2}
-              justifyContent={"space-between"}
+              justifyContent="space-between"
             >
-              <Box display={"flex"} alignItems={"center"} gap={2}>
+              <Box
+                display="flex"
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                gap={{ xs: 1, sm: 2 }}
+                flexDirection={{ xs: "column", sm: "row" }}
+              >
                 {avatarPreview ? (
                   <Avatar
                     src={avatarPreview}
-                    sx={{ width: 64, height: 64, borderRadius: "50%" }}
+                    sx={{
+                      width: { xs: 48, sm: 64 },
+                      height: { xs: 48, sm: 64 },
+                      borderRadius: "50%",
+                    }}
                   />
                 ) : (
                   <IconButton
@@ -388,12 +404,12 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                     sx={{
                       bgcolor: "#E5E7EB",
                       borderRadius: "50%",
-                      width: 64,
-                      height: 64,
+                      width: { xs: 48, sm: 64 },
+                      height: { xs: 48, sm: 64 },
                       color: "#4F46E5",
                     }}
                   >
-                    <UploadIcon fontSize="24px" />
+                    <UploadIcon style={{ fontSize: "16px" }} />
                     <input
                       type="file"
                       accept="image/png, image/jpeg, image/gif"
@@ -405,9 +421,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 <Typography
                   level="body-sm"
                   sx={{
-                    fontSize: "12px",
+                    fontSize: { xs: "10px", sm: "12px" },
                     color: "#6B7280",
                     lineHeight: "16px",
+                    textAlign: { xs: "left", sm: "left" },
                   }}
                 >
                   Upload Avatar
@@ -430,13 +447,13 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
 
             {showDeleteConfirmation && (
               <Stack
-                direction="row"
+                direction={{ xs: "column", sm: "row" }}
                 spacing={2}
-                alignItems="center"
+                alignItems={{ xs: "flex-start", sm: "center" }}
                 sx={{
                   bgcolor: isLightTheme ? "#DDDEE0" : "transparent",
                   borderRadius: "6px",
-                  p: 1,
+                  p: { xs: 1, sm: 1.5 },
                   justifyContent: "space-between",
                   border: "1px solid var(--joy-palette-divider)",
                 }}
@@ -444,8 +461,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 <Typography
                   level="body-md"
                   sx={{
-                    fontSize: "14px",
-                    color: isLightTheme ? "#272930" : "var(--joy-palette-text-secondary)",
+                    fontSize: { xs: "12px", sm: "14px" },
+                    color: isLightTheme
+                      ? "#272930"
+                      : "var(--joy-palette-text-secondary)",
                   }}
                 >
                   Are you sure you want to delete image?
@@ -455,6 +474,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                     variant="solid"
                     color="neutral"
                     onClick={() => setShowDeleteConfirmation(false)}
+                    sx={{
+                      fontSize: { xs: "12px", sm: "14px" },
+                      px: { xs: 2, sm: 3 },
+                    }}
                   >
                     No
                   </Button>
@@ -462,6 +485,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                     variant="solid"
                     color="danger"
                     onClick={handleDeleteAvatar}
+                    sx={{
+                      fontSize: { xs: "12px", sm: "14px" },
+                      px: { xs: 2, sm: 3 },
+                    }}
                   >
                     Yes
                   </Button>
@@ -471,26 +498,35 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
           </Stack>
 
           {userId && (
-            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              mb={{ xs: 1, sm: 2 }}
+            >
               <Switch
                 checked={isActive}
                 onChange={(event) => setIsActive(event.target.checked)}
+                sx={{ transform: { xs: "scale(0.9)", sm: "scale(1)" } }}
               />
               <Typography
                 level="body-sm"
-                sx={{ fontSize: "14px", color: "#6B7280" }}
+                sx={{ fontSize: { xs: "12px", sm: "14px" }, color: "#6B7280" }}
               >
                 Active
               </Typography>
             </Stack>
           )}
 
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1.5, sm: 2 }}
+          >
             <Stack sx={{ flex: 1 }}>
               <Typography
                 level="body-sm"
                 sx={{
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   color: "var(--joy-palette-text-primary)",
                   mb: 0.5,
                   fontWeight: 500,
@@ -506,11 +542,16 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                 }}
               />
               {errors?.firstName && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {errors.firstName}
                 </FormHelperText>
               )}
@@ -519,7 +560,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               <Typography
                 level="body-sm"
                 sx={{
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   color: "var(--joy-palette-text-primary)",
                   mb: 0.5,
                   fontWeight: 500,
@@ -535,23 +576,31 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                 }}
               />
               {errors?.lastName && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {errors.lastName}
                 </FormHelperText>
               )}
             </Stack>
           </Stack>
 
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1.5, sm: 2 }}
+          >
             <Stack sx={{ flex: 1 }}>
               <Typography
                 level="body-sm"
                 sx={{
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   color: "var(--joy-palette-text-primary)",
                   mb: 0.5,
                   fontWeight: 500,
@@ -568,16 +617,26 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 slotProps={{ input: { maxLength: 255 } }}
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                 }}
               />
               {errors?.email && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {errors.email}
                 </FormHelperText>
               )}
               {emailWarnings[0] && (
-                <FormHelperText sx={{ color: "var(--joy-palette-warning-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-warning-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {emailWarnings[0]}
                 </FormHelperText>
               )}
@@ -586,7 +645,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
               <Typography
                 level="body-sm"
                 sx={{
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   color: "var(--joy-palette-text-primary)",
                   mb: 0.5,
                   fontWeight: 500,
@@ -602,68 +661,41 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 }
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
-                  border: errors?.customer ? "1px solid var(--joy-palette-danger-500)" : undefined,
+                  fontSize: { xs: "12px", sm: "14px" },
+                  border: errors?.customer
+                    ? "1px solid var(--joy-palette-danger-500)"
+                    : undefined,
                 }}
               >
-                {customers && customers?.map((customer) => (
-                  <Option key={customer.id} value={customer.name}>
-                    {customer?.name.slice(0, 45)}
-                  </Option>
-                ))}
+                {customers &&
+                  customers?.map((customer) => (
+                    <Option key={customer.id} value={customer.name}>
+                      {customer?.name.slice(0, 45)}
+                    </Option>
+                  ))}
               </Select>
               {errors?.customer && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {errors.customer}
                 </FormHelperText>
               )}
             </Stack>
           </Stack>
 
-          {/* {additionalEmails.map((email, index) => (
-            <Stack key={index}>
-              <Typography
-                level="body-sm"
-                sx={{
-                  fontSize: "14px",
-                  color: "var(--joy-palette-text-primary)",
-                  mb: 0.5,
-                  fontWeight: 500,
-                }}
-              >
-                Additional Email {index + 1}
-              </Typography>
-              <Input
-                placeholder="Enter additional email"
-                value={email}
-                onChange={(e) =>
-                  handleAdditionalEmailChange(index, e.target.value)
-                }
-                error={!!errors?.additionalEmails?.[index]}
-                sx={{
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                }}
-              />
-              {errors?.additionalEmails?.[index] && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
-                  {errors.additionalEmails[index]}
-                </FormHelperText>
-              )}
-              {emailWarnings[index + 1] && (
-                <FormHelperText sx={{ color: "var(--joy-palette-warning-500)", fontSize: '12px' }}>
-                  {emailWarnings[index + 1]}
-                </FormHelperText>
-              )}
-            </Stack>
-          ))} */}
-
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1.5, sm: 2 }}
+          >
             <Stack sx={{ flex: 1 }}>
               <Typography
                 level="body-sm"
                 sx={{
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                   color: "var(--joy-palette-text-primary)",
                   mb: 0.5,
                   fontWeight: 500,
@@ -679,8 +711,10 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 }
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
-                  border: errors?.role ? "1px solid var(--joy-palette-danger-500)" : undefined,
+                  fontSize: { xs: "12px", sm: "14px" },
+                  border: errors?.role
+                    ? "1px solid var(--joy-palette-danger-500)"
+                    : undefined,
                 }}
               >
                 {roles?.map((role) => (
@@ -690,7 +724,12 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 ))}
               </Select>
               {errors?.role && (
-                <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: '12px' }}>
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                  }}
+                >
                   {errors.role}
                 </FormHelperText>
               )}
@@ -700,7 +739,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 <Typography
                   level="body-sm"
                   sx={{
-                    fontSize: "14px",
+                    fontSize: { xs: "12px", sm: "14px" },
                     color: "var(--joy-palette-text-primary)",
                     mb: 0.5,
                     fontWeight: 500,
@@ -714,11 +753,15 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                   sx={{
                     background: "#DAD8FD",
                     color: "#3D37DD",
-                    width: "206px",
+                    width: { xs: "180px", sm: "206px" },
+                    fontSize: { xs: "10px", sm: "12px" },
                   }}
                 >
                   <Box sx={{ background: "none", cursor: "pointer" }}>
-                    <WarningCircle fontSize="16px" color="#6B7280" />
+                    <WarningCircle
+                      style={{ fontSize: "16px" }}
+                      color="#6B7280"
+                    />
                   </Box>
                 </Tooltip>
               </Box>
@@ -730,7 +773,7 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
                 }
                 sx={{
                   borderRadius: "6px",
-                  fontSize: "14px",
+                  fontSize: { xs: "12px", sm: "14px" },
                 }}
               >
                 <Option value="">None</Option>
@@ -743,22 +786,38 @@ export default function AddEditUser({ open, onClose, userId }: AddEditUserProps)
             </Stack>
           </Stack>
 
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="outlined" onClick={onClose}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            justifyContent="flex-end"
+          >
+            <Button
+              variant="outlined"
+              onClick={onClose}
+              sx={{
+                fontSize: { xs: "12px", sm: "14px" },
+                px: { xs: 2, sm: 3 },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               Cancel
             </Button>
             <Button
               variant="solid"
               onClick={handleSave}
-              disabled={createUserMutation.isPending || updateUserMutation.isPending}
+              disabled={
+                createUserMutation.isPending || updateUserMutation.isPending
+              }
               sx={{
                 borderRadius: "20px",
                 bgcolor: "#4F46E5",
                 color: "#FFFFFF",
                 fontWeight: 500,
-                px: 3,
+                fontSize: { xs: "12px", sm: "14px" },
+                px: { xs: 2, sm: 3 },
                 py: 1,
                 "&:hover": { bgcolor: "#4338CA" },
+                width: { xs: "100%", sm: "auto" },
               }}
             >
               Save

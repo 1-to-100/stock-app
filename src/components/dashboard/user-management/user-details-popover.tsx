@@ -149,8 +149,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   };
 
   const menuItemStyle = {
-    padding: "8px 16px",
-    fontSize: "16px",
+    padding: { xs: "6px 12px", sm: "8px 16px" },
+    fontSize: { xs: "14px", sm: "16px" },
     fontWeight: "400",
     display: "flex",
     alignItems: "center",
@@ -160,7 +160,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   };
 
   const iconStyle = {
-    marginRight: "14px",
+    marginRight: "10px",
     color: "var(--joy-palette-text-primary)",
   };
 
@@ -172,50 +172,57 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     <>
       <Sheet
         sx={{
-          position: "absolute",
-          top: "20.3%",
-          right: "1.5%",
-          width: "500px",
+          position: { xs: "fixed", sm: "absolute" },
+          top: { xs: "10%", sm: "20.3%" },
+          right: { xs: "5%", sm: "1.5%" },
+          width: { xs: "90%", sm: 400, md: 500 },
+          maxWidth: "100%",
           borderRadius: "8px",
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
+          overflow: "auto",
+          maxHeight: { xs: "80vh", sm: "70vh" },
           zIndex: 1300,
           border: "1px solid var(--joy-palette-divider)",
         }}
       >
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack
             direction="row"
             spacing={2}
             sx={{
               alignItems: "center",
               justifyContent: "space-between",
-              mb: 2,
+              mb: { xs: 1, sm: 2 },
               borderBottom: "1px solid var(--joy-palette-divider)",
-              paddingBottom: 2,
+              paddingBottom: { xs: 1, sm: 2 },
             }}
           >
             <Typography
               level="title-lg"
-              sx={{ fontSize: "24px" }}
+              sx={{ fontSize: { xs: "18px", sm: "22px", md: "24px" } }}
               fontWeight="600"
             >
               User Details
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Button variant="plain" size="sm" onClick={onClose}>
-                <XIcon fontSize="20px" weight="bold" />
+              <Button
+                variant="plain"
+                size="sm"
+                onClick={onClose}
+                sx={{ p: { xs: 0.5, sm: 1 } }}
+              >
+                <XIcon fontSize="16px" weight="bold" />
               </Button>
             </Stack>
           </Stack>
           <Stack
             direction="column"
-            spacing={2}
+            spacing={{ xs: 1.5, sm: 2 }}
             sx={{
               width: "100%",
               borderBottom: "1px solid var(--joy-palette-divider)",
-              paddingBottom: 2,
-              mb: 2,
+              paddingBottom: { xs: 1, sm: 2 },
+              mb: { xs: 1, sm: 2 },
             }}
           >
             <Box
@@ -225,17 +232,27 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 alignItems: "center",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: "8px", sm: "16px" },
+                  flexDirection: { xs: "row", sm: "row" },
+                }}
+              >
                 {userData?.avatar ? (
-                  <Avatar src={userData.avatar} sx={{ width: 64, height: 64 }} />
+                  <Avatar
+                    src={userData.avatar}
+                    sx={{ width: { xs: 48, sm: 64 }, height: { xs: 48, sm: 64 } }}
+                  />
                 ) : (
-                  <Avatar sx={{ width: 64, height: 64 }} />
+                  <Avatar sx={{ width: { xs: 48, sm: 64 }, height: { xs: 48, sm: 64 } }} />
                 )}
-                <Stack>
+                <Stack alignItems={{ xs: "center", sm: "flex-start" }}>
                   <Typography
                     level="body-lg"
                     sx={{
-                      fontSize: "18px",
+                      fontSize: { xs: "16px", sm: "18px" },
                       color: "var(--joy-palette-text-primary)",
                     }}
                     fontWeight="600"
@@ -261,7 +278,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                       px: 1,
                       display: "inline-block",
                       width: "fit-content",
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: 500,
                     }}
                   >
@@ -287,7 +304,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               >
                 <DotsIcon
                   weight="bold"
-                  size={22}
+                  size={18}
                   color="var(--joy-palette-text-secondary)"
                 />
               </Button>
@@ -299,7 +316,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   bgcolor: isLightTheme ? "#FFF8C5" : "transparent",
                   border: isLightTheme ? "transparent" : "1px solid #4D2D00",
                   borderRadius: "8px",
-                  px: 2,
+                  px: { xs: 1, sm: 2 },
                   py: 1.5,
                   display: "flex",
                   alignItems: "center",
@@ -308,13 +325,13 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 }}
               >
                 <Warning
-                  size={20}
+                  size={16}
                   color={isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)"}
                 />
                 <Typography
                   level="body-sm"
                   sx={{
-                    fontSize: "14px",
+                    fontSize: { xs: "12px", sm: "14px" },
                     color: isLightTheme ? "#4D2D00" : "rgb(198, 143, 66)",
                     fontWeight: 300,
                   }}
@@ -330,7 +347,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
             open={Boolean(menuAnchorEl)}
             placement="bottom-start"
             style={{
-              minWidth: "150px",
+              minWidth: "120px",
               borderRadius: "8px",
               boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
               backgroundColor: "var(--joy-palette-background-surface)",
@@ -345,11 +362,11 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={menuItemStyle}
             >
-              <PencilIcon fontSize="20px" style={iconStyle} />
+              <PencilIcon fontSize="16px" style={iconStyle} />
               Edit
             </Box>
-            <Box sx={menuItemStyle}>
-              <ArrowRightIcon fontSize="20px" style={iconStyle} />
+            {/* <Box sx={menuItemStyle}>
+              <ArrowRightIcon fontSize="16px" style={iconStyle} />
               Impersonate user
             </Box>
             <Box
@@ -359,7 +376,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={menuItemStyle}
             >
-              <ToggleLeft fontSize="20px" style={iconStyle} />
+              <ToggleLeft fontSize="16px" style={iconStyle} />
               Deactivate
             </Box>
             <Box
@@ -369,7 +386,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={menuItemStyle}
             >
-              <Warning fontSize="20px" style={iconStyle} />
+              <Warning fontSize="16px" style={iconStyle} />
               Suspend
             </Box>
             <Box
@@ -379,9 +396,9 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={menuItemStyle}
             >
-              <Password fontSize="20px" style={iconStyle} />
+              <Password fontSize="16px" style={iconStyle} />
               Reset password
-            </Box>
+            </Box> */}
             <Box
               onMouseDown={(event) => {
                 event.preventDefault();
@@ -389,33 +406,44 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               }}
               sx={{ ...menuItemStyle, color: "#EF4444" }}
             >
-              <TrashIcon fontSize="20px" style={iconStyle} />
+              <TrashIcon fontSize="16px" style={iconStyle} />
               Delete
             </Box>
           </Popper>
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={2}>
+          <Stack spacing={{ xs: 1, sm: 2 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
+                sx={{
+                  color: "#636B74",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Name
               </Typography>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "var(--joy-palette-text-primary)" }}
+                sx={{
+                  color: "var(--joy-palette-text-primary)",
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 {userData?.firstName} {userData?.lastName}
               </Typography>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
+                sx={{
+                  color: "#636B74",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Email
               </Typography>
@@ -423,59 +451,80 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 <Typography
                   level="body-sm"
                   fontWeight="300"
-                  sx={{ color: "var(--joy-palette-text-primary)" }}
+                  sx={{
+                    color: "var(--joy-palette-text-primary)",
+                    fontSize: { xs: "12px", sm: "14px" },
+                  }}
                 >
                   {userData?.email}
                 </Typography>
               </Stack>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
+                sx={{
+                  color: "#636B74",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Customer
               </Typography>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "var(--joy-palette-text-primary)" }}
+                sx={{
+                  color: "var(--joy-palette-text-primary)",
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 {userData?.customer?.name}
               </Typography>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
+                sx={{
+                  color: "#636B74",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Role
               </Typography>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "var(--joy-palette-text-primary)" }}
+                sx={{
+                  color: "var(--joy-palette-text-primary)",
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 {userData?.role?.name}
               </Typography>
             </Stack>
 
             <Stack
-              direction="row"
+              direction={{ xs: "column", sm: "row" }}
               spacing={2}
               sx={{
                 borderBottom: "1px solid var(--joy-palette-divider)",
-                paddingBottom: 2,
+                paddingBottom: { xs: 1, sm: 2 },
               }}
             >
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#6B7280", width: "100px" }}
+                sx={{
+                  color: "#6B7280",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Billing
               </Typography>
@@ -489,7 +538,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     px: 1,
                     display: "inline-block",
                     width: "fit-content",
-                    fontSize: "12px",
+                    fontSize: { xs: "10px", sm: "12px" },
                     "&:hover": { bgcolor: "#C7D2FE" },
                   }}
                 >
@@ -505,18 +554,25 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 </Typography>
                 <Typography
                   level="body-sm"
-                  sx={{ color: "var(--joy-palette-text-primary)" }}
+                  sx={{
+                    color: "var(--joy-palette-text-primary)",
+                    fontSize: { xs: "12px", sm: "14px" },
+                  }}
                 >
                   2,000 users
                 </Typography>
               </Stack>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Typography
                 level="body-sm"
                 fontWeight="300"
-                sx={{ color: "#6B7280", width: "100px" }}
+                sx={{
+                  color: "#6B7280",
+                  width: { xs: "100%", sm: "100px" },
+                  fontSize: { xs: "12px", sm: "14px" },
+                }}
               >
                 Activity
               </Typography>
@@ -529,7 +585,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                         fontWeight="300"
                         sx={{
                           color: "var(--joy-palette-text-primary)",
-                          fontSize: "14px",
+                          fontSize: { xs: "12px", sm: "14px" },
                         }}
                       >
                         {act.browserOs}
@@ -539,7 +595,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                         fontWeight="300"
                         sx={{
                           color: "var(--joy-palette-text-secondary)",
-                          fontSize: "12px",
+                          fontSize: { xs: "10px", sm: "12px" },
                         }}
                       >
                         {act.locationTime}
@@ -550,7 +606,10 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   <Typography
                     level="body-sm"
                     fontWeight="300"
-                    sx={{ color: "var(--joy-palette-text-primary)" }}
+                    sx={{
+                      color: "var(--joy-palette-text-primary)",
+                      fontSize: { xs: "12px", sm: "14px" },
+                    }}
                   >
                     No activity data available
                   </Typography>
@@ -561,11 +620,11 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         </Box>
       </Sheet>
 
-      {/* <DeleteDeactivateUserModal
+      <DeleteDeactivateUserModal
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
-        usersToDelete={[userData?.name]}
+        usersToDelete={[userData?.firstName + " " + userData?.lastName || ""]}
       />
 
       <DeleteDeactivateUserModal
@@ -573,14 +632,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         onClose={() => setOpenDeactivateModal(false)}
         onConfirm={confirmDeactivate}
         isDeactivate={true}
-        usersToDelete={[userData?.name]}
-      /> */}
+        usersToDelete={[userData?.firstName + " " + userData?.lastName || ""]}
+      />
 
-      {/* <ResetPasswordUserModal
+      <ResetPasswordUserModal
         open={openResetPasswordModal}
         onClose={() => setOpenResetPasswordModal(false)}
-        userName={userData?.name}
-        userEmail={userData?.email}
+        userName={userData?.firstName + " " + userData?.lastName || ""}
+        userEmail={userData?.email || ""}
         onConfirm={(selectedEmail) => {
           console.log(`Resetting password for ${selectedEmail}`);
         }}
@@ -589,9 +648,9 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
       <SuspendUserModal
         open={openSuspendModal}
         onClose={() => setOpenSuspendModal(false)}
-        userName={userData?.name}
+        userName={userData?.firstName + " " + userData?.lastName || ""}
         onConfirm={handleConfirmSuspend}
-      /> */}
+      />
 
       <AddEditUser
         open={openEditModal}
