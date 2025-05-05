@@ -63,29 +63,7 @@ export function MainNav({items}: MainNavProps): React.JSX.Element {
                         >
                             <ListIcon fontSize="var(--Icon-fontSize)" weight="bold"/>
                         </IconButton>
-                        {/* <Input
-              startDecorator={<SearchIcon />}
-              placeholder="Search"
-              sx={{
-                width: { xs: '100%', sm: '300px' },
-                display: { xs: 'none', sm: 'flex' },
-                bgcolor: '#F5F7FA',
-                borderRadius: '20px',
-                border: 'none',
-                '&:hover': {
-                  bgcolor: '#EDEFF2',
-                },
-                '& .MuiInput-input': {
-                  padding: '8px 0px',
-                  fontSize: '16px',
-                  color: '#636B74',
-                },
-                '& .MuiInput-startDecorator': {
-                  color: '#636B74',
-                  marginLeft: '2px',
-                },
-              }}
-            /> */}
+                        
                     </Stack>
                     <Stack
                         direction="row"

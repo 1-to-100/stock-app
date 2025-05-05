@@ -9,18 +9,17 @@ import dayjs from 'dayjs';
 import { config } from '@/config';
 import { SessionItem } from '@/components/dashboard/settings/session-item';
 import type { Session } from '@/components/dashboard/settings/session-item';
-import { UpdatePasswordForm } from '@/components/dashboard/settings/update-password-form';
+// import { UpdatePasswordForm } from '@/components/dashboard/settings/update-password-form';
 
 export const metadata = { title: `Security | Settings | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
   return (
     <Stack divider={<Divider />} spacing={5}>
-      <UpdatePasswordForm />
+      {/* <UpdatePasswordForm /> */}
       <Stack spacing={3}>
         <div>
-          <Typography level="h4">Login History</Typography>
-          <Typography level="body-sm">Your recent login activity</Typography>
+          <Typography level="body-sm">Activity</Typography>
         </div>
         <List sx={{ '--List-gap': '24px' }}>
           {(

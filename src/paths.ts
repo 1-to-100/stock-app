@@ -87,10 +87,13 @@ export const paths = {
       },
       permissions: '/dashboard/team/permissions',
     },
-    settings: {
-      profile: '/dashboard/settings',
+    profile: {
+      profile: '/dashboard/profile',
       billing: '/dashboard/settings/billing',
-      security: '/dashboard/settings/security',
+      activity: '/dashboard/profile/activity',
+    },
+    settings: {
+      settings: '/dashboard/settings',
     },
     test: {
         list: '/dashboard/test',

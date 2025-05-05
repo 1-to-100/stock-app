@@ -45,12 +45,12 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
       anchorEl={anchorEl}
       onClose={onClose}
       open={open}
-      placement="bottom-end"
-      sx={{ maxWidth: '340px', px: 2, py: 1 }}
+      placement="bottom-start"
+      sx={{ maxWidth: '250px', px: 1, py: 1 }}
     >
-      <PopupContent sx={{ p: 3 }}>
+      <PopupContent sx={{ p: 2 }}>
         <Stack spacing={2}>
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
+          {/* <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
             <Avatar src={user.avatar} />
             <div>
               <Typography fontWeight="lg" textColor="inherit">
@@ -60,7 +60,7 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
                 {user.email}
               </Typography>
             </div>
-          </Stack>
+          </Stack> */}
           <List
             sx={{
               '--List-padding': 0,
@@ -74,19 +74,19 @@ export function UserPopover({ anchorEl, onClose, open }: UserPopoverProps): Reac
               },
             }}
           >
-            {/* <ListItemButton component={RouterLink} href={paths.dashboard.settings.profile} onClick={onClose}>
+            <ListItemButton component={RouterLink} href={paths.dashboard.profile.profile} onClick={onClose}>
               <ListItemDecorator>
                 <UserIcon fontSize="var(--Icon-fontSize)" weight="bold" />
               </ListItemDecorator>
               <ListItemContent>Profile</ListItemContent>
             </ListItemButton>
-            <ListItemButton component={RouterLink} href={paths.dashboard.settings.security} onClick={onClose}>
+            <ListItemButton component={RouterLink} href={paths.dashboard.settings.settings} onClick={onClose}>
               <ListItemDecorator>
                 <GearSixIcon fontSize="var(--Icon-fontSize)" weight="bold" />
               </ListItemDecorator>
-              <ListItemContent>Security</ListItemContent>
+              <ListItemContent>Settings</ListItemContent>
             </ListItemButton>
-            <ListItemButton component={RouterLink} href={paths.dashboard.settings.billing} onClick={onClose}>
+            {/* <ListItemButton component={RouterLink} href={paths.dashboard.settings.billing} onClick={onClose}>
               <ListItemDecorator>
                 <CreditCardIcon fontSize="var(--Icon-fontSize)" weight="bold" />
               </ListItemDecorator>

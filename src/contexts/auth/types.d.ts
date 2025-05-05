@@ -32,6 +32,7 @@ export interface ApiUser {
     status: string;
     avatar?: string;
     createdAt?: string;
+    phone?: string;
     activity?: {
       id: number;
       browserOs: string;

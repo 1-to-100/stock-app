@@ -79,7 +79,7 @@ export function CurrentUser({ onNavigate }: CurrentUserProps): React.JSX.Element
             <Button
               color="neutral"
               component={RouterLink}
-              href={paths.dashboard.settings.billing}
+              href={paths.dashboard.profile.billing}
               onClick={onNavigate}
               size="sm"
               startDecorator={<LightningIcon fontSize="var(--Icon-fontSize)" weight="bold" />}
@@ -99,7 +99,7 @@ export function CurrentUser({ onNavigate }: CurrentUserProps): React.JSX.Element
         <IconButton
           color="neutral"
           component={RouterLink}
-          href={paths.dashboard.settings.profile}
+          href={paths.dashboard.profile.profile}
           onClick={onNavigate}
           size="sm"
           sx={{

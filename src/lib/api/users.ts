@@ -86,6 +86,12 @@ export async function getUserById(id: number): Promise<ApiUser> {
   });
 }
 
+export async function getUserInfo(): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${API_URL}/users/me`, {
+    method: 'GET',
+  });
+}
+
 export async function getStatuses(): Promise<Status[]> {
   return apiFetch<Status[]>(`${API_URL}/taxonomies/statuses`, {
     method: "GET",

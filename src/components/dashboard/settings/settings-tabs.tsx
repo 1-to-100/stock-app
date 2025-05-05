@@ -17,15 +17,15 @@ export function SettingsTabs(): React.JSX.Element {
     <Box sx={{ display: 'flex' }}>
       <Tabs value={segment} variant="custom">
         <TabList>
-          <Tab component={RouterLink} href={paths.dashboard.settings.profile} value="profile">
-            Profile
+          <Tab component={RouterLink} href={paths.dashboard.profile.profile} value="profile">
+            Profile information
           </Tab>
-          <Tab component={RouterLink} href={paths.dashboard.settings.security} value="security">
-            Security
+          <Tab component={RouterLink} href={paths.dashboard.profile.activity} value="activity">
+            Activity
           </Tab>
-          <Tab component={RouterLink} href={paths.dashboard.settings.billing} value="billing">
+          {/* <Tab component={RouterLink} href={paths.dashboard.settings.billing} value="billing">
             Billing
-          </Tab>
+          </Tab> */}
         </TabList>
       </Tabs>
     </Box>

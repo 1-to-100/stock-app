@@ -1,287 +1,351 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Avatar from '@mui/joy/Avatar';
-import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
-import Chip from '@mui/joy/Chip';
-import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
-import FormHelperText from '@mui/joy/FormHelperText';
-import FormLabel from '@mui/joy/FormLabel';
-import Grid from '@mui/joy/Grid';
-import Input from '@mui/joy/Input';
-import Option from '@mui/joy/Option';
-import Select from '@mui/joy/Select';
-import Stack from '@mui/joy/Stack';
-import Textarea from '@mui/joy/Textarea';
-import Typography from '@mui/joy/Typography';
-import { Pen as PenIcon } from '@phosphor-icons/react/dist/ssr/Pen';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
-
-import { logger } from '@/lib/default-logger';
-import { toast } from '@/components/core/toaster';
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Avatar from "@mui/joy/Avatar";
+import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
+import Divider from "@mui/joy/Divider";
+import FormControl from "@mui/joy/FormControl";
+import FormHelperText from "@mui/joy/FormHelperText";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { Pen as PenIcon } from "@phosphor-icons/react/dist/ssr/Pen";
+import { Controller, useForm } from "react-hook-form";
+import { z as zod } from "zod";
+import { logger } from "@/lib/default-logger";
+import { toast } from "@/components/core/toaster";
+import { IconButton } from "@mui/joy";
+import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
+import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
+import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
+import ChangePasswordModal from "../modals/ChangePasswordModal";
+import { getUserInfo } from "@/lib/api/users";
+import { useQuery } from "@tanstack/react-query";
 
 const schema = zod.object({
   avatar: zod.string().optional(),
-  firstName: zod.string().min(1, { message: 'First name is required' }).max(255),
-  lastName: zod.string().min(1, { message: 'Last name is required' }).max(255),
-  email: zod.string().min(1, { message: 'Email is required' }).email(),
-  bio: zod.string().max(500).optional(),
-  website: zod.string().max(255).optional(),
-  country: zod.string().min(1, 'Country is required').max(255),
-  state: zod.string().min(1, 'State is required').max(255),
-  city: zod.string().min(1, 'City is required').max(255),
-  zipCode: zod.string().min(1, 'Zip code is required').max(255),
-  line1: zod.string().min(1, 'Address is required').max(255),
-  line2: zod.string().max(255).optional(),
+  firstName: zod
+    .string()
+    .min(1, { message: "First name is required" })
+    .max(255),
+  lastName: zod.string().min(1, { message: "Last name is required" }).max(255),
+  email: zod.string().min(1, { message: "Email is required" }).email(),
+  phone: zod
+    .string()
+    .min(1, { message: "Phone number is required" })
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
+  password: zod
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = {
-  avatar: '/assets/avatar.png',
-  firstName: 'Rene',
-  lastName: 'Wells',
-  email: 'rene@devias.io',
-  bio: "Hi there! I'm Rene, a seasoned developer with a heart that belongs to both the digital realm and the breathtaking mountains. Let's connect and code the future together!",
-  website: 'devias.io',
-  country: 'us',
-  state: 'Colorado',
-  city: 'Denver',
-  zipCode: '80218',
-  line1: 'Street Roy Alley 1155, house 1B',
-} satisfies Values;
-
 export function UpdateProfileForm(): React.JSX.Element {
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: getUserInfo,
+  });
+
+  const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
+
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+  } = useForm<Values>({
+    defaultValues: {
+      avatar: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: "",
+    },
+    resolver: zodResolver(schema),
+  });
+
+ 
+  React.useEffect(() => {
+    if (user) {
+      reset({
+        avatar: user.avatar || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: typeof user.phone === "string" ? user.phone : "",
+        password: "",
+      });
+    }
+  }, [user, reset]);
+
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
 
   const onSubmit = React.useCallback(async (_: Values): Promise<void> => {
     try {
-      // Make API request
-      toast.success('Details updated');
+      toast.success("Details updated");
     } catch (err) {
       logger.error(err);
     }
   }, []);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack divider={<Divider />} spacing={5}>
-        <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
-          <Controller
-            control={control}
-            name="avatar"
-            render={({ field }) => (
-              <Box sx={{ '--Avatar-size': '120px', position: 'relative' }}>
-                <Avatar src={field.value} />
-                <Box
-                  sx={{
-                    alignItems: 'center',
-                    borderRadius: '100%',
-                    color: 'var(--joy-palette-common-white)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    height: '100%',
-                    justifyContent: 'center',
-                    left: 0,
-                    position: 'absolute',
-                    top: 0,
-                    width: '100%',
-                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.4)' },
-                    '&:not(:hover) > *': { display: 'none' },
-                  }}
-                >
-                  <PenIcon fontSize="var(--joy-fontSize-md)" weight="bold" />
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={4}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <Controller
+              control={control}
+              name="avatar"
+              render={({ field }) => (
+                <Box sx={{ "--Avatar-size": "120px", position: "relative" }}>
+                  <Box
+                    display="flex"
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    gap={{ xs: 1, sm: 2 }}
+                    flexDirection={{ xs: "column", sm: "row" }}
+                  >
+                    {field.value ? (
+                      <Avatar
+                        src={field.value}
+                        sx={{
+                          width: { xs: 48, sm: 64 },
+                          height: { xs: 48, sm: 64 },
+                          borderRadius: "50%",
+                        }}
+                      />
+                    ) : (
+                      <IconButton
+                        component="label"
+                        sx={{
+                          bgcolor: "#E5E7EB",
+                          borderRadius: "50%",
+                          width: { xs: 48, sm: 64 },
+                          height: { xs: 48, sm: 64 },
+                          color: "#4F46E5",
+                        }}
+                      >
+                        <UploadIcon style={{ fontSize: "16px" }} />
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/gif"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                field.onChange(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </IconButton>
+                    )}
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      <Typography
+                        level="body-sm"
+                        sx={{
+                          fontSize: { xs: "12px", sm: "14px" },
+                          fontWeight: 500,
+                          color: "var(--joy-palette-text-primary)",
+                          lineHeight: "16px",
+                          textAlign: { xs: "left", sm: "left" },
+                        }}
+                      >
+                        Upload Avatar
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: { xs: "10px", sm: "12px" },
+                          fontWeight: 400,
+                          color: "var(--joy-palette-text-secondary)",
+                          lineHeight: "16px",
+                          textAlign: { xs: "left", sm: "left" },
+                        }}
+                      >
+                        We support PNGs, JPEGs, and GIFs under 3MB
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-            )}
-          />
-          <div>
-            <Typography level="h4">Profile Picture</Typography>
-            <Typography level="body-sm">Supports PNGs, JPEGs and GIFs under 3MB</Typography>
-          </div>
-        </Stack>
-        <Stack spacing={3}>
-          <Typography level="h4">Basic details</Typography>
-          <Box sx={{ maxWidth: 'lg' }}>
-            <Grid container spacing={3}>
-              <Grid md={6} xs={12}>
+              )}
+            />
+          </Stack>
+          <Divider sx={{ maxWidth: "512px" }} />
+          <Stack spacing={2}>
+            <Typography sx={{ fontSize: "14px", fontWeight: 300 }}>
+              General info
+            </Typography>
+            <Box sx={{ maxWidth: "512px" }}>
+              <Stack
+                flexDirection={{ px: "column", sm: "row" }}
+                spacing={3}
+                sx={{ mb: 3 }}
+              >
                 <Controller
                   control={control}
                   name="firstName"
                   render={({ field }) => (
-                    <FormControl error={Boolean(errors.firstName)}>
+                    <FormControl
+                      error={Boolean(errors.firstName)}
+                      sx={{ flex: 1 }}
+                    >
                       <FormLabel>First Name</FormLabel>
                       <Input {...field} />
-                      {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
+                      {errors.firstName ? (
+                        <FormHelperText>
+                          {errors.firstName.message}
+                        </FormHelperText>
+                      ) : null}
                     </FormControl>
                   )}
                 />
-              </Grid>
-              <Grid md={6} xs={12}>
                 <Controller
                   control={control}
                   name="lastName"
                   render={({ field }) => (
-                    <FormControl error={Boolean(errors.lastName)}>
+                    <FormControl
+                      error={Boolean(errors.lastName)}
+                      sx={{ flex: 1 }}
+                    >
                       <FormLabel>Last Name</FormLabel>
                       <Input {...field} />
-                      {errors.lastName ? <FormHelperText>{errors.lastName.message}</FormHelperText> : null}
+                      {errors.lastName ? (
+                        <FormHelperText>
+                          {errors.lastName.message}
+                        </FormHelperText>
+                      ) : null}
                     </FormControl>
                   )}
                 />
-              </Grid>
-              <Grid md={6} xs={12}>
-                <Stack spacing={3}>
-                  <Controller
-                    control={control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)}>
-                        <FormLabel>Email Address</FormLabel>
-                        <Input {...field} type="email" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.bio)}>
-                        <FormLabel>Bio</FormLabel>
-                        <Textarea {...field} maxRows={5} minRows={3} />
-                        {errors.bio ? <FormHelperText>{errors.bio.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="website"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.website)}>
-                        <FormLabel>Website</FormLabel>
-                        <Input
-                          {...field}
-                          startDecorator={
-                            <Chip size="sm" variant="soft">
-                              www.
-                            </Chip>
-                          }
-                        />
-                      </FormControl>
-                    )}
-                  />
-                </Stack>
-              </Grid>
-            </Grid>
-          </Box>
-        </Stack>
-        <Stack spacing={3}>
-          <Stack spacing={3}>
-            <Typography level="h4">Location</Typography>
-            <Box sx={{ maxWidth: 'lg' }}>
-              <Grid container spacing={3}>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.country)}>
-                        <FormLabel>Country</FormLabel>
-                        <Select
-                          {...field}
-                          onChange={(_, value) => {
-                            field.onChange(value);
-                          }}
-                        >
-                          <Option value="">Choose a country</Option>
-                          <Option value="ca">Canada</Option>
-                          <Option value="uk">United Kingdom</Option>
-                          <Option value="us">United States</Option>
-                        </Select>
-                        {errors.country ? <FormHelperText>{errors.country.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.state)}>
-                        <FormLabel>State</FormLabel>
-                        <Input {...field} />
-                        {errors.state ? <FormHelperText>{errors.state.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.city)}>
-                        <FormLabel>City</FormLabel>
-                        <Input {...field} />
-                        {errors.city ? <FormHelperText>{errors.city.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.zipCode)}>
-                        <FormLabel>Zip Code</FormLabel>
-                        <Input {...field} />
-                        {errors.zipCode ? <FormHelperText>{errors.zipCode.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="line1"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.line1)}>
-                        <FormLabel>Address</FormLabel>
-                        <Textarea {...field} maxRows={3} minRows={2} />
-                        {errors.line1 ? <FormHelperText>{errors.line1.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-              </Grid>
+              </Stack>
+              <Stack spacing={3}>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormControl error={Boolean(errors.email)}>
+                      <FormLabel>Email</FormLabel>
+                      <Input
+                        {...field}
+                        type="email"
+                        sx={{ maxWidth: "512px" }}
+                      />
+                      {errors.email ? (
+                        <FormHelperText>{errors.email.message}</FormHelperText>
+                      ) : null}
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormControl error={Boolean(errors.phone)}>
+                      <FormLabel>Phone number</FormLabel>
+                      <Input {...field} type="tel" sx={{ maxWidth: "512px" }} />
+                      {errors.phone ? (
+                        <FormHelperText>{errors.phone.message}</FormHelperText>
+                      ) : null}
+                    </FormControl>
+                  )}
+                />
+              </Stack>
             </Box>
           </Stack>
-        </Stack>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
-          <Button
-            color="neutral"
-            onClick={() => {
-              reset();
+
+          <Divider sx={{ maxWidth: "512px" }} />
+
+          <Stack spacing={2}>
+            <Typography sx={{ fontSize: "14px", fontWeight: 300 }}>
+              Security
+            </Typography>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormControl
+                  error={Boolean(errors.password)}
+                  sx={{ maxWidth: "512px" }}
+                >
+                  <FormLabel>Password</FormLabel>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Input
+                      {...field}
+                      sx={{ width: "100%", maxWidth: "360px" }}
+                      type={showPassword ? "text" : "password"}
+                      endDecorator={
+                        <IconButton
+                          onClick={(): void => {
+                            setShowPassword(!showPassword);
+                          }}
+                        >
+                          {showPassword ? (
+                            <EyeSlashIcon
+                              fontSize="var(--Icon-fontSize)"
+                              weight="bold"
+                            />
+                          ) : (
+                            <EyeIcon
+                              fontSize="var(--Icon-fontSize)"
+                              weight="bold"
+                            />
+                          )}
+                        </IconButton>
+                      }
+                    />
+                    <Box
+                      sx={{
+                        color: "#3D37DD",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setIsModalOpen(true)}
+                    >
+                      Change password
+                    </Box>
+                  </Box>
+                  {errors.password ? (
+                    <FormHelperText>{errors.password.message}</FormHelperText>
+                  ) : null}
+                </FormControl>
+              )}
+            />
+          </Stack>
+
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              top: { xs: "97px", lg: "120px" },
+              right: { xs: "20px", lg: "50px" },
+              position: "fixed",
             }}
-            variant="outlined"
           >
-            Discard
-          </Button>
-          <Button type="submit">Save Changes</Button>
+            <Button
+              onClick={() => {
+                reset();
+              }}
+              variant="outlined"
+            >
+              Cancel
+            </Button>
+            <Button type="submit">Save</Button>
+          </Stack>
         </Stack>
-      </Stack>
-    </form>
+      </form>
+      <ChangePasswordModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }
