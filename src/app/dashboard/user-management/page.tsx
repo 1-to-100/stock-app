@@ -170,6 +170,20 @@ export default function Page(): React.JSX.Element {
     );
   };
 
+  useEffect(() => {
+    const handleClickOutsidePopover = (event: MouseEvent) => {
+      if (popoverAnchorEl && !popoverAnchorEl.contains(event.target as Node)) {
+        handleClosePopover();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsidePopover);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsidePopover);
+    };
+  }, [popoverAnchorEl]);
+
   const handleSelectAllChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -682,6 +696,10 @@ export default function Page(): React.JSX.Element {
                           key={user.id}
                           onMouseEnter={() => setHoveredRow(index)}
                           onMouseLeave={() => setHoveredRow(null)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleOpenDetail(event, user.id);
+                          }}
                         >
                           <td>
                             <Checkbox

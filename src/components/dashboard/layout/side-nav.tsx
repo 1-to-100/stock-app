@@ -17,6 +17,7 @@ import { paths } from "@/paths";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
 import { Logo } from "@/components/core/logo";
 import { NoSsr } from "@/components/core/no-ssr";
+import { useUserInfo } from "@/hooks/use-user-info";
 
 import { ColorSchemeSwitch } from "./color-scheme-switch";
 import { CurrentUser } from "./current-user";
@@ -29,6 +30,17 @@ export interface SideNavProps {
 
 export function SideNav({ items }: SideNavProps): React.JSX.Element {
   const pathname = usePathname();
+  const { userInfo } = useUserInfo();
+
+  const filteredItems = items.map((group) => ({
+    ...group,
+    items: group.items?.filter((item) => {
+      if (!userInfo?.isSuperadmin) {
+        return item.key !== "role" && item.key !== "customer";
+      }
+      return true;
+    }),
+  }));
 
   return (
     <Box
@@ -63,13 +75,12 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
           height: "100%",
           pb: "197px",
           position: "relative",
-          pt: "38px", 
+          pt: "38px",
         }}
       >
         <Stack
-          
           sx={{
-            left: '-15px',
+            left: "-15px",
             position: "absolute",
             top: 0,
             width: "100%",
@@ -92,12 +103,12 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
           sx={{
             height: "100%",
             overflowY: "auto",
-            pb: "20px", 
+            pb: "20px",
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {renderNavGroups({ items, pathname })}
+          {renderNavGroups({ items: filteredItems, pathname })}
         </Box>
         <Box
           sx={{
@@ -304,12 +315,9 @@ function NavItem({
               borderRadius: "30px",
               border: "1px solid var(--joy-palette-divider)",
               color: "var(--joy-palette-text-primary)",
-              boxShadow: "var(--joy-shadow-sm)"
+              boxShadow: "var(--joy-shadow-sm)",
             }),
             ...(open && { color: "var(--NavItem-open-color)" }),
-            // '&:hover': {
-            //   ...(!active && { bgcolor: 'var(--NavItem-hover-background)', color: 'var(--NavItem-hover-color)' }),
-            // },
           }}
         >
           {Icon ? (

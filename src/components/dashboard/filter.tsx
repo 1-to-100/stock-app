@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Stack from "@mui/joy/Stack";
@@ -54,6 +54,36 @@ const Filter = ({
     number[]
   >([]);
   const [activeCategory, setActiveCategory] = useState<string | null>("Status");
+
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sheetRef.current &&
+        !sheetRef.current.contains(event.target as Node) &&
+        anchorEl &&
+        !anchorEl.contains(event.target as Node)
+      ) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [anchorEl]);
+
+  useEffect(() => {
+    const handleCloseFilter = () => {
+      setAnchorEl(null);
+      setActiveCategory("Status");
+      if (onClose) {
+        onClose();
+      }
+    };
+  }, [onClose]);
 
   const { data: customersSelect, isLoading: isCustomersLoading } = useQuery({
     queryKey: ["customers"],
@@ -226,6 +256,7 @@ const Filter = ({
 
       {open && anchorEl && (
         <Sheet
+          ref={sheetRef}
           sx={{
             position: "absolute",
             top: {
@@ -402,7 +433,7 @@ const Filter = ({
                         color:
                           activeCategory === "Manager"
                             ? "var(--joy-palette-text-primary)"
-                            : "#32383E",
+                            : "#32383E ReferralCode",
                         fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >

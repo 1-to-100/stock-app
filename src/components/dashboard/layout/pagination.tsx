@@ -92,7 +92,7 @@ export default function Pagination({
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
-          fontSize: { xs: "14px", sm: "16px" }
+          fontSize: { xs: "12px", sm: "14px" }
         }}
       >
         <CaretLineLeft />
@@ -113,7 +113,7 @@ export default function Pagination({
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
-          fontSize: { xs: "14px", sm: "16px" }
+          fontSize: { xs: "12px", sm: "14px" }
         }}
       >
         <ArrowLeft />
@@ -131,7 +131,7 @@ export default function Pagination({
               borderRadius: "50%",
               minWidth: { xs: "32px", sm: "40px" },
               height: { xs: "32px", sm: "40px" },
-              fontSize: { xs: "14px", sm: "16px" }
+              fontSize: { xs: "12px", sm: "14px" }
             }}
           >
             {page}
@@ -146,7 +146,7 @@ export default function Pagination({
               width: { xs: "32px", sm: "40px" },
               height: { xs: "32px", sm: "40px" },
               color: disabled ? "var(--joy-palette-text-disabled)" : "gray",
-              fontSize: { xs: "14px", sm: "16px" }
+              fontSize: { xs: "12px", sm: "14px" }
             }}
           >
             {page}
@@ -168,7 +168,7 @@ export default function Pagination({
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
-          fontSize: { xs: "14px", sm: "16px" }
+          fontSize: { xs: "12px", sm: "14px" }
         }}
       >
         <span>Next</span>
@@ -189,7 +189,7 @@ export default function Pagination({
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
           borderColor: "gray",
-          fontSize: { xs: "14px", sm: "16px" }
+          fontSize: { xs: "12px", sm: "14px" }
         }}
       >
         <span>Last</span>

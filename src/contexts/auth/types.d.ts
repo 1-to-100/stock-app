@@ -33,6 +33,7 @@ export interface ApiUser {
     avatar?: string;
     createdAt?: string;
     phone?: string;
+    isSuperadmin?: boolean;
     activity?: {
       id: number;
       browserOs: string;
@@ -64,6 +65,11 @@ export interface ApiUser {
       id: number;
       name: string;
       email: string;
+    }
+    owner: {
+      id: number;
+      firstName: string;
+      lastName: string;
     }
   }
 

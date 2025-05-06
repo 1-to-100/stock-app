@@ -12,9 +12,8 @@ import Input from "@mui/joy/Input";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
-import IconButton from "@mui/joy/IconButton";
 import FormHelperText from "@mui/joy/FormHelperText";
-import { Box, Divider } from "@mui/joy";
+import Autocomplete from "@mui/joy/Autocomplete";
 import { useColorScheme } from "@mui/joy/styles";
 import {
   createCustomer,
@@ -50,6 +49,12 @@ interface FormErrors {
   ownerId?: string;
 }
 
+interface SelectUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
 export default function AddEditCustomer({
   open,
   onClose,
@@ -71,13 +76,9 @@ export default function AddEditCustomer({
     ownerId: null,
   });
 
-  const [isActive, setIsActive] = useState<boolean>(true);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] =
-    useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors | null>(null);
   const [emailWarnings, setEmailWarnings] = useState<string[]>([]);
   const { colorScheme } = useColorScheme();
-  const isLightTheme = colorScheme === "light";
   const queryClient = useQueryClient();
 
   const { data: managers, isLoading: isManagersLoading } = useQuery({
@@ -92,7 +93,7 @@ export default function AddEditCustomer({
     enabled: open,
   });
 
-  const { data: customerData, isLoading: isUserLoading } = useQuery({
+  const { data: customerData, isLoading: isCustomerLoading } = useQuery({
     queryKey: ["customers", customerId],
     queryFn: () => getCustomerById(customerId!),
     enabled: !!customerId && open,
@@ -106,8 +107,10 @@ export default function AddEditCustomer({
 
   const { data: users, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: async ({ queryKey }) => {
-      const params: GetUsersParams = {};
+    queryFn: async () => {
+      const params: GetUsersParams = {
+        perPage: 1000,
+      };
       return getUsers(params);
     },
     enabled: open,
@@ -124,7 +127,7 @@ export default function AddEditCustomer({
         subscriptionId: customerData.subscriptionId ?? null,
         managerId: customerData.manager?.id ?? null,
         status: customerData.status || "",
-        ownerId: customerData.ownerId ?? null,
+        ownerId: customerData.owner?.id ?? null,
       });
       setErrors(null);
       setEmailWarnings([]);
@@ -137,7 +140,6 @@ export default function AddEditCustomer({
         status: "",
         ownerId: null,
       });
-      setIsActive(false);
       setErrors(null);
       setEmailWarnings([]);
     }
@@ -209,28 +211,6 @@ export default function AddEditCustomer({
     return null;
   };
 
-  const checkEmailUniqueness = async (
-    email: string,
-    index?: number
-  ): Promise<boolean> => {
-    if (!email || !validateEmail(email)) return false;
-    try {
-      setEmailWarnings((prev) => {
-        const newWarnings = [...prev];
-        if (index !== undefined) {
-          newWarnings[index] = "";
-        } else {
-          newWarnings[0] = "";
-        }
-        return newWarnings;
-      });
-      return false;
-    } catch (error) {
-      console.error("Error checking email uniqueness:", error);
-      return false;
-    }
-  };
-
   const validateForm = (): FormErrors => {
     const newErrors: FormErrors = {};
 
@@ -247,21 +227,18 @@ export default function AddEditCustomer({
       newErrors.managerId = "Manager is required";
     }
 
-      // if (!formData.ownerId) {
-      //   newErrors.ownerId = "Owner is required";
-      // }
-
     if (!formData.subscriptionId) {
       newErrors.subscriptionId = "Subscription is required";
+    }
+
+    if (!formData.ownerId) {
+      newErrors.ownerId = "Customer admin is required";
     }
 
     return newErrors;
   };
 
-  const handleInputChange = async (
-    field: string,
-    value: string | number | null
-  ) => {
+  const handleInputChange = (field: string, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({
       ...prev,
@@ -301,6 +278,48 @@ export default function AddEditCustomer({
       }
     }
   };
+
+  const selectUsers = React.useMemo<SelectUser[]>(() => {
+    const usersData = (users?.data || []) as ApiUser[];
+
+    const filteredUsers = usersData.filter((user) => user.customerId === null);
+
+    const idCounts = filteredUsers.reduce((acc, user) => {
+      acc[user.id] = (acc[user.id] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+    const duplicates = Object.entries(idCounts)
+      .filter(([id, count]) => count > 1)
+      .map(([id]) => Number(id));
+    if (duplicates.length > 0) {
+      console.warn(`Duplicate user IDs found: ${duplicates.join(", ")}`);
+    }
+
+    const userMap = new Map<number, SelectUser>();
+    filteredUsers.forEach((user) => {
+      if (user.id != null) {
+        userMap.set(user.id, {
+          id: user.id,
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+        });
+      }
+    });
+
+    if (customerData?.owner?.id != null) {
+      const ownerId = customerData.owner.id;
+      const ownerUser = usersData.find((user) => user.id === ownerId);
+      if (ownerUser && ownerUser.customerId === null && !userMap.has(ownerId)) {
+        userMap.set(ownerId, {
+          id: ownerId,
+          firstName: customerData.owner.firstName || "",
+          lastName: customerData.owner.lastName || "",
+        });
+      }
+    }
+
+    return Array.from(userMap.values());
+  }, [users, customerData]);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -546,12 +565,21 @@ export default function AddEditCustomer({
               >
                 Customer admin
               </Typography>
-              <Select
-                placeholder="Select user"
-                value={formData.ownerId}
-                onChange={(e, newValue) =>
-                  handleInputChange("ownerId", newValue)
+              <Autocomplete
+                placeholder="Search users"
+                options={selectUsers}
+                getOptionLabel={(user) =>
+                  `${user.firstName.slice(0, 25)} ${user.lastName.slice(0, 25)}`
                 }
+                getOptionKey={(user) => user.id}
+                value={
+                  selectUsers.find((user) => user.id === formData.ownerId) ||
+                  null
+                }
+                onChange={(event, newValue) =>
+                  handleInputChange("ownerId", newValue ? newValue.id : null)
+                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
@@ -559,13 +587,7 @@ export default function AddEditCustomer({
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
                 }}
-              >
-                {users?.data?.map((user: ApiUser) => (
-                  <Option key={user.id} value={user.id}>
-                    {user.firstName} {user.lastName}
-                  </Option>
-                ))}
-              </Select>
+              />
               {errors?.ownerId && (
                 <FormHelperText
                   sx={{

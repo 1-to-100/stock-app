@@ -446,33 +446,35 @@ const Customer: React.FC = () => {
               mt: 2,
             }}
           >
-            <Typography
-              level="title-md"
-              sx={{ fontWeight: "500", fontSize: "18px" }}
-              component="div"
-            >
-              Users{" "}
-              {users.length > 0 ? (
-                <Box
-                  sx={{
-                    bgcolor: "var(--joy-palette-divider)",
-                    borderRadius: "50%",
-                    width: "20px",
-                    height: "20px",
-                    display: "inline-flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    p: 1.5,
-                    fontSize: "14px",
-                    color: "var(--joy-palette-text-primary)",
-                  }}
-                >
-                  {users.length}
-                </Box>
-              ) : (
-                ""
-              )}
-            </Typography>
+            {users.length > 0 && (
+              <Typography
+                level="title-md"
+                sx={{ fontWeight: "500", fontSize: "18px" }}
+                component="div"
+              >
+                Users{" "}
+                {users.length > 0 ? (
+                  <Box
+                    sx={{
+                      bgcolor: "var(--joy-palette-divider)",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      display: "inline-flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      p: 1.5,
+                      fontSize: "14px",
+                      color: "var(--joy-palette-text-primary)",
+                    }}
+                  >
+                    {users.length}
+                  </Box>
+                ) : (
+                  ""
+                )}
+              </Typography>
+            )}
             <Stack sx={{ alignItems: "center", ml: "auto", mr: 2 }}>
               {selectedRows.length > 0 ? (
                 <Box
@@ -504,50 +506,52 @@ const Customer: React.FC = () => {
                 </Box>
               ) : null}
             </Stack>
-            <Tabs
-              value={viewMode}
-              onChange={(event, newValue) =>
-                setViewMode(newValue as "list" | "grid")
-              }
-              variant="custom"
-            >
-              <TabList
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  p: 0,
-                  "& .MuiTab-root": {
-                    borderRadius: "20px",
-                    minWidth: "40px",
-                    p: 1,
-                    color: "var(--joy-palette-text-secondary)",
-                    "&[aria-selected='true']": {
-                      border: "1px solid var(--joy-palette-divider)",
-                      color: "var(--joy-palette-background-primaryColor)",
-                      "& svg": { fill: "url(#tab-gradient)" },
-                    },
-                  },
-                }}
+            {users.length > 0 && (
+              <Tabs
+                value={viewMode}
+                onChange={(event, newValue) =>
+                  setViewMode(newValue as "list" | "grid")
+                }
+                variant="custom"
               >
-                <svg width="0" height="0">
-                  <defs>
-                    <linearGradient
-                      id="tab-gradient"
-                      gradientTransform="rotate(120)"
-                    >
-                      <stop offset="0%" stopColor="#282490" />
-                      <stop offset="100%" stopColor="#3F4DCF" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <Tab value="grid">
-                  <GridFour size={20} weight="bold" />
-                </Tab>
-                <Tab value="list">
-                  <TableIcon size={20} weight="bold" />
-                </Tab>
-              </TabList>
-            </Tabs>
+                <TabList
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    p: 0,
+                    "& .MuiTab-root": {
+                      borderRadius: "20px",
+                      minWidth: "40px",
+                      p: 1,
+                      color: "var(--joy-palette-text-secondary)",
+                      "&[aria-selected='true']": {
+                        border: "1px solid var(--joy-palette-divider)",
+                        color: "var(--joy-palette-background-primaryColor)",
+                        "& svg": { fill: "url(#tab-gradient)" },
+                      },
+                    },
+                  }}
+                >
+                  <svg width="0" height="0">
+                    <defs>
+                      <linearGradient
+                        id="tab-gradient"
+                        gradientTransform="rotate(120)"
+                      >
+                        <stop offset="0%" stopColor="#282490" />
+                        <stop offset="100%" stopColor="#3F4DCF" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <Tab value="grid">
+                    <GridFour size={20} weight="bold" />
+                  </Tab>
+                  <Tab value="list">
+                    <TableIcon size={20} weight="bold" />
+                  </Tab>
+                </TabList>
+              </Tabs>
+            )}
           </Box>
 
           {isLoading || isCustomerLoading ? (
@@ -673,19 +677,19 @@ const Customer: React.FC = () => {
                             />
                           ) : (
                             <Avatar
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            fontWeight: "bold",
-                            fontSize: "13px",
-                          }}
-                          {...getAvatarProps(user.name)}
-                        >
-                          {user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </Avatar>
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                              }}
+                              {...getAvatarProps(user.name)}
+                            >
+                              {user.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </Avatar>
                           )}
                         </td>
                         <td>
@@ -1025,6 +1029,20 @@ const Customer: React.FC = () => {
               )}
             </Box>
           )}
+          {(users.length > 0 || isLoading) && (
+            <Box
+              sx={{
+                mt: "60px",
+              }}
+            >
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                disabled={!hasResults}
+              />
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ flex: 0.7, mt: 2 }}>
@@ -1218,28 +1236,6 @@ const Customer: React.FC = () => {
           </Stack>
         </Box>
       </Box>
-
-      {(users.length > 0 || isLoading) && (
-        <Box
-        //   sx={{
-        //     position: "fixed",
-        //     bottom: "30px",
-        //     left: 0,
-        //     right: 0,
-        //     zIndex: 1000,
-        //     padding: "12px 24px",
-        //     display: "flex",
-        //     justifyContent: "center",
-        //   }}
-        >
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            disabled={!hasResults}
-          />
-        </Box>
-      )}
 
       <DeleteDeactivateUserModal
         open={openDeleteModal}

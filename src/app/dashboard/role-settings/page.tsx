@@ -13,6 +13,7 @@ import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import Button from "@mui/joy/Button";
 import AddRoleModal from "../../../components/dashboard/modals/AddRoleModal";
 import CircularProgress from "@mui/joy/CircularProgress";
+import { useUserInfo } from "@/hooks/use-user-info";
 
 interface HttpError extends Error {
   response?: {
@@ -43,6 +44,8 @@ export default function Page(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<HttpError | null>(null);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
+
+  const { userInfo } = useUserInfo();
 
   const fetchRoles = async () => {
     try {
@@ -107,16 +110,16 @@ export default function Page(): React.JSX.Element {
     );
   }
 
-  if (error) {
+  if (error || !userInfo?.isSuperadmin) {
     const httpError = error as HttpError;
-    let status: number | undefined = httpError.response?.status;
-    
-    if (!status && httpError.message.includes("status:")) {
+    let status: number | undefined = httpError?.response?.status;
+
+    if (!status && httpError?.message?.includes("status:")) {
       const match = httpError.message.match(/status: (\d+)/);
       status = match ? parseInt(match[1] ?? "0", 10) : undefined;
     }
-  
-    if (status === 403) {
+
+    if (status === 403 || !userInfo?.isSuperadmin) {
       return (
         <Box sx={{ textAlign: "center", mt: 35 }}>
           <Typography

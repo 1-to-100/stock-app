@@ -30,6 +30,7 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import { paths } from "@/paths";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
+import { useUserInfo } from "@/hooks/use-user-info";
 
 interface HttpError extends Error {
   response?: {
@@ -64,6 +65,8 @@ export default function Page(): React.JSX.Element {
     statusId: [],
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const { userInfo } = useUserInfo();
 
   const router = useRouter();
   const rowsPerPage = 10;
@@ -274,16 +277,16 @@ export default function Page(): React.JSX.Element {
     marginRight: { xs: "10px", sm: "14px" },
   };
 
-  if (error) {
+  if (error || !userInfo?.isSuperadmin) {
     const httpError = error as HttpError;
-    let status: number | undefined = httpError.response?.status;
+    let status: number | undefined = httpError?.response?.status;
 
-    if (!status && httpError.message.includes("status:")) {
+    if (!status && httpError?.message?.includes("status:")) {
       const match = httpError.message.match(/status: (\d+)/);
       status = match ? parseInt(match[1] ?? "0", 10) : undefined;
     }
 
-    if (status === 403) {
+    if (status === 403 || !userInfo?.isSuperadmin) {
       return (
         <Box sx={{ textAlign: "center", mt: { xs: 10, sm: 20, md: 35 } }}>
           <Typography
@@ -564,7 +567,7 @@ export default function Page(): React.JSX.Element {
                         />
                       </Box>
                     </th>
-                    <th style={{ width: "5%", minWidth: "40px" }}></th>
+                    <th style={{ width: "60px" }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -581,7 +584,13 @@ export default function Page(): React.JSX.Element {
                     </tr>
                   ) : (
                     customers.map((customer, index) => (
-                      <tr key={customer.id}>
+                      <tr
+                        key={customer.id}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleOpenDetail(event, customer.id);
+                        }}
+                      >
                         <td>
                           <Checkbox
                             checked={selectedRows.includes(customer.id)}
@@ -704,11 +713,10 @@ export default function Page(): React.JSX.Element {
                             onClick={(event) => {
                               handleMenuOpen(event, index);
                             }}
-                            sx={{ padding: { xs: "4px", sm: "6px" } }}
                           >
                             <DotsThreeVertical
                               weight="bold"
-                              size={18}
+                              size={22}
                               color="var(--joy-palette-text-secondary)"
                             />
                           </IconButton>

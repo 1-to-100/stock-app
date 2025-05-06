@@ -734,7 +734,7 @@ export default function AddEditUser({
                 </FormHelperText>
               )}
             </Stack>
-            <Stack sx={{ flex: 1 }}>
+            {/* <Stack sx={{ flex: 1 }}>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography
                   level="body-sm"
@@ -783,7 +783,7 @@ export default function AddEditUser({
                   </Option>
                 ))}
               </Select>
-            </Stack>
+            </Stack> */}
           </Stack>
 
           <Stack

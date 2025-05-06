@@ -22,8 +22,7 @@ import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 import ChangePasswordModal from "../modals/ChangePasswordModal";
-import { getUserInfo } from "@/lib/api/users";
-import { useQuery } from "@tanstack/react-query";
+import { useUserInfo } from '@/hooks/use-user-info';
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -45,10 +44,7 @@ const schema = zod.object({
 type Values = zod.infer<typeof schema>;
 
 export function UpdateProfileForm(): React.JSX.Element {
-  const { data: user, isLoading: isUserLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: getUserInfo,
-  });
+  const { userInfo } = useUserInfo();
 
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
 
@@ -71,17 +67,17 @@ export function UpdateProfileForm(): React.JSX.Element {
 
  
   React.useEffect(() => {
-    if (user) {
+    if (userInfo) {
       reset({
-        avatar: user.avatar || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        phone: typeof user.phone === "string" ? user.phone : "",
+        avatar: userInfo.avatar || "",
+        firstName: userInfo.firstName || "",
+        lastName: userInfo.lastName || "",
+        email: userInfo.email || "",
+        phone: typeof userInfo.phone === "string" ? userInfo.phone : "",
         password: "",
       });
     }
-  }, [user, reset]);
+  }, [userInfo, reset]);
 
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
 
