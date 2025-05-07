@@ -419,57 +419,85 @@ const SystemAdminSettings: React.FC = () => {
   }
 
   return (
-    <Box sx={{ padding: "24px" }}>
-      <SearchInput
-        onSearch={handleSearch}
-        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
-      />
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "1.5%", md: "1.5%", lg: "4%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
         }}
       >
-        <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
-          {roleData?.name}
-        </Typography>
-        <Box sx={{ position: "relative" }}>
-          <Button
-            sx={{ marginRight: "8px" }}
-            variant="outlined"
-            color="primary"
-            onClick={handleEditRole}
-            startDecorator={<PencilIcon fontSize="var(--Icon-fontSize)" />}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="solid"
-            color="primary"
-            onClick={handleAddUser}
-            startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-          >
-            Add user
-          </Button>
-        </Box>
+        <SearchInput onSearch={handleSearch} />
       </Box>
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
+        >
+          <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
+              {roleData?.name}
+            </Typography>
+          </Stack>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{
+              alignItems: { xs: "stretch", sm: "center" },
+              width: { xs: "100%", sm: "auto" },
+              position: "relative",
+            }}
+          >
+            <Button
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
+              variant="outlined"
+              color="primary"
+              onClick={handleEditRole}
+              startDecorator={<PencilIcon fontSize="var(--Icon-fontSize)" />}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="solid"
+              color="primary"
+              onClick={handleAddUser}
+              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
+            >
+              Add user
+            </Button>
+          </Stack>
+        </Stack>
+      </Stack>
 
-      <Breadcrumbs separator={<BreadcrumbsSeparator />}>
-        <BreadcrumbsItem
-          href={paths.dashboard.roleSettings.list}
-          type="start"
-        />
-        <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
-          Role Settings
-        </BreadcrumbsItem>
-        <BreadcrumbsItem type="end">{roleData?.name}</BreadcrumbsItem>
-      </Breadcrumbs>
+      <Stack sx={{ mt: 4 }}>
+        <Breadcrumbs separator={<BreadcrumbsSeparator />}>
+          <BreadcrumbsItem
+            href={paths.dashboard.roleSettings.list}
+            type="start"
+          />
+          <BreadcrumbsItem href={paths.dashboard.roleSettings.list}>
+            Role Settings
+          </BreadcrumbsItem>
+          <BreadcrumbsItem type="end">{roleData?.name}</BreadcrumbsItem>
+        </Breadcrumbs>
+      </Stack>
 
       <Box
         sx={{
-          display: "flex",
+          display: { xs: "block", sm: "flex" },
           gap: 3,
           borderTop: "1px solid var(--joy-palette-divider)",
           mt: 3,
@@ -479,7 +507,10 @@ const SystemAdminSettings: React.FC = () => {
         <Box
           sx={{
             flex: 2,
-            borderRight: "1px solid var(--joy-palette-divider)",
+            borderRight: {
+              xs: "none",
+              sm: "1px solid var(--joy-palette-divider)",
+            },
             pr: 3,
           }}
         >
@@ -627,147 +658,131 @@ const SystemAdminSettings: React.FC = () => {
                   />
                 </Box>
               ) : viewMode === "list" ? (
-                <Table aria-label="system admin users table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "5%" }}>
-                        <Checkbox
-                          checked={
-                            hasResults && selectedRows.length === users.length
-                          }
-                          indeterminate={
-                            hasResults &&
-                            selectedRows.length > 0 &&
-                            selectedRows.length < users.length
-                          }
-                          onChange={handleSelectAllChange}
-                          disabled={!hasResults}
-                        />
-                      </th>
-                      <th style={{ width: "60px" }}></th>
-                      <th onClick={() => handleSort("name")}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": { opacity: 1 },
-                          }}
-                        >
-                          Name
-                        </Box>
-                      </th>
-                      <th onClick={() => handleSort("email")}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": { opacity: 1 },
-                          }}
-                        >
-                          Email
-                        </Box>
-                      </th>
-                      <th style={{ width: "60px" }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user, index) => (
-                      <tr
-                        key={user.id}
-                        onMouseEnter={() => setHoveredRow(index)}
-                        onMouseLeave={() => setHoveredRow(null)}
-                      >
-                        <td>
+                <Box
+                  sx={{
+                    overflowX: "auto",
+                    width: "100%",
+                    WebkitOverflowScrolling: "touch",
+                    scrollbarWidth: { xs: "thin", sm: "auto" },
+                    "&::-webkit-scrollbar": {
+                      height: { xs: "8px", sm: "12px" },
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "var(--joy-palette-divider)",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
+                  <Table
+                    aria-label="system admin users table"
+                    sx={{
+                      minWidth: "400px",
+                      tableLayout: "fixed",
+                      "& th, & td": {
+                        px: { xs: 1, sm: 2 },
+                        py: { xs: 1, sm: 1.5 },
+                      },
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th style={{ width: "5%" }}>
                           <Checkbox
-                            checked={selectedRows.includes(user.id)}
-                            onChange={() => handleRowCheckboxChange(user.id)}
+                            checked={
+                              hasResults && selectedRows.length === users.length
+                            }
+                            indeterminate={
+                              hasResults &&
+                              selectedRows.length > 0 &&
+                              selectedRows.length < users.length
+                            }
+                            onChange={handleSelectAllChange}
+                            disabled={!hasResults}
                           />
-                        </td>
-                        <td>
-                          {user.avatar ? (
-                            <Avatar
-                              src={user.avatar}
-                              sx={{ width: 28, height: 28 }}
-                            />
-                          ) : (
-                            <Avatar
-                              sx={{
-                                width: 28,
-                                height: 28,
-                                fontWeight: "bold",
-                                fontSize: "13px",
-                              }}
-                              {...getAvatarProps(user.name)}
-                            >
-                              {user.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </Avatar>
-                          )}
-                        </td>
-                        <td>
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            sx={{ alignItems: "center" }}
-                          >
-                            <Typography sx={{ wordBreak: "break-all" }}>
-                              {user.name}
-                            </Typography>
-                            <Tooltip
-                              title={user.status}
-                              placement="top"
-                              sx={{
-                                background: "#DAD8FD",
-                                color: "#3D37DD",
-                                textTransform: "capitalize",
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  bgcolor:
-                                    user.status === "active"
-                                      ? "#1A7D36"
-                                      : user.status === "inactive"
-                                      ? "#D3232F"
-                                      : "#FAE17D",
-                                  borderRadius: "50%",
-                                  width: "10px",
-                                  minWidth: "10px",
-                                  height: "10px",
-                                  display: "inline-block",
-                                }}
-                              />
-                            </Tooltip>
-                          </Stack>
-                        </td>
-                        <td>
+                        </th>
+                        <th style={{ width: "60px" }}></th>
+                        <th onClick={() => handleSort("name")}>
                           <Box
                             sx={{
-                              position: "relative",
-                              display: "inline-block",
-                              fontWeight: 400,
-                              color: "var(--joy-palette-text-secondary)",
-                              wordBreak: "break-all",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              "& .sort-icon": {
+                                opacity: 0,
+                                transition: "opacity 0.2s ease-in-out",
+                              },
+                              "&:hover .sort-icon": { opacity: 1 },
                             }}
                           >
-                            {typeof user.email === "string"
-                              ? user.email
-                              : user.email[0]}
-                            {hoveredRow === index && (
+                            Name
+                          </Box>
+                        </th>
+                        <th onClick={() => handleSort("email")}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              "& .sort-icon": {
+                                opacity: 0,
+                                transition: "opacity 0.2s ease-in-out",
+                              },
+                              "&:hover .sort-icon": { opacity: 1 },
+                            }}
+                          >
+                            Email
+                          </Box>
+                        </th>
+                        <th style={{ width: "60px" }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((user, index) => (
+                        <tr
+                          key={user.id}
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
+                          <td>
+                            <Checkbox
+                              checked={selectedRows.includes(user.id)}
+                              onChange={() => handleRowCheckboxChange(user.id)}
+                            />
+                          </td>
+                          <td>
+                            {user.avatar ? (
+                              <Avatar
+                                src={user.avatar}
+                                sx={{ width: 28, height: 28 }}
+                              />
+                            ) : (
+                              <Avatar
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  fontWeight: "bold",
+                                  fontSize: "13px",
+                                }}
+                                {...getAvatarProps(user.name)}
+                              >
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </Avatar>
+                            )}
+                          </td>
+                          <td>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{ alignItems: "center" }}
+                            >
+                              <Typography sx={{ wordBreak: "break-all" }}>
+                                {user.name.slice(0, 85)}
+                              </Typography>
                               <Tooltip
-                                title="Copy Email"
+                                title={user.status}
                                 placement="top"
                                 sx={{
                                   background: "#DAD8FD",
@@ -775,133 +790,195 @@ const SystemAdminSettings: React.FC = () => {
                                   textTransform: "capitalize",
                                 }}
                               >
-                                <IconButton
-                                  size="sm"
-                                  onClick={() => {
-                                    if (typeof user.email === "string") {
-                                      handleCopyEmail(user.email);
-                                    }
-                                  }}
+                                <Box
                                   sx={{
-                                    position: "absolute",
-                                    right: "-30px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    bgcolor: "transparent",
-                                    "&:hover": { bgcolor: "transparent" },
+                                    bgcolor:
+                                      user.status === "active"
+                                        ? "#1A7D36"
+                                        : user.status === "inactive"
+                                        ? "#D3232F"
+                                        : "#FAE17D",
+                                    borderRadius: "50%",
+                                    width: "10px",
+                                    minWidth: "10px",
+                                    height: "10px",
+                                    display: "inline-block",
+                                  }}
+                                />
+                              </Tooltip>
+                            </Stack>
+                          </td>
+                          <td>
+                            <Box
+                              sx={{
+                                position: "relative",
+                                display: "inline-block",
+                                fontWeight: 400,
+                                color: "var(--joy-palette-text-secondary)",
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {typeof user.email === "string"
+                                ? user.email.slice(0, 85)
+                                : user.email[0]}
+                              {hoveredRow === index && (
+                                <Tooltip
+                                  title="Copy Email"
+                                  placement="top"
+                                  sx={{
+                                    background: "#DAD8FD",
+                                    color: "#3D37DD",
+                                    textTransform: "capitalize",
                                   }}
                                 >
-                                  <CopyIcon fontSize="var(--Icon-fontSize)" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {copiedEmail === user.email && (
-                              <Box
-                                sx={{
-                                  position: "fixed",
-                                  bottom: "20px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  bgcolor: "#DCFCE7",
-                                  color: "#16A34A",
-                                  padding: "4px 6px",
-                                  borderRadius: "10px",
-                                  fontSize: "12px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                  zIndex: 1000,
-                                }}
-                              >
-                                Copied to clipboard
-                                <IconButton
-                                  size="sm"
-                                  onClick={() => setCopiedEmail(null)}
-                                  sx={{ color: "#16A34A" }}
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => {
+                                      if (typeof user.email === "string") {
+                                        handleCopyEmail(user.email);
+                                      }
+                                    }}
+                                    sx={{
+                                      position: "absolute",
+                                      right: "-30px",
+                                      top: "50%",
+                                      transform: "translateY(-50%)",
+                                      bgcolor: "transparent",
+                                      "&:hover": { bgcolor: "transparent" },
+                                    }}
+                                  >
+                                    <CopyIcon fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {copiedEmail === user.email && (
+                                <Box
+                                  sx={{
+                                    position: "fixed",
+                                    bottom: "20px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    bgcolor: "#DCFCE7",
+                                    color: "#16A34A",
+                                    padding: "4px 6px",
+                                    borderRadius: "10px",
+                                    fontSize: "12px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    zIndex: 1000,
+                                  }}
                                 >
-                                  <X fontSize="var(--Icon-fontSize)" />
-                                </IconButton>
+                                  Copied to clipboard
+                                  <IconButton
+                                    size="sm"
+                                    onClick={() => setCopiedEmail(null)}
+                                    sx={{ color: "#16A34A" }}
+                                  >
+                                    <X fontSize="var(--Icon-fontSize)" />
+                                  </IconButton>
+                                </Box>
+                              )}
+                            </Box>
+                          </td>
+                          <td>
+                            <IconButton
+                              size="sm"
+                              onClick={(event) => handleMenuOpen(event, index)}
+                            >
+                              <DotsThreeVertical
+                                weight="bold"
+                                size={22}
+                                color="var(--joy-palette-text-secondary)"
+                              />
+                            </IconButton>
+                            <Popper
+                              open={menuRowIndex === index && Boolean(anchorEl)}
+                              anchorEl={anchorEl}
+                              placement="bottom-start"
+                              style={{
+                                minWidth: "150px",
+                                borderRadius: "8px",
+                                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                                backgroundColor:
+                                  "var(--joy-palette-background-surface)",
+                                zIndex: 1300,
+                                border: "1px solid var(--joy-palette-divider)",
+                              }}
+                            >
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleOpenDetail(event, user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <EyeIcon fontSize="20px" style={iconStyle} />
+                                Open detail
                               </Box>
-                            )}
-                          </Box>
-                        </td>
-                        <td>
-                          <IconButton
-                            size="sm"
-                            onClick={(event) => handleMenuOpen(event, index)}
-                          >
-                            <DotsThreeVertical
-                              weight="bold"
-                              size={22}
-                              color="var(--joy-palette-text-secondary)"
-                            />
-                          </IconButton>
-                          <Popper
-                            open={menuRowIndex === index && Boolean(anchorEl)}
-                            anchorEl={anchorEl}
-                            placement="bottom-start"
-                            style={{
-                              minWidth: "150px",
-                              borderRadius: "8px",
-                              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-                              backgroundColor:
-                                "var(--joy-palette-background-surface)",
-                              zIndex: 1300,
-                              border: "1px solid var(--joy-palette-divider)",
-                            }}
-                          >
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleOpenDetail(event, user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <EyeIcon fontSize="20px" style={iconStyle} />
-                              Open detail
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleEdit(user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <PencilIcon fontSize="20px" style={iconStyle} />
-                              Edit
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleResetPassword(user.id);
-                              }}
-                              sx={menuItemStyle}
-                            >
-                              <Password fontSize="20px" style={iconStyle} />
-                              Reset password
-                            </Box>
-                            <Box
-                              onMouseDown={(event) => {
-                                event.preventDefault();
-                                handleDeleteRow(user.id);
-                                handleMenuClose();
-                              }}
-                              sx={{ ...menuItemStyle, color: "#EF4444" }}
-                            >
-                              <TrashIcon fontSize="20px" style={iconStyle} />
-                              Delete
-                            </Box>
-                          </Popper>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleEdit(user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <PencilIcon fontSize="20px" style={iconStyle} />
+                                Edit
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleResetPassword(user.id);
+                                }}
+                                sx={menuItemStyle}
+                              >
+                                <Password fontSize="20px" style={iconStyle} />
+                                Reset password
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleDeleteRow(user.id);
+                                  handleMenuClose();
+                                }}
+                                sx={{ ...menuItemStyle, color: "#EF4444" }}
+                              >
+                                <TrashIcon fontSize="20px" style={iconStyle} />
+                                Delete
+                              </Box>
+                            </Popper>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                  {(users.length > 0 || isLoading) && (
+                    <Box
+                      sx={{
+                        position: { xs: "static", sm: "static" },
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        padding: "12px 24px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Pagination
+                        totalPages={totalPages}
+                        currentPage={currentPage}
+                        onPageChange={handlePageChange}
+                        disabled={!hasResults}
+                      />
+                    </Box>
+                  )}
+                </Box>
               ) : (
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+                    gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
                     gap: 2,
                   }}
                 >
@@ -913,6 +990,13 @@ const SystemAdminSettings: React.FC = () => {
                         p: "16px",
                         display: "flex",
                         alignItems: "center",
+                        maxWidth: {
+                          xs: "92vw",
+                          sm: "65vw",
+                          md: "32vw",
+                          lg: "25vw",
+                          xl: "27vw",
+                        },
                       }}
                     >
                       <Box
@@ -968,7 +1052,7 @@ const SystemAdminSettings: React.FC = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {user.name}
+                          {user.name.slice(0, 85)}
                         </Typography>
                         <Typography
                           level="body-sm"
@@ -1060,7 +1144,7 @@ const SystemAdminSettings: React.FC = () => {
           )}
         </Box>
 
-        <Box sx={{ flex: 0.7, mt: 2 }}>
+        <Box sx={{ flex: 0.7, mt: { xs: 4, sm: 2 } }}>
           <Box
             sx={{
               mb: 3,
@@ -1214,28 +1298,6 @@ const SystemAdminSettings: React.FC = () => {
           </Box>
         </Box>
       </Box>
-
-      {(users.length > 0 || isLoading) && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: "30px",
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            padding: "12px 24px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            disabled={!hasResults}
-          />
-        </Box>
-      )}
 
       <DeleteDeactivateUserModal
         open={openDeleteModal}

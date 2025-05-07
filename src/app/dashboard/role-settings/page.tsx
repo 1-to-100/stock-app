@@ -148,27 +148,42 @@ export default function Page(): React.JSX.Element {
   }
 
   return (
-    <Box sx={{ p: "var(--Content-padding)" }}>
-      <SearchInput
-        onSearch={handleSearch}
-        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
-      />
-      <Stack spacing={3}>
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
+      <Box
+        sx={{
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "1.5%", md: "1.5%", lg: "4%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
+        }}
+      >
+        <SearchInput onSearch={handleSearch} />
+      </Box>
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
-          display={"flex"}
-          direction={"row"}
-          alignItems={"center"}
-          justifyContent={"space-between"}
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
         >
-          <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
-            Role Settings
-          </Typography>
+          <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
+              Role Settings
+            </Typography>
+          </Stack>
           <Stack>
             <Button
               variant="solid"
               color="primary"
               onClick={handleAddRoleModal}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
             >
               Add role
             </Button>
