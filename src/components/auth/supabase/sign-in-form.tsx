@@ -29,17 +29,7 @@ import { paths } from '@/paths';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
-
-interface OAuthProvider {
-  id: 'google' | 'discord';
-  name: string;
-  logo: string;
-}
-
-const oAuthProviders = [
-  { id: 'google', name: 'Google', logo: '/assets/logo-google.svg' },
-  { id: 'discord', name: 'Discord', logo: '/assets/logo-discord.svg' },
-] satisfies OAuthProvider[];
+import {OAuthProvider, oAuthProviders} from "@/lib/auth/supabase/auth-providers";
 
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email(),
@@ -118,29 +108,40 @@ export function SignInForm(): React.JSX.Element {
 
   return (
     <Stack spacing={5}>
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-          <DynamicLogo colorDark="light" colorLight="dark" height={32} width={154} />
+      <Box sx={{display: "flex", justifyContent: "center"}}>
+        <Box
+          component={RouterLink}
+          href={paths.home}
+          sx={{display: "inline-block", fontSize: 0}}
+        >
+          <DynamicLogo
+            colorDark="light"
+            colorLight="dark"
+            height={24}
+            width={150}
+          />
         </Box>
       </Box>
-      <Tabs value="sign-in" variant="custom">
-        <TabList>
-          <Tab component={RouterLink} href={paths.auth.supabase.signIn} value="sign-in">
-            Sign In
-          </Tab>
-          <Tab component={RouterLink} href={paths.auth.supabase.signUp} value="sign-up">
-            Create Account
-          </Tab>
-        </TabList>
-      </Tabs>
+      <Box
+        sx={{
+          textAlign: "center",
+          fontSize: "30px",
+          color: "var(--joy-palette-text-primary)",
+          fontWeight: "600",
+          lineHeight: "32px",
+        }}
+      >
+        Welcome to StockApp <br/> admin panel
+      </Box>
       <Stack spacing={3}>
         <Stack spacing={2}>
           {oAuthProviders.map(
             (provider): React.JSX.Element => (
               <Button
-                color="neutral"
                 disabled={isPending}
-                endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
+                endDecorator={
+                  <Image alt="" height={24} src={provider.logo} width={24}/>
+                }
                 key={provider.id}
                 onClick={(): void => {
                   onAuth(provider.id).catch(() => {
@@ -155,6 +156,26 @@ export function SignInForm(): React.JSX.Element {
           )}
         </Stack>
         <Divider>or</Divider>
+      </Stack>
+      <Tabs value="sign-in" variant="custom">
+        <TabList>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.supabase.signIn}
+            value="sign-in"
+          >
+            Sign In
+          </Tab>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.supabase.signUp}
+            value="sign-up"
+          >
+            Sign Up
+          </Tab>
+        </TabList>
+      </Tabs>
+      <Stack spacing={3}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
             <Controller

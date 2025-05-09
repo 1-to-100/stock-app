@@ -11,13 +11,13 @@ export function createClient(
   cookieStore: ReturnType<typeof cookies>
 ): SupabaseClient {
   return createServerClient(config.supabase.url!, config.supabase.anonKey!, {
-    cookieOptions: {
-      name: "sb",
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7,
-    },
+    // cookieOptions: {
+    //   name: "sb",
+    //   path: "/",
+    //   sameSite: "lax",
+    //   secure: process.env.NODE_ENV === "production",
+    //   maxAge: 60 * 60 * 24 * 7,
+    // },
     cookies: {
       async get(name: string) {
         const store = await cookieStore;

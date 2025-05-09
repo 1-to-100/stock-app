@@ -9,6 +9,7 @@ import { logger } from '@/lib/default-logger';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
 import type { UserContextValue } from '../types';
+import {apiFetch} from "@/lib/api/api-fetch";
 
 export const UserContext = React.createContext<UserContextValue | undefined>(undefined);
 
@@ -26,6 +27,16 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     error: null,
     isLoading: true,
   });
+
+  const syncUser = React.useCallback(async (session: Session | null) => {
+    console.log("[syncUser]" );
+    const user = session?.user;
+    if(!user) return;
+
+    return apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sync/supabase`, {
+      method: 'POST',
+    })
+  }, [])
 
   React.useEffect(() => {
     function handleInitialSession(session: Session | null): void {
@@ -79,10 +90,12 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
 
       if (event === 'INITIAL_SESSION') {
         handleInitialSession(session);
+        syncUser(session).then();
       }
 
       if (event === 'SIGNED_IN') {
         handleSignedIn(session);
+        syncUser(session).then();
       }
 
       if (event === 'SIGNED_OUT') {
@@ -93,7 +106,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     return () => {
       subscription?.unsubscribe();
     };
-  }, [router, supabaseClient]);
+  }, [router, supabaseClient, syncUser]);
 
   return <UserContext.Provider value={{ ...state }}>{children}</UserContext.Provider>;
 }

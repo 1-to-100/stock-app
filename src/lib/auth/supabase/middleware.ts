@@ -1,13 +1,12 @@
 import type { NextRequest, NextResponse } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
 
-import { logger } from '@/lib/default-logger';
-import { createClient } from '@/lib/supabase/middleware';
+export async function supabaseMiddleware(request: NextRequest): Promise<NextResponse> {
+  return await updateSession(request);
 
-export async function supabaseMiddleware(req: NextRequest): Promise<NextResponse> {
-  const { supabaseClient, res } = createClient(req);
-
+  /* OLD CODE
   try {
-    const { error } = await supabaseClient.auth.getSession();
+    const { error } = await supabaseServerClient.auth.getSession();
 
     if (error) {
       logger.debug('Something went wrong, deleted auth token cookie');
@@ -20,6 +19,7 @@ export async function supabaseMiddleware(req: NextRequest): Promise<NextResponse
   }
 
   return res;
+  */
 }
 
 // Supabase does not automatically remove the auth token in

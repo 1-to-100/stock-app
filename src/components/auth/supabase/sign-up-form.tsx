@@ -27,17 +27,8 @@ import { paths } from '@/paths';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
-
-interface OAuthProvider {
-  id: 'google' | 'discord';
-  name: string;
-  logo: string;
-}
-
-const oAuthProviders = [
-  { id: 'google', name: 'Google', logo: '/assets/logo-google.svg' },
-  { id: 'discord', name: 'Discord', logo: '/assets/logo-discord.svg' },
-] satisfies OAuthProvider[];
+import {OAuthProvider, oAuthProviders} from "@/lib/auth/supabase/auth-providers";
+import {Typography} from "@mui/joy";
 
 const schema = zod.object({
   firstName: zod.string().min(1, { message: 'First name is required' }),
@@ -152,9 +143,10 @@ export function SignUpForm(): React.JSX.Element {
           {oAuthProviders.map(
             (provider): React.JSX.Element => (
               <Button
-                color="neutral"
                 disabled={isPending}
-                endDecorator={<Image alt="" height={24} src={provider.logo} width={24} />}
+                endDecorator={
+                  <Image alt="" height={24} src={provider.logo} width={24}/>
+                }
                 key={provider.id}
                 onClick={(): void => {
                   onAuth(provider.id).catch(() => {
@@ -220,17 +212,27 @@ export function SignUpForm(): React.JSX.Element {
               name="terms"
               render={({ field }) => (
                 <FormControl error={Boolean(errors.terms)}>
-                  <Checkbox
-                    checked={field.value}
-                    label={
-                      <React.Fragment>
-                        I have read the <Link>terms and conditions</Link>
-                      </React.Fragment>
-                    }
-                    name={field.name}
-                    onChange={field.onChange}
-                  />
-                  {errors.terms ? <FormHelperText>{errors.terms.message}</FormHelperText> : null}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                    }}
+                  >
+                    <Checkbox checked={field.value} onChange={field.onChange} />
+                    <Typography
+                      level="body-sm"
+                      sx={{
+                        fontSize: "14px",
+                        color: "var(--joy-palette-text-primary)",
+                      }}
+                    >
+                      I have read the <Link>terms and conditions</Link>
+                    </Typography>
+                  </Box>
+                  {errors.terms ? (
+                    <FormHelperText>{errors.terms.message}</FormHelperText>
+                  ) : null}
                 </FormControl>
               )}
             />
