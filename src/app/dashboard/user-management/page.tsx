@@ -21,7 +21,7 @@ import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/Penci
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
 import { config } from "@/config";
-import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
+import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import { useState, useCallback, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
@@ -957,6 +957,8 @@ export default function Page(): React.JSX.Element {
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
         usersToDelete={usersToDelete}
+        title="Delete user"
+        description="Are you sure you want to delete this user?"
       />
 
       <DeleteDeactivateUserModal
@@ -965,6 +967,8 @@ export default function Page(): React.JSX.Element {
         onConfirm={confirmDeactivate}
         usersToDelete={usersToDelete}
         isDeactivate={true}
+        title="Deactivate user"
+        description="Are you sure you want to deactivate this user?"
       />
 
       <UserDetailsPopover

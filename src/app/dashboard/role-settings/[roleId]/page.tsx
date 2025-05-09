@@ -43,7 +43,7 @@ import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { useCallback, useState, useEffect } from "react";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
-import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
+import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import Pagination from "@/components/dashboard/layout/pagination";
 import InviteUser from "@/components/dashboard/modals/InviteUserModal";
 import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
@@ -1304,6 +1304,8 @@ const SystemAdminSettings: React.FC = () => {
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
         usersToDelete={usersToDelete}
+        title="Delete role"
+        description="Are you sure you want to delete this role?"
       />
 
       <AddEditUser

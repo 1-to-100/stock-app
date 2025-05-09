@@ -17,7 +17,7 @@ import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
 import { config } from "@/config";
-import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteDeactivateUserModal";
+import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import AddEditCustomer from "@/components/dashboard/modals/AddEditCustomerModal";
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
@@ -797,6 +797,8 @@ export default function Page(): React.JSX.Element {
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
         usersToDelete={customersToDelete}
+        title="Delete customer"
+        description="Are you sure you want to delete this customer?"
       />
 
       <AddEditCustomer

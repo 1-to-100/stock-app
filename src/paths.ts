@@ -46,7 +46,10 @@ export const paths = {
       list: '/dashboard/customer-management',
       details: (customerId: string) => `/dashboard/customer-management/${customerId}`,
     },
-    crypto: '/dashboard/crypto',
+    documentation: {
+      list: '/dashboard/documentation',
+      details: (categoryId: string) => `/dashboard/documentation/${categoryId}`,
+    },
     roleSettings: {
       list: '/dashboard/role-settings',
       details: (roleId: string) => `/dashboard/role-settings/${roleId}`,

@@ -14,7 +14,7 @@ import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { Warning as Warning } from "@phosphor-icons/react/dist/ssr/Warning";
-import DeleteDeactivateUserModal from "../modals/DeleteDeactivateUserModal";
+import DeleteDeactivateUserModal from "../modals/DeleteItemModal";
 import ResetPasswordUserModal from "../modals/ResetPasswordUserModal";
 import SuspendUserModal from "../modals/SuspendUserModal";
 import { useState, useEffect, useRef } from "react";
@@ -625,6 +625,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
         usersToDelete={[userData?.firstName + " " + userData?.lastName || ""]}
+        title="Delete user"
+        description="Are you sure you want to delete this user?"
       />
 
       <DeleteDeactivateUserModal
@@ -633,6 +635,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
         onConfirm={confirmDeactivate}
         isDeactivate={true}
         usersToDelete={[userData?.firstName + " " + userData?.lastName || ""]}
+        title="Deactivate user"
+        description="Are you sure you want to deactivate this user?"
       />
 
       <ResetPasswordUserModal
