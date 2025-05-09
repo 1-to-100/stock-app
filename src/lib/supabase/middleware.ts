@@ -1,36 +1,65 @@
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import type { CookieOptions } from '@supabase/ssr';
-import { createServerClient } from '@supabase/ssr';
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { config } from '@/config';
+import {paths} from "@/paths";
 
 type ResponseCookie = Pick<CookieOptions, 'httpOnly' | 'maxAge' | 'priority'>;
 
-export function createClient(req: NextRequest): { supabaseClient: SupabaseClient; res: NextResponse } {
-  // Create an unmodified response
-  let res = NextResponse.next({ request: { headers: req.headers } });
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
-  const supabaseClient = createServerClient(config.supabase.url!, config.supabase.anonKey!, {
-    cookies: {
-      get(name: string) {
-        return req.cookies.get(name)?.value;
+  const supabase = createServerClient(
+    config.supabase.url!,
+    config.supabase.anonKey!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
       },
-      set(name: string, value: string, options: CookieOptions) {
-        // If the cookie is updated, update the cookies for the request and response
-        req.cookies.set({ name, value, ...(options as Partial<ResponseCookie>) });
-        res = NextResponse.next({ request: { headers: req.headers } });
-        res.cookies.set({ name, value, ...(options as Partial<ResponseCookie>) });
-      },
-      remove(name: string, options: CookieOptions) {
-        // If the cookie is removed, update the cookies for the request and response
-        req.cookies.set({ name, value: '', ...(options as Partial<ResponseCookie>) });
-        res = NextResponse.next({ request: { headers: req.headers } });
-        res.cookies.set({ name, value: '', ...(options as Partial<ResponseCookie>) });
-      },
-    },
-  });
+    }
+  )
 
-  return { supabaseClient, res };
+  // Do not run code between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
+
+  // IMPORTANT: DO NOT REMOVE auth.getUser()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && !request.nextUrl.pathname.startsWith('/auth')) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone()
+    url.pathname = paths.auth.supabase.signIn
+    return NextResponse.redirect(url)
+  }
+
+  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  // If you're creating a new response object with NextResponse.next() make sure to:
+  // 1. Pass the request in it, like so:
+  //    const myNewResponse = NextResponse.next({ request })
+  // 2. Copy over the cookies, like so:
+  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
+  // 3. Change the myNewResponse object to fit your needs, but avoid changing
+  //    the cookies!
+  // 4. Finally:
+  //    return myNewResponse
+  // If this is not done, you may be causing the browser and server to go out
+  // of sync and terminate the user's session prematurely!
+
+  return supabaseResponse
 }

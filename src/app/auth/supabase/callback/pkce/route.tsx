@@ -27,8 +27,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ error: description });
   }
-
   const code = searchParams.get('code');
+  let next = searchParams.get('next');
 
   if (!code) {
     return NextResponse.json({ error: 'Code is missing' });
@@ -53,7 +53,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Something went wrong' });
   }
 
-  let next = searchParams.get('next');
 
   if (!next) {
     next = paths.home;
