@@ -92,10 +92,10 @@ export function SignUpForm(): React.JSX.Element {
       const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
       redirectToUrl.searchParams.set('next', paths.dashboard.overview);
 
-      const { data, error } = await supabaseClient.auth.signUp({
+      const {data, error} = await supabaseClient.auth.signUp({
         email: values.email,
         password: values.password,
-        options: { emailRedirectTo: redirectToUrl.href },
+        options: {emailRedirectTo: redirectToUrl.href, data: {firstName: values.firstName, lastName: values.lastName}},
       });
 
       if (error) {
