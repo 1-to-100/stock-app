@@ -32,7 +32,7 @@ export interface ApiUser {
   status: string;
   avatar?: string;
   createdAt?: string;
-  phone?: string;
+  phoneNumber?: string;
   isSuperadmin?: boolean;
   activity?: {
     id: number;
@@ -83,6 +83,32 @@ export interface Category {
     Articles: number;
   };
   updatedAt: string;
+  Creator: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface Article {
+  id: number;
+  title: string;
+  articleCategoryId: number;
+  subcategory: string;
+  status: string;
+  content: string;
+  videoUrl: string;
+  updatedAt: string;
+  viewsNumber: number;
+  Creator: {
+    id: number;
+    firstName: string;
+    lastName: string;
+  };
+  Category: {
+    id: number;
+    name: string;
+  };
 }
 
 export type Status = "active" | "inactive" | "suspended";

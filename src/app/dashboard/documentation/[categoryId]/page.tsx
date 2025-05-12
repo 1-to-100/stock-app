@@ -24,46 +24,25 @@ import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { Popper } from "@mui/base/Popper";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
-import { Password } from "@phosphor-icons/react/dist/ssr/Password";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
+import { Star as StarIcon } from "@phosphor-icons/react/dist/ssr/Star";
+import { X as XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { useCallback, useState, useEffect } from "react";
-import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import Pagination from "@/components/dashboard/layout/pagination";
-import ResetPasswordUser from "@/components/dashboard/modals/ResetPasswordUserModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUsers, getUserById } from "../../../../lib/api/users";
-import { getRoles, ModulePermission } from "../../../../lib/api/roles";
-import { getCustomers } from "../../../../lib/api/customers";
-import { getRoleById } from "../../../../lib/api/roles";
-import { ApiUser } from "@/contexts/auth/types";
-import AddRoleModal from "@/components/dashboard/modals/AddRoleModal";
+import { Article } from "@/contexts/auth/types";
 import { getCategoryById } from "@/lib/api/categories";
+import { getArticlesList } from "@/lib/api/articles";
+import { useRouter } from "next/navigation";
 
 const RouterLink = Link;
 
-interface Permission {
-  id: string;
-  name: string;
-  label: string;
-  description?: string;
-}
-
-interface Module {
-  id: string;
-  name: string;
-  permissions: Permission[];
-}
-
-const SystemAdminSettings: React.FC = () => {
+const CategoryInfo: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
-  const [expandedPermissions, setExpandedPermissions] = useState<string[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(
     null
@@ -72,17 +51,14 @@ const SystemAdminSettings: React.FC = () => {
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<Article | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [openEditRoleModal, setOpenEditRoleModal] = useState(false);
-  const [openResetPasswordModal, setOpenResetPasswordModal] = useState(false);
-  const [userToResetPassword, setUserToResetPassword] =
-    useState<ApiUser | null>(null);
   const [userToEditId, setUserToEditId] = useState<number | null>(null);
-  const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
+  const [sortColumn, setSortColumn] = useState<keyof Article | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -91,85 +67,53 @@ const SystemAdminSettings: React.FC = () => {
   const params = useParams();
   const categoryId = params.categoryId;
 
+  const router = useRouter();
+
   const rowsPerPage = 10;
 
   const {
-    data: roleData,
-    isLoading: isRoleLoading,
-    error: roleError,
+    data: categoryData,
+    isLoading: isCategoryLoading,
+    error: categoryError,
   } = useQuery({
-    queryKey: ["role", categoryId],
+    queryKey: ["category", categoryId],
     queryFn: () => {
       if (!categoryId) {
-        throw new Error("Role ID is missing");
+        throw new Error("Category ID is missing");
       }
       return getCategoryById(Number(categoryId));
     },
     enabled: !!categoryId,
   });
 
-  const { data: roles, isLoading: isRolesLoading } = useQuery({
-    queryKey: ["roles"],
-    queryFn: getRoles,
-  });
-
-  const { data: customers, isLoading: isCustomersLoading } = useQuery({
-    queryKey: ["customers"],
-    queryFn: getCustomers,
-  });
-
-  const transformUser = (apiUser: ApiUser): ApiUser => {
-    const customer = customers?.find((c) => c.id === apiUser.customerId);
-    const role = roles?.find((r) => r.id === apiUser.roleId);
-    return {
-      managerId: apiUser.managerId,
-      id: apiUser.id,
-      firstName: apiUser.firstName,
-      lastName: apiUser.lastName,
-      name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-      email: apiUser.email,
-      customerId: apiUser.customerId,
-      customer: customer || apiUser.customer,
-      roleId: apiUser.roleId,
-      role: role || apiUser.role,
-      persona: apiUser.persona || "",
-      status: apiUser.status,
-      avatar: apiUser.avatar || undefined,
-      activity: apiUser.activity,
-      createdAt: apiUser.createdAt,
-    };
-  };
-
   const { data, isLoading, error } = useQuery({
     queryKey: [
-      "users",
+      "articles",
       currentPage,
       searchTerm,
       sortColumn,
       sortDirection,
       categoryId,
-      customers,
     ],
     queryFn: async () => {
-      const response = await getUsers({
+      const response = await getArticlesList({
         page: currentPage,
         perPage: rowsPerPage,
         search: searchTerm || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
-        roleId: categoryId ? [Number(categoryId)] : undefined,
+        categoryId: categoryId ? [Number(categoryId)] : undefined,
       });
       return {
         ...response,
-        data: response.data.map(transformUser),
+        data: response.data.map((article) => article),
       };
     },
-    enabled: !isRolesLoading && !isCustomersLoading,
   });
 
-  const users = data?.data || [];
+  const articles = data?.data || [];
   const totalPages = data?.meta?.lastPage || 1;
-  const hasResults = users.length > 0;
+  const hasResults = articles.length > 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -177,7 +121,7 @@ const SystemAdminSettings: React.FC = () => {
         handleMenuClose();
       }
       if (addUserAnchorEl && !addUserAnchorEl.contains(event.target as Node)) {
-        handleAddUserMenuClose();
+        handleAddArticleMenuClose();
       }
     };
 
@@ -192,7 +136,6 @@ const SystemAdminSettings: React.FC = () => {
     setCurrentPage(1);
   };
 
-
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
     index: number
@@ -201,12 +144,9 @@ const SystemAdminSettings: React.FC = () => {
     setAnchorEl(event.currentTarget);
     setMenuRowIndex(index);
   };
+ 
 
-  const handleAddUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAddUserAnchorEl(event.currentTarget);
-  };
-
-  const handleAddUserMenuClose = () => {
+  const handleAddArticleMenuClose = () => {
     setAddUserAnchorEl(null);
   };
 
@@ -215,55 +155,23 @@ const SystemAdminSettings: React.FC = () => {
     setMenuRowIndex(null);
   };
 
-  const handleOpenDetail = async (
-    event: React.MouseEvent<HTMLElement>,
-    userId: number
-  ) => {
-    event.preventDefault();
-    event.persist();
-    const targetElement = event.currentTarget;
-    try {
-      const userData = await getUserById(userId);
-      const transformedUser = transformUser(userData);
-      setSelectedUser(transformedUser);
-      setPopoverAnchorEl(targetElement);
-    } catch (err) {
-      console.error("Error fetching user details:", err);
-    }
-    handleMenuClose();
-  };
 
-  const handleClosePopover = () => {
-    setSelectedUser(null);
-    setPopoverAnchorEl(null);
-  };
-
-  const handleEdit = (userId: number) => {
-    setUserToEditId(userId);
+  const handleEdit = (articleId: number) => {
+    setUserToEditId(articleId);
     setOpenEditModal(true);
     handleMenuClose();
   };
 
-  const handleAddUser = () => {
-    setOpenAddUserModal(true);
-    handleAddUserMenuClose();
+  const handleAddArticle = () => {
+      router.push("/dashboard/documentation/add");
   };
 
   const handleEditRole = () => {
     setOpenEditRoleModal(true);
   };
 
-  const handleResetPassword = (userId: number) => {
-    const user = users.find((u) => u.id === userId);
-    if (user) {
-      setUserToResetPassword(user);
-      setOpenResetPasswordModal(true);
-    }
-    handleMenuClose();
-  };
-
-  const handleDeleteRow = useCallback((userId: number) => {
-    setRowsToDelete([userId]);
+  const handleDeleteRow = useCallback((articleId: number) => {
+    setRowsToDelete([articleId]);
     setOpenDeleteModal(true);
   }, []);
 
@@ -279,33 +187,17 @@ const SystemAdminSettings: React.FC = () => {
     setRowsToDelete([]);
     setSelectedRows([]);
   };
-
-  const handleCloseEditModal = () => {
-    setOpenEditModal(false);
-    setUserToEditId(null);
-  };
+ 
 
   const handleCloseAddUserModal = () => {
     setOpenAddUserModal(false);
   };
 
-  const handleCloseEditRoleModal = () => {
-    setOpenEditRoleModal(false);
-  };
-
-  const handleRoleEdited = async () => {
-    if (categoryId) {
-      await queryClient.invalidateQueries({
-        queryKey: ["role", categoryId],
-      });
-    }
-  };
-
-  const handleRowCheckboxChange = (userId: number) => {
+  const handleRowCheckboxChange = (articleId: number) => {
     setSelectedRows((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+      prev.includes(articleId)
+        ? prev.filter((id) => id !== articleId)
+        : [...prev, articleId]
     );
   };
 
@@ -314,7 +206,7 @@ const SystemAdminSettings: React.FC = () => {
   ) => {
     if (!hasResults) return;
     if (event.target.checked) {
-      setSelectedRows(users.map((user) => user.id));
+      setSelectedRows(articles.map((article) => article.id));
     } else {
       setSelectedRows([]);
     }
@@ -325,24 +217,17 @@ const SystemAdminSettings: React.FC = () => {
     setSelectedRows([]);
   };
 
-  const handleSort = (column: keyof ApiUser) => {
+  const handleSort = (column: keyof Article) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     const newDirection = isAsc ? "desc" : "asc";
     setSortColumn(column);
     setSortDirection(newDirection);
   };
 
-  const handleCopyEmail = (email: string) => {
-    navigator.clipboard.writeText(email).then(() => {
-      setCopiedEmail(email);
-      setTimeout(() => setCopiedEmail(null), 2000);
-    });
-  };
-
   const usersToDelete = rowsToDelete
-    .map((userId) => {
-      const user = users.find((u) => u.id === userId);
-      return user ? user.name : undefined;
+    .map((articleId) => {
+      const article = articles.find((u) => u.id === articleId);
+      return article ? article.title : undefined;
     })
     .filter((name): name is string => name !== undefined);
 
@@ -381,9 +266,18 @@ const SystemAdminSettings: React.FC = () => {
     };
   };
 
-  if (roleError || error) {
-    return <Typography>Error: {(roleError || error)?.message}</Typography>;
-  }
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  };
+
+  // if (roleError || error) {
+  //   return <Typography>Error: {(roleError || error)?.message}</Typography>;
+  // }
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
@@ -409,7 +303,7 @@ const SystemAdminSettings: React.FC = () => {
               level="h1"
               sx={{ wordBreak: "break-word" }}
             >
-              {roleData?.name}
+              {categoryData?.name}
             </Typography>
           </Stack>
           <Stack
@@ -421,7 +315,7 @@ const SystemAdminSettings: React.FC = () => {
               position: "relative",
             }}
           >
-            <Button
+            {/* <Button
               sx={{
                 width: { xs: "100%", sm: "auto" },
                 py: { xs: 1, sm: 0.75 },
@@ -432,18 +326,18 @@ const SystemAdminSettings: React.FC = () => {
               startDecorator={<PencilIcon fontSize="var(--Icon-fontSize)" />}
             >
               Edit
-            </Button>
+            </Button> */}
             <Button
               variant="solid"
               color="primary"
-              onClick={handleAddUser}
+              onClick={handleAddArticle}
               startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
               sx={{
                 width: { xs: "100%", sm: "auto" },
                 py: { xs: 1, sm: 0.75 },
               }}
             >
-              Add user
+              Add article
             </Button>
           </Stack>
         </Stack>
@@ -458,7 +352,7 @@ const SystemAdminSettings: React.FC = () => {
           <BreadcrumbsItem href={paths.dashboard.documentation.list}>
             Documentation
           </BreadcrumbsItem>
-          <BreadcrumbsItem type="end">{roleData?.name}</BreadcrumbsItem>
+          <BreadcrumbsItem type="end">{categoryData?.name}</BreadcrumbsItem>
         </Breadcrumbs>
       </Stack>
 
@@ -515,10 +409,7 @@ const SystemAdminSettings: React.FC = () => {
             </Stack>
           </Box>
 
-          {isLoading ||
-          isRoleLoading ||
-          isRolesLoading ||
-          isCustomersLoading ? (
+          {isLoading ? (
             <Box
               sx={{
                 display: "flex",
@@ -531,7 +422,7 @@ const SystemAdminSettings: React.FC = () => {
             </Box>
           ) : (
             <Box>
-              {users.length === 0 ? (
+              {articles.length === 0 ? (
                 <Box sx={{ textAlign: "center", mt: "150px" }}>
                   <Typography
                     sx={{
@@ -553,12 +444,12 @@ const SystemAdminSettings: React.FC = () => {
                     Add articles avialable for this category.
                   </Typography>
                   <Button
-                    onClick={handleAddUser}
+                    onClick={handleAddArticle}
                     variant="outlined"
                     startDecorator={<Plus size={20} weight="bold" />}
                     sx={{ mt: 2, color: "var(--joy-palette-text-secondary)" }}
                   >
-                    Add user
+                    Add article
                   </Button>
                   <AddEditUser
                     open={openAddUserModal}
@@ -599,12 +490,12 @@ const SystemAdminSettings: React.FC = () => {
                             <Checkbox
                               checked={
                                 hasResults &&
-                                selectedRows.length === users.length
+                                selectedRows.length === articles.length
                               }
                               indeterminate={
                                 hasResults &&
                                 selectedRows.length > 0 &&
-                                selectedRows.length < users.length
+                                selectedRows.length < articles.length
                               }
                               onChange={handleSelectAllChange}
                               disabled={!hasResults}
@@ -614,7 +505,7 @@ const SystemAdminSettings: React.FC = () => {
                           <th style={{ width: "10%" }}>Last edit</th>
                           <th style={{ width: "10%" }}>Status</th>
                           <th
-                            onClick={() => handleSort("name")}
+                            onClick={() => handleSort("title")}
                             style={{ width: "25%" }}
                           >
                             <Box
@@ -632,7 +523,7 @@ const SystemAdminSettings: React.FC = () => {
                               Author
                             </Box>
                           </th>
-                          <th onClick={() => handleSort("email")}>
+                          <th onClick={() => handleSort("updatedAt")}>
                             <Box
                               sx={{
                                 display: "flex",
@@ -652,38 +543,30 @@ const SystemAdminSettings: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {users.map((user, index) => (
-                          <tr
-                            key={user.id}
-                            onMouseEnter={() => setHoveredRow(index)}
-                            onMouseLeave={() => setHoveredRow(null)}
-                          >
+                        {articles.map((article, index) => (
+                          <tr key={article.id}>
                             <td>
                               <Checkbox
-                                checked={selectedRows.includes(user.id)}
+                                checked={selectedRows.includes(article.id)}
                                 onChange={() =>
-                                  handleRowCheckboxChange(user.id)
+                                  handleRowCheckboxChange(article.id)
                                 }
                               />
                             </td>
-                            <td></td>
-                            <td></td>
+                            <td>{article.title}</td>
+                            <td>{formatDate(article.updatedAt)}</td>
                             <td>
                               <Box
                                 sx={{
                                   bgcolor:
-                                    user.status === "active"
-                                      ? "#1A7D36"
-                                      : user.status === "inactive"
-                                      ? "#D3232F"
-                                      : "#FAE17D",
-                                  borderRadius: "50%",
-                                  width: "10px",
-                                  minWidth: "10px",
-                                  height: "10px",
+                                    article.status === "draft"
+                                      ? "#FFF8C5"
+                                      : "#EEEFF0",
                                   display: "inline-block",
+                                  padding: "8px 8px",
+                                  borderRadius: "25px",
                                 }}
-                              />
+                              >{article.status.charAt(0).toUpperCase() + article.status.slice(1)}</Box>
                             </td>
                             <td>
                               <Stack
@@ -692,12 +575,7 @@ const SystemAdminSettings: React.FC = () => {
                                 sx={{ alignItems: "center" }}
                               >
                                 <Typography>
-                                  {user.avatar ? (
-                                    <Avatar
-                                      src={user.avatar}
-                                      sx={{ width: 28, height: 28 }}
-                                    />
-                                  ) : (
+                                  
                                     <Avatar
                                       sx={{
                                         width: 28,
@@ -705,17 +583,19 @@ const SystemAdminSettings: React.FC = () => {
                                         fontWeight: "bold",
                                         fontSize: "13px",
                                       }}
-                                      {...getAvatarProps(user.name)}
+                                      {...getAvatarProps(article.Creator.firstName + article.Creator.lastName)}
                                     >
-                                      {user.name
+                                      {article.Creator.firstName
                                         .split(" ")
                                         .map((n) => n[0])
-                                        .join("")}
+                                        .join("")} {article.Creator.lastName
+                                          .split(" ")
+                                          .map((n) => n[0])
+                                          .join("")}
                                     </Avatar>
-                                  )}
                                 </Typography>
                                 <Typography sx={{ wordBreak: "break-all" }}>
-                                  {user.name.slice(0, 45)}
+                                  {article.Creator.firstName.slice(0, 30)} {article.Creator.lastName.slice(0, 30)}
                                 </Typography>
                               </Stack>
                             </td>
@@ -726,7 +606,7 @@ const SystemAdminSettings: React.FC = () => {
                               >
                                 <EyeIcon fontSize="18px" style={iconStyle} />
                                 <Typography sx={{ wordBreak: "break-all" }}>
-                                  {user.name.slice(0, 2)}
+                                  {article.viewsNumber}
                                 </Typography>
                               </Stack>
                             </td>
@@ -763,17 +643,17 @@ const SystemAdminSettings: React.FC = () => {
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleOpenDetail(event, user.id);
+                                    router.push(`/dashboard/documentation/article/${article.id}`);
                                   }}
                                   sx={menuItemStyle}
                                 >
                                   <EyeIcon fontSize="20px" style={iconStyle} />
-                                  Open detail
+                                  Open article
                                 </Box>
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleEdit(user.id);
+                                    handleEdit(article.id);
                                   }}
                                   sx={menuItemStyle}
                                 >
@@ -786,17 +666,33 @@ const SystemAdminSettings: React.FC = () => {
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleResetPassword(user.id);
+                                    handleEdit(article.id);
                                   }}
                                   sx={menuItemStyle}
                                 >
-                                  <Password fontSize="20px" style={iconStyle} />
-                                  Reset password
+                                  <XIcon
+                                    fontSize="20px"
+                                    style={iconStyle}
+                                  />
+                                  Unpublish
                                 </Box>
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleDeleteRow(user.id);
+                                    handleEdit(article.id);
+                                  }}
+                                  sx={menuItemStyle}
+                                >
+                                  <StarIcon
+                                    fontSize="20px"
+                                    style={iconStyle}
+                                  />
+                                  Add to favorite
+                                </Box>
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    handleDeleteRow(article.id);
                                     handleMenuClose();
                                   }}
                                   sx={{ ...menuItemStyle, color: "#EF4444" }}
@@ -813,7 +709,7 @@ const SystemAdminSettings: React.FC = () => {
                         ))}
                       </tbody>
                     </Table>
-                    {(users.length > 0 || isLoading) && (
+                    {(articles.length > 0 || isLoading) && (
                       <Box
                         sx={{
                           position: { xs: "static", sm: "static" },
@@ -849,40 +745,9 @@ const SystemAdminSettings: React.FC = () => {
         title="Delete article"
         description="Are you sure you want to delete this article?"
       />
-
-      <AddEditUser
-        open={openEditModal}
-        onClose={handleCloseEditModal}
-        userId={userToEditId}
-      />
-
-      <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
-
-      <AddRoleModal
-        open={openEditRoleModal}
-        onClose={handleCloseEditRoleModal}
-        roleId={roleData?.id}
-        onRoleCreated={handleRoleEdited}
-      />
-
-      <ResetPasswordUser
-        open={openResetPasswordModal}
-        onClose={() => setOpenResetPasswordModal(false)}
-        userName={userToResetPassword?.name || ""}
-        userEmail={userToResetPassword?.email || ""}
-        onConfirm={(selectedEmail) => {
-          console.log(`Resetting password for ${selectedEmail}`);
-        }}
-      />
-
-      <UserDetailsPopover
-        open={Boolean(popoverAnchorEl)}
-        onClose={handleClosePopover}
-        anchorEl={popoverAnchorEl}
-        userId={selectedUser?.id ?? 0}
-      />
+      
     </Box>
   );
 };
 
-export default SystemAdminSettings;
+export default CategoryInfo;

@@ -33,9 +33,9 @@ const schema = zod.object({
     .max(255),
   lastName: zod.string().min(1, { message: "Last name is required" }).max(255),
   email: zod.string().min(1, { message: "Email is required" }).email(),
-  phone: zod
+  phoneNumber: zod
     .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" })
+    
     .optional(),
   password: zod.string().min(6, { message: "Password must be at least 6 characters" }).optional(),
 });
@@ -58,7 +58,7 @@ export function UpdateProfileForm(): React.JSX.Element {
       firstName: "",
       lastName: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       password: "",
     },
     resolver: zodResolver(schema),
@@ -71,7 +71,7 @@ export function UpdateProfileForm(): React.JSX.Element {
         firstName: userInfo.firstName || "",
         lastName: userInfo.lastName || "",
         email: userInfo.email || "",
-        phone: typeof userInfo.phone === "string" ? userInfo.phone : "",
+        phoneNumber: userInfo.phoneNumber || "",
         password: "",
       });
     }
@@ -84,7 +84,7 @@ export function UpdateProfileForm(): React.JSX.Element {
       const payload = {
         firstName: values.firstName,
         lastName: values.lastName,
-        // phone: values.phone || undefined,
+        phoneNumber: values.phoneNumber || undefined,
       };
 
       await editUserInfo(payload);
@@ -238,7 +238,7 @@ export function UpdateProfileForm(): React.JSX.Element {
                       <Input
                         {...field}
                         type="email"
-                        disabled // Make email non-editable
+                        disabled 
                         sx={{ maxWidth: "512px" }}
                       />
                       {errors.email ? (
@@ -249,13 +249,13 @@ export function UpdateProfileForm(): React.JSX.Element {
                 />
                 <Controller
                   control={control}
-                  name="phone"
+                  name="phoneNumber"
                   render={({ field }) => (
-                    <FormControl error={Boolean(errors.phone)}>
+                    <FormControl error={Boolean(errors.phoneNumber)}>
                       <FormLabel>Phone number</FormLabel>
-                      <Input {...field} type="tel" sx={{ maxWidth: "512px" }} />
-                      {errors.phone ? (
-                        <FormHelperText>{errors.phone.message}</FormHelperText>
+                      <Input {...field} type="number" sx={{ maxWidth: "512px" }} />
+                      {errors.phoneNumber ? (
+                        <FormHelperText>{errors.phoneNumber.message}</FormHelperText>
                       ) : null}
                     </FormControl>
                   )}

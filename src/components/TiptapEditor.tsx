@@ -603,7 +603,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             </button>
             <span className="tooltip">Insert Image</span>
           </div>
-          <div className="tooltip-wrapper">
+          {/* <div className="tooltip-wrapper">
             <button
               onClick={() => videoInputRef.current?.click()}
               disabled={isPreview || !editor}
@@ -611,7 +611,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
               <Video size={22} />
             </button>
             <span className="tooltip">Insert Video</span>
-          </div>
+          </div> */}
           <input
             type="file"
             accept="image/*"
@@ -628,14 +628,19 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           />
         </div>
       )}
-      {isPreview ? (
-        <div
-          className="tiptap-preview"
-          dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }}
-        />
-      ) : (
-        <EditorContent editor={editor} />
-      )}
+      {content ? (
+      <div
+        className="tiptap-preview"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    ) : isPreview ? (
+      <div
+        className="tiptap-preview"
+        dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }}
+      />
+    ) : (
+      <EditorContent editor={editor} />
+    )}
       <style jsx>{`
         .tiptap-toolbar {
           position: relative;

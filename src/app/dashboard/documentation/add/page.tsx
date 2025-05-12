@@ -10,9 +10,10 @@ import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { getCategoriesList, getSubcategories } from "@/lib/api/categories";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import TiptapEditor from "@/components/TiptapEditor";
 import { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
+import { createArticle } from "@/lib/api/articles"; 
+import {toast} from '@/components/core/toaster';
 
 const AddArticlePage = () => {
   const { data: subcategories, isLoading: isSubcategoriesLoading } = useQuery({
@@ -32,6 +33,8 @@ const AddArticlePage = () => {
   const [videoLink, setVideoLink] = useState<string>("");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [isPreview, setIsPreview] = useState(false);
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
   const togglePreview = () => {
     setIsPreview((prev) => !prev);
@@ -50,6 +53,56 @@ const AddArticlePage = () => {
 
     const id = extractVideoId(link);
     setVideoId(id);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!title || !selectedCategory || !selectedSubcategory || !content) {
+      alert("Please fill in all required fields: title, category, subcategory, and content.");
+      return;
+    }
+
+    const payload = {
+      title,
+      articleCategoryId: Number(selectedCategory),
+      subcategory: selectedSubcategory,
+      status: "draft",
+      content,
+      videoUrl: videoLink,
+    };
+
+    try {
+      const response = await createArticle(payload);
+      toast.success("Article saved as draft!");
+      console.log(response);
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+      toast.error("Failed to save draft.");
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!title || !selectedCategory || !selectedSubcategory || !content) {
+      toast.error("Please fill in all required fields: title, category, subcategory, and content.");
+      return;
+    }
+
+    const payload = {
+      title,
+      articleCategoryId: Number(selectedCategory),
+      subcategory: selectedSubcategory,
+      status: "published",
+      content,
+      videoUrl: videoLink,
+    };
+
+    try {
+      const response = await createArticle(payload);
+      toast.success("Article published!");
+      console.log(response);
+    } catch (error) {
+      console.error("Failed to publish:", error);
+      toast.error("Failed to publish.");
+    }
   };
 
   return (
@@ -87,7 +140,7 @@ const AddArticlePage = () => {
               color="primary"
               onClick={togglePreview}
             >
-              {!isPreview  ? (
+              {!isPreview ? (
                 <EyeIcon fontSize="var(--Icon-fontSize)" color="#636B74" />
               ) : (
                 <EyeSlash fontSize="var(--Icon-fontSize)" color="#636B74" />
@@ -100,6 +153,7 @@ const AddArticlePage = () => {
               }}
               variant="outlined"
               color="primary"
+              onClick={handleSaveDraft}
             >
               Save as a draft
             </Button>
@@ -110,6 +164,7 @@ const AddArticlePage = () => {
                 width: { xs: "100%", sm: "auto" },
                 py: { xs: 1, sm: 0.75 },
               }}
+              onClick={handlePublish}
             >
               Publish
             </Button>
@@ -149,7 +204,33 @@ const AddArticlePage = () => {
             pt: 1,
           }}
         >
-          <TiptapEditor isPreview={isPreview} />
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              level="body-sm"
+              sx={{
+                fontSize: "14px",
+                color: "var(--joy-palette-text-primary)",
+                mb: 0.5,
+                fontWeight: 500,
+              }}
+            >
+              Title
+            </Typography>
+            <Input
+              type="text"
+              placeholder="Enter article title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              sx={{
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+            />
+          </Box>
+          <TiptapEditor
+            isPreview={isPreview}
+            onChange={setContent}
+          />
         </Box>
 
         <Box sx={{ flex: 0.7, mt: { xs: 4, sm: 2 } }}>
