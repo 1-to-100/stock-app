@@ -23,7 +23,12 @@ import {
   X,
   WebhooksLogo,
 } from "@phosphor-icons/react/dist/ssr";
-import { createCategory, getSubcategories, getCategoryById, editCategory } from "@/lib/api/categories";
+import {
+  createCategory,
+  getSubcategories,
+  getCategoryById,
+  editCategory,
+} from "@/lib/api/categories";
 import { useQuery } from "@tanstack/react-query";
 
 interface AddEditCategoryProps {
@@ -64,13 +69,11 @@ export default function AddEditCategory({
     enabled: open,
   });
 
- 
   useEffect(() => {
-    if (subcategories) {
-      const subcategoryNames = subcategories.map((option: { name: string }) =>
-        typeof option === "string" ? option : option.name
-      );
-      setLocalSubcategories(subcategoryNames);
+    if (Array.isArray(subcategories)) {
+      setLocalSubcategories(subcategories);
+    } else {
+      setLocalSubcategories([]);
     }
   }, [subcategories]);
 
@@ -166,14 +169,7 @@ export default function AddEditCategory({
     });
     setIsAddingSubcategory(false);
     setNewSubcategory("");
-    if (subcategories) {
-      const subcategoryNames = subcategories.map((option: { name: string }) =>
-        typeof option === "string" ? option : option.name
-      );
-      setLocalSubcategories(subcategoryNames);
-    } else {
-      setLocalSubcategories([]);
-    }
+    setLocalSubcategories(subcategories || []);
     onClose();
   };
 

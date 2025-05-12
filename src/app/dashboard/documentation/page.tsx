@@ -16,6 +16,7 @@ import AddEditCategoryModal from "@/components/dashboard/modals/AddEditCategoryM
 import { getCategoriesList } from "@/lib/api/categories";
 import { Category } from "@/contexts/auth/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 interface HttpError extends Error {
   response?: {
@@ -27,10 +28,15 @@ export default function Page(): React.JSX.Element {
   const [openAddCategoryModal, setOpenAddCategoryModal] = useState(false);
   const { userInfo } = useUserInfo();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const { data: categories = [], isLoading, error } = useQuery<Category[], HttpError>({
-    queryKey: ['categories'],
-    queryFn: getCategoriesList
+  const {
+    data: categories = [],
+    isLoading,
+    error,
+  } = useQuery<Category[], HttpError>({
+    queryKey: ["categories"],
+    queryFn: getCategoriesList,
   });
 
   const handleAddCategoryModal = () => {
@@ -42,10 +48,14 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleFetchCategories = () => {
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
 
   const handleSearch = (searchTerm: string) => {};
+
+  const handleAddArticle = () => {
+    router.push("/dashboard/documentation/add");
+  };
 
   if (error && error.response?.status === 403) {
     return (
@@ -89,40 +99,54 @@ export default function Page(): React.JSX.Element {
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
-          spacing={{ xs: 2, sm: 3 }}
-          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
+          spacing={{ xs: 1, sm: 2 }}
+          sx={{
+            alignItems: { xs: "stretch", sm: "center" },
+            width: { xs: "100%", sm: "auto" },
+          }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-              width: "100%",
-            }}
-          >
-            <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
+          <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
               Documentation
             </Typography>
-            <Box sx={{ position: "relative" }}>
-              <Button
-                sx={{ marginRight: "8px" }}
-                variant="outlined"
-                color="primary"
-                onClick={handleAddCategoryModal}
-                startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-              >
-                Add category
-              </Button>
-              <Button
-                variant="solid"
-                color="primary"
-                startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-              >
-                Add article
-              </Button>
-            </Box>
-          </Box>
+          </Stack>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{
+              alignItems: { xs: "stretch", sm: "center" },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <Button
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
+              variant="outlined"
+              color="primary"
+              onClick={handleAddCategoryModal}
+              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+            >
+              Add category
+            </Button>
+            <Button
+              variant="solid"
+              color="primary"
+              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
+              onClick={handleAddArticle}
+            >
+              Add article
+            </Button>
+          </Stack>
         </Stack>
 
         {isLoading ? (
@@ -137,7 +161,10 @@ export default function Page(): React.JSX.Element {
             <CircularProgress />
           </Box>
         ) : categories.length > 0 ? (
-          <CategoriesListComponent categories={categories} fetchCategories={handleFetchCategories} />
+          <CategoriesListComponent
+            categories={categories}
+            fetchCategories={handleFetchCategories}
+          />
         ) : (
           <EmptyCategoriesList fetchCategories={handleFetchCategories} />
         )}

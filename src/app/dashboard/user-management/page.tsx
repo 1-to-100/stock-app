@@ -843,7 +843,7 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
-                              {user.customer?.name}
+                              {user.customer?.name.slice(0, 75)}
                             </Box>
                           </td>
                           <td
@@ -852,7 +852,7 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
-                              {user.role?.name}
+                              {user.role?.name.slice(0, 75)}
                             </Box>
                           </td>
                           <td>

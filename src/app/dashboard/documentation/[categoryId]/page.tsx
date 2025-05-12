@@ -41,6 +41,7 @@ import { getCustomers } from "../../../../lib/api/customers";
 import { getRoleById } from "../../../../lib/api/roles";
 import { ApiUser } from "@/contexts/auth/types";
 import AddRoleModal from "@/components/dashboard/modals/AddRoleModal";
+import { getCategoryById } from "@/lib/api/categories";
 
 const RouterLink = Link;
 
@@ -102,7 +103,7 @@ const SystemAdminSettings: React.FC = () => {
       if (!categoryId) {
         throw new Error("Role ID is missing");
       }
-      return getRoleById(Number(categoryId));
+      return getCategoryById(Number(categoryId));
     },
     enabled: !!categoryId,
   });
@@ -170,21 +171,6 @@ const SystemAdminSettings: React.FC = () => {
   const totalPages = data?.meta?.lastPage || 1;
   const hasResults = users.length > 0;
 
-  const permissionsByModule: Module[] = roleData?.permissions
-    ? Object.keys(roleData.permissions).map((moduleName) => ({
-        id: moduleName,
-        name: moduleName,
-        permissions: (roleData.permissions[moduleName] || []).map(
-          (perm: ModulePermission) => ({
-            id: perm.id.toString(),
-            name: perm.name,
-            label: perm.label,
-            description: perm.label,
-          })
-        ),
-      }))
-    : [];
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (anchorEl && !anchorEl.contains(event.target as Node)) {
@@ -206,11 +192,6 @@ const SystemAdminSettings: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const togglePermission = (id: string) => {
-    setExpandedPermissions((prev) =>
-      prev.includes(id) ? prev.filter((permId) => permId !== id) : [...prev, id]
-    );
-  };
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -632,7 +613,10 @@ const SystemAdminSettings: React.FC = () => {
                           <th style={{ width: "30%" }}>Article name</th>
                           <th style={{ width: "10%" }}>Last edit</th>
                           <th style={{ width: "10%" }}>Status</th>
-                          <th onClick={() => handleSort("name")} style={{ width: "25%" }}>
+                          <th
+                            onClick={() => handleSort("name")}
+                            style={{ width: "25%" }}
+                          >
                             <Box
                               sx={{
                                 display: "flex",
@@ -682,26 +666,24 @@ const SystemAdminSettings: React.FC = () => {
                                 }
                               />
                             </td>
+                            <td></td>
+                            <td></td>
                             <td>
-                            </td>
-                            <td>
-                            </td>
-                            <td>
-                            <Box
-                                    sx={{
-                                      bgcolor:
-                                        user.status === "active"
-                                          ? "#1A7D36"
-                                          : user.status === "inactive"
-                                          ? "#D3232F"
-                                          : "#FAE17D",
-                                      borderRadius: "50%",
-                                      width: "10px",
-                                      minWidth: "10px",
-                                      height: "10px",
-                                      display: "inline-block",
-                                    }}
-                                  />
+                              <Box
+                                sx={{
+                                  bgcolor:
+                                    user.status === "active"
+                                      ? "#1A7D36"
+                                      : user.status === "inactive"
+                                      ? "#D3232F"
+                                      : "#FAE17D",
+                                  borderRadius: "50%",
+                                  width: "10px",
+                                  minWidth: "10px",
+                                  height: "10px",
+                                  display: "inline-block",
+                                }}
+                              />
                             </td>
                             <td>
                               <Stack
@@ -709,38 +691,42 @@ const SystemAdminSettings: React.FC = () => {
                                 spacing={1}
                                 sx={{ alignItems: "center" }}
                               >
-                                <Typography>{user.avatar ? (
-                                <Avatar
-                                  src={user.avatar}
-                                  sx={{ width: 28, height: 28 }}
-                                />
-                              ) : (
-                                <Avatar
-                                  sx={{
-                                    width: 28,
-                                    height: 28,
-                                    fontWeight: "bold",
-                                    fontSize: "13px",
-                                  }}
-                                  {...getAvatarProps(user.name)}
-                                >
-                                  {user.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </Avatar>
-                              )}</Typography>
+                                <Typography>
+                                  {user.avatar ? (
+                                    <Avatar
+                                      src={user.avatar}
+                                      sx={{ width: 28, height: 28 }}
+                                    />
+                                  ) : (
+                                    <Avatar
+                                      sx={{
+                                        width: 28,
+                                        height: 28,
+                                        fontWeight: "bold",
+                                        fontSize: "13px",
+                                      }}
+                                      {...getAvatarProps(user.name)}
+                                    >
+                                      {user.name
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .join("")}
+                                    </Avatar>
+                                  )}
+                                </Typography>
                                 <Typography sx={{ wordBreak: "break-all" }}>
-                                 {user.name.slice(0, 45)}
+                                  {user.name.slice(0, 45)}
                                 </Typography>
                               </Stack>
                             </td>
                             <td>
-                              <Stack direction="row"
-                                sx={{ alignItems: "center" }}>
-                              <EyeIcon fontSize="18px" style={iconStyle} />
-                              <Typography sx={{ wordBreak: "break-all" }}>
-                                 {user.name.slice(0, 2)}
+                              <Stack
+                                direction="row"
+                                sx={{ alignItems: "center" }}
+                              >
+                                <EyeIcon fontSize="18px" style={iconStyle} />
+                                <Typography sx={{ wordBreak: "break-all" }}>
+                                  {user.name.slice(0, 2)}
                                 </Typography>
                               </Stack>
                             </td>

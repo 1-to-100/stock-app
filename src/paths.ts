@@ -49,6 +49,8 @@ export const paths = {
     documentation: {
       list: '/dashboard/documentation',
       details: (categoryId: string) => `/dashboard/documentation/${categoryId}`,
+      article: (categoryId: string, articleId: string) => `/dashboard/documentation/${categoryId}/${articleId}`,
+      add: (categoryId: string) => `/dashboard/documentation/${categoryId}/add`,
     },
     roleSettings: {
       list: '/dashboard/role-settings',

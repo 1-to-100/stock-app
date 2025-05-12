@@ -22,7 +22,8 @@ import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 import ChangePasswordModal from "../modals/ChangePasswordModal";
-import { useUserInfo } from '@/hooks/use-user-info';
+import { useUserInfo } from "@/hooks/use-user-info";
+import { editUserInfo } from "@/lib/api/users";
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -34,11 +35,9 @@ const schema = zod.object({
   email: zod.string().min(1, { message: "Email is required" }).email(),
   phone: zod
     .string()
-    .min(1, { message: "Phone number is required" })
-    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" }),
-  password: zod
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: "Invalid phone number" })
+    .optional(),
+  password: zod.string().min(6, { message: "Password must be at least 6 characters" }).optional(),
 });
 
 type Values = zod.infer<typeof schema>;
@@ -65,7 +64,6 @@ export function UpdateProfileForm(): React.JSX.Element {
     resolver: zodResolver(schema),
   });
 
- 
   React.useEffect(() => {
     if (userInfo) {
       reset({
@@ -81,11 +79,20 @@ export function UpdateProfileForm(): React.JSX.Element {
 
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
 
-  const onSubmit = React.useCallback(async (_: Values): Promise<void> => {
+  const onSubmit = React.useCallback(async (values: Values): Promise<void> => {
     try {
-      toast.success("Details updated");
+      const payload = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        // phone: values.phone || undefined,
+      };
+
+      await editUserInfo(payload);
+
+      toast.success("User info has been successfully updated");
     } catch (err) {
       logger.error(err);
+      toast.error("Failed to update details");
     }
   }, []);
 
@@ -231,6 +238,7 @@ export function UpdateProfileForm(): React.JSX.Element {
                       <Input
                         {...field}
                         type="email"
+                        disabled // Make email non-editable
                         sx={{ maxWidth: "512px" }}
                       />
                       {errors.email ? (

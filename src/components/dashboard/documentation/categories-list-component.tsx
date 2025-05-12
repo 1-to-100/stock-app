@@ -170,6 +170,7 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
             "&:hover": {
               borderColor: "var(--joy-palette-text-secondary)",
             },
+            maxWidth: { xs: "100%", sm: "336px" },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

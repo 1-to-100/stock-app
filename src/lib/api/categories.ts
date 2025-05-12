@@ -25,8 +25,8 @@ interface PermissionsByModule {
   
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
-  export async function getSubcategories(): Promise<Category[]> {
-    return apiFetch<Category[]>(`${API_URL}/documents/categories/subcategories`, {
+  export async function getSubcategories(): Promise<string[]> {
+    return apiFetch<string[]>(`${API_URL}/documents/categories/subcategories`, {
       method: "GET",
       headers: {
         accept: "*/*",

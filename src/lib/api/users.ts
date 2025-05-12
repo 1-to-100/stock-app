@@ -17,6 +17,11 @@ interface UpdateUserPayload extends Partial<CreateUserPayload> {
   id: number;
 }
 
+interface EditUserInfoPayload extends Partial<CreateUserPayload> {
+  firstName: string;
+  lastName: string;
+}
+
 export interface GetUsersParams {
   page?: number;
   perPage?: number;
@@ -89,6 +94,13 @@ export async function getUserById(id: number): Promise<ApiUser> {
 export async function getUserInfo(): Promise<ApiUser> {
   return apiFetch<ApiUser>(`${API_URL}/users/me`, {
     method: 'GET',
+  });
+}
+
+export async function editUserInfo(payload: EditUserInfoPayload): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${API_URL}/users/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
   });
 }
 

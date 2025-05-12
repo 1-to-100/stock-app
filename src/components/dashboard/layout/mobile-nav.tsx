@@ -26,6 +26,7 @@ import { ColorSchemeSwitch } from './color-scheme-switch';
 import { CurrentUser } from './current-user';
 import { icons } from './nav-icons';
 import { WorkspaceSwitch } from './workspace-switch';
+import { useUserInfo } from "@/hooks/use-user-info";
 
 export interface MobileNavProps {
   items: NavItemConfig[];
@@ -36,6 +37,17 @@ export interface MobileNavProps {
 export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.Element {
   const pathname = usePathname();
   const canOpen = useMediaQuery('between', 'xs', 'lg');
+  const { userInfo } = useUserInfo();
+
+  const filteredItems = items.map((group) => ({
+    ...group,
+    items: group.items?.filter((item) => {
+      if (!userInfo?.isSuperadmin) {
+        return item.key !== "role" && item.key !== "customer";
+      }
+      return true;
+    }),
+  }));
 
   return (
     <Drawer
@@ -101,7 +113,7 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
       >
         {/* <WorkspaceSwitch /> */}
         <Box component="nav" sx={{ flex: '1 1 auto' }}>
-          {renderNavGroups({ items, onClose, pathname })}
+          {renderNavGroups({ items: filteredItems, onClose, pathname })}
         </Box>
         <NoSsr>
           <ColorSchemeSwitch />
