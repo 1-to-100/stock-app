@@ -58,5 +58,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     next = paths.home;
   }
 
-  return NextResponse.redirect(new URL(next, origin));
+  return NextResponse.redirect(new URL(next, config.site.url));
 }
