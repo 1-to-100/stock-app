@@ -9,13 +9,17 @@ import { Box, Stack } from "@mui/system";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { getCategoriesList, getSubcategories } from "@/lib/api/categories";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
-import { createArticle } from "@/lib/api/articles"; 
-import {toast} from '@/components/core/toaster';
+import { editArticle, getArticleById } from "@/lib/api/articles";
+import { toast } from "@/components/core/toaster";
+import { useParams } from "next/navigation";
 
-const AddArticlePage = () => {
+const EditArticlePage = () => {
+  const params = useParams();
+  const articleId = params.articleId;
+
   const { data: subcategories, isLoading: isSubcategoriesLoading } = useQuery({
     queryKey: ["subcategories"],
     queryFn: getSubcategories,
@@ -28,6 +32,21 @@ const AddArticlePage = () => {
     enabled: true,
   });
 
+  const {
+    data: articleData,
+    isLoading: isArticleLoading,
+    error: articleError,
+  } = useQuery({
+    queryKey: ["article", articleId],
+    queryFn: () => {
+      if (!articleId) {
+        throw new Error("Article ID is missing");
+      }
+      return getArticleById(Number(articleId));
+    },
+    enabled: !!articleId,
+  });
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [videoLink, setVideoLink] = useState<string>("");
@@ -35,6 +54,18 @@ const AddArticlePage = () => {
   const [isPreview, setIsPreview] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+
+  useEffect(() => {
+    if (articleData) {
+      setTitle(articleData.title || "");
+      setContent(articleData.content || "");
+      setSelectedCategory(articleData.articleCategoryId?.toString() || null);
+      setSelectedSubcategory(articleData.subcategory || null);
+      setVideoLink(articleData.videoUrl || "");
+      const id = extractVideoId(articleData.videoUrl || "");
+      setVideoId(id);
+    }
+  }, [articleData]);
 
   const togglePreview = () => {
     setIsPreview((prev) => !prev);
@@ -57,7 +88,7 @@ const AddArticlePage = () => {
 
   const handleSaveDraft = async () => {
     if (!title || !selectedCategory || !selectedSubcategory || !content) {
-      alert("Please fill in all required fields: title, category, subcategory, and content.");
+      toast.error("Please fill in all required fields: title, category, subcategory, and content.");
       return;
     }
 
@@ -71,11 +102,10 @@ const AddArticlePage = () => {
     };
 
     try {
-      const response = await createArticle(payload);
+      const response = await editArticle(Number(articleId), payload);
       toast.success("Article has been saved as draft!");
       getCategoriesList();
     } catch (error) {
-      console.error("Failed to save draft:", error);
       toast.error("Failed to save draft.");
     }
   };
@@ -96,11 +126,10 @@ const AddArticlePage = () => {
     };
 
     try {
-      const response = await createArticle(payload);
-      toast.success("Article has been published!");
+      const response = await editArticle(Number(articleId), payload);
+      toast.success("Article has been updated!");
       getCategoriesList();
     } catch (error) {
-      console.error("Failed to publish:", error);
       toast.error("Failed to publish article.");
     }
   };
@@ -119,7 +148,7 @@ const AddArticlePage = () => {
               level="h1"
               sx={{ wordBreak: "break-word" }}
             >
-              Add article
+              Edit article
             </Typography>
           </Stack>
           <Stack
@@ -180,7 +209,14 @@ const AddArticlePage = () => {
           <BreadcrumbsItem href={paths.dashboard.documentation.list}>
             Documentation
           </BreadcrumbsItem>
-          <BreadcrumbsItem type="end">Add article</BreadcrumbsItem>
+          <BreadcrumbsItem
+            href={paths.dashboard.documentation.details(
+              articleData?.Category.id?.toString() || ""
+            )}
+          >
+            {articleData?.Category.name || "Loading..."}
+          </BreadcrumbsItem>
+          <BreadcrumbsItem type="end">{articleData?.title || "Loading..."}</BreadcrumbsItem>
         </Breadcrumbs>
       </Stack>
 
@@ -204,7 +240,8 @@ const AddArticlePage = () => {
             pt: 1,
           }}
         >
-          <Box sx={{ mb: 2 }}>
+          {!isPreview && (
+            <Box sx={{ mb: 2 }}>
             <Typography
               level="body-sm"
               sx={{
@@ -227,9 +264,11 @@ const AddArticlePage = () => {
               }}
             />
           </Box>
+          )}
           <TiptapEditor
             isPreview={isPreview}
             onChange={setContent}
+            content={articleData?.content}
           />
         </Box>
 
@@ -304,7 +343,7 @@ const AddArticlePage = () => {
                     }}
                   >
                     {categories?.map((option) => (
-                      <Option key={option.id} value={option.id}>
+                      <Option key={option.id} value={option.id.toString()}>
                         {option.name}
                       </Option>
                     ))}
@@ -463,4 +502,4 @@ const AddArticlePage = () => {
   );
 };
 
-export default AddArticlePage;
+export default EditArticlePage;

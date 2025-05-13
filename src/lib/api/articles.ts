@@ -2,12 +2,12 @@ import { apiFetch } from "./api-fetch";
 import { Article } from "@/contexts/auth/types";
 
 interface CreateArticlePayload {
-  title: string;
-  articleCategoryId: number;
-  subcategory: string;
-  status: string;
-  content: string;
-  videoUrl: string;
+  title?: string;
+  articleCategoryId?: number;
+  subcategory?: string;
+  status?: string;
+  content?: string;
+  videoUrl?: string;
 }
 
 export interface GetArticlesParams {

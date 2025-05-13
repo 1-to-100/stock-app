@@ -36,8 +36,9 @@ import Pagination from "@/components/dashboard/layout/pagination";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Article } from "@/contexts/auth/types";
 import { getCategoryById } from "@/lib/api/categories";
-import { getArticlesList } from "@/lib/api/articles";
+import { deleteArticle, editArticle, getArticlesList } from "@/lib/api/articles";
 import { useRouter } from "next/navigation";
+import {toast} from '@/components/core/toaster';
 
 const RouterLink = Link;
 
@@ -48,10 +49,7 @@ const CategoryInfo: React.FC = () => {
     null
   );
   const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
-    null
-  );
-  const [selectedUser, setSelectedUser] = useState<Article | null>(null);
+
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -144,7 +142,6 @@ const CategoryInfo: React.FC = () => {
     setAnchorEl(event.currentTarget);
     setMenuRowIndex(index);
   };
- 
 
   const handleAddArticleMenuClose = () => {
     setAddUserAnchorEl(null);
@@ -155,7 +152,6 @@ const CategoryInfo: React.FC = () => {
     setMenuRowIndex(null);
   };
 
-
   const handleEdit = (articleId: number) => {
     setUserToEditId(articleId);
     setOpenEditModal(true);
@@ -163,11 +159,7 @@ const CategoryInfo: React.FC = () => {
   };
 
   const handleAddArticle = () => {
-      router.push("/dashboard/documentation/add");
-  };
-
-  const handleEditRole = () => {
-    setOpenEditRoleModal(true);
+    router.push("/dashboard/documentation/add");
   };
 
   const handleDeleteRow = useCallback((articleId: number) => {
@@ -182,12 +174,16 @@ const CategoryInfo: React.FC = () => {
     }
   };
 
-  const confirmDelete = () => {
-    setOpenDeleteModal(false);
-    setRowsToDelete([]);
-    setSelectedRows([]);
+  const confirmDelete = async () => {
+    try {
+      await Promise.all(rowsToDelete.map((id) => deleteArticle(id)));
+      setOpenDeleteModal(false);
+      setRowsToDelete([]);
+      setSelectedRows([]);
+    } catch (error) {
+      console.error("Failed to delete articles:", error);
+    }
   };
- 
 
   const handleCloseAddUserModal = () => {
     setOpenAddUserModal(false);
@@ -224,7 +220,23 @@ const CategoryInfo: React.FC = () => {
     setSortDirection(newDirection);
   };
 
-  const usersToDelete = rowsToDelete
+  const handleSaveDraft = async (articleId: number) => {
+
+    const payload = {
+      status: "draft",
+    };
+
+    try {
+      const response = await editArticle(Number(articleId), payload);
+      toast.success("Article has been saved as draft!");
+      getArticlesList();
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+      toast.error("Failed to save draft.");
+    }
+  };
+
+  const articlesToDelete = rowsToDelete
     .map((articleId) => {
       const article = articles.find((u) => u.id === articleId);
       return article ? article.title : undefined;
@@ -462,10 +474,8 @@ const CategoryInfo: React.FC = () => {
                     sx={{
                       overflowX: "auto",
                       width: "100%",
-                      WebkitOverflowScrolling: "touch",
-                      scrollbarWidth: { xs: "thin", sm: "auto" },
                       "&::-webkit-scrollbar": {
-                        height: { xs: "8px", sm: "12px" },
+                        height: "8px",
                       },
                       "&::-webkit-scrollbar-thumb": {
                         backgroundColor: "var(--joy-palette-divider)",
@@ -474,9 +484,9 @@ const CategoryInfo: React.FC = () => {
                     }}
                   >
                     <Table
-                      aria-label="system admin users table"
+                      aria-label="documentation table"
                       sx={{
-                        minWidth: "400px",
+                        minWidth: "800px",
                         tableLayout: "fixed",
                         "& th, & td": {
                           px: { xs: 1, sm: 2 },
@@ -486,7 +496,7 @@ const CategoryInfo: React.FC = () => {
                     >
                       <thead>
                         <tr>
-                          <th style={{ width: "5%" }}>
+                          <th style={{ width: "5%", minWidth: "40px" }}>
                             <Checkbox
                               checked={
                                 hasResults &&
@@ -501,12 +511,12 @@ const CategoryInfo: React.FC = () => {
                               disabled={!hasResults}
                             />
                           </th>
-                          <th style={{ width: "30%" }}>Article name</th>
-                          <th style={{ width: "10%" }}>Last edit</th>
-                          <th style={{ width: "10%" }}>Status</th>
+                          <th style={{ width: "30%", minWidth: "150px" }}>Article name</th>
+                          <th style={{ width: "15%", minWidth: "50px" }}>Last edit</th>
+                          <th style={{ width: "15%", minWidth: "50px" }}>Status</th>
                           <th
                             onClick={() => handleSort("title")}
-                            style={{ width: "25%" }}
+                            style={{ width: "25%", minWidth: "150px" }}
                           >
                             <Box
                               sx={{
@@ -523,7 +533,7 @@ const CategoryInfo: React.FC = () => {
                               Author
                             </Box>
                           </th>
-                          <th onClick={() => handleSort("updatedAt")}>
+                          <th style={{ width: "15%", minWidth: "50px" }} onClick={() => handleSort("updatedAt")}>
                             <Box
                               sx={{
                                 display: "flex",
@@ -566,7 +576,10 @@ const CategoryInfo: React.FC = () => {
                                   padding: "8px 8px",
                                   borderRadius: "25px",
                                 }}
-                              >{article.status.charAt(0).toUpperCase() + article.status.slice(1)}</Box>
+                              >
+                                {article.status.charAt(0).toUpperCase() +
+                                  article.status.slice(1)}
+                              </Box>
                             </td>
                             <td>
                               <Stack
@@ -574,28 +587,26 @@ const CategoryInfo: React.FC = () => {
                                 spacing={1}
                                 sx={{ alignItems: "center" }}
                               >
-                                <Typography>
-                                  
-                                    <Avatar
-                                      sx={{
-                                        width: 28,
-                                        height: 28,
-                                        fontWeight: "bold",
-                                        fontSize: "13px",
-                                      }}
-                                      {...getAvatarProps(article.Creator.firstName + article.Creator.lastName)}
-                                    >
-                                      {article.Creator.firstName
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")} {article.Creator.lastName
-                                          .split(" ")
-                                          .map((n) => n[0])
-                                          .join("")}
-                                    </Avatar>
-                                </Typography>
+                                <Avatar
+                                  sx={{
+                                    width: 28,
+                                    height: 28,
+                                    fontWeight: "bold",
+                                    fontSize: "13px",
+                                  }}
+                                  {...getAvatarProps(
+                                    `${article.Creator.firstName} ${article.Creator.lastName}`.trim()
+                                  )}
+                                >
+                                  {`${article.Creator.firstName} ${article.Creator.lastName}`
+                                    .trim()
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </Avatar>
                                 <Typography sx={{ wordBreak: "break-all" }}>
-                                  {article.Creator.firstName.slice(0, 30)} {article.Creator.lastName.slice(0, 30)}
+                                  {article.Creator.firstName.slice(0, 30)}{" "}
+                                  {article.Creator.lastName.slice(0, 30)}
                                 </Typography>
                               </Stack>
                             </td>
@@ -643,7 +654,9 @@ const CategoryInfo: React.FC = () => {
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    router.push(`/dashboard/documentation/article/${article.id}`);
+                                    router.push(
+                                      `/dashboard/documentation/article/${article.id}`
+                                    );
                                   }}
                                   sx={menuItemStyle}
                                 >
@@ -653,7 +666,9 @@ const CategoryInfo: React.FC = () => {
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleEdit(article.id);
+                                    router.push(
+                                      `/dashboard/documentation/edit/${article.id}`
+                                    );
                                   }}
                                   sx={menuItemStyle}
                                 >
@@ -663,30 +678,26 @@ const CategoryInfo: React.FC = () => {
                                   />
                                   Edit
                                 </Box>
-                                <Box
+                                {article.status === 'published' && (
+                                  <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
-                                    handleEdit(article.id);
+                                    handleSaveDraft(article.id);
                                   }}
                                   sx={menuItemStyle}
                                 >
-                                  <XIcon
-                                    fontSize="20px"
-                                    style={iconStyle}
-                                  />
+                                  <XIcon fontSize="20px" style={iconStyle} />
                                   Unpublish
                                 </Box>
+                                )}
                                 <Box
-                                  onMouseDown={(event) => {
-                                    event.preventDefault();
-                                    handleEdit(article.id);
-                                  }}
+                                  // onMouseDown={(event) => {
+                                  //   event.preventDefault();
+                                  //   handleEdit(article.id);
+                                  // }}
                                   sx={menuItemStyle}
                                 >
-                                  <StarIcon
-                                    fontSize="20px"
-                                    style={iconStyle}
-                                  />
+                                  <StarIcon fontSize="20px" style={iconStyle} />
                                   Add to favorite
                                 </Box>
                                 <Box
@@ -741,11 +752,10 @@ const CategoryInfo: React.FC = () => {
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
-        usersToDelete={usersToDelete}
+        usersToDelete={articlesToDelete}
         title="Delete article"
         description="Are you sure you want to delete this article?"
       />
-      
     </Box>
   );
 };

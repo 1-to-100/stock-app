@@ -203,7 +203,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           rel: "noopener noreferrer",
         },
       }),
-      Image,
+      Image.configure({
+        inline: true,
+        allowBase64: true, 
+      }),
       Underline,
       TextStyle,
       Color,
@@ -220,6 +223,12 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     },
     editable: !isPreview,
   });
+
+  useEffect(() => {
+    if (editor && content && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   const applyLink = () => {
     if (linkUrl) {
@@ -628,7 +637,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           />
         </div>
       )}
-      {content ? (
+      {/* {content ? (
       <div
         className="tiptap-preview"
         dangerouslySetInnerHTML={{ __html: content }}
@@ -640,7 +649,16 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       />
     ) : (
       <EditorContent editor={editor} />
-    )}
+    )} */}
+
+      {isPreview ? (
+        <div
+          className="tiptap-preview"
+          dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }}
+        />
+      ) : (
+        <EditorContent editor={editor} />
+      )}
       <style jsx>{`
         .tiptap-toolbar {
           position: relative;
