@@ -6,6 +6,7 @@ import { AuthApiError } from '@supabase/supabase-js';
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { createClient } from '@/lib/supabase/server';
+import { config } from '@/config';
 
 export const dynamic = 'force-dynamic';
 
