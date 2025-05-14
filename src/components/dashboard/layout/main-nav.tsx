@@ -8,6 +8,8 @@ import IconButton from "@mui/joy/IconButton";
 import Stack from "@mui/joy/Stack";
 import { Bell as BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
 import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
+import FormControl from "@mui/joy/FormControl";
+import Typography from "@mui/joy/Typography";
 
 import type { NavItemConfig } from "@/types/nav";
 import { usePopover } from "@/hooks/use-popover";
@@ -15,7 +17,6 @@ import { usePopover } from "@/hooks/use-popover";
 import { MobileNav } from "./mobile-nav";
 import { NotificationsPopover } from "./notifications-popover";
 import { UserPopover } from "./user-popover/user-popover";
-import Typography from "@mui/joy/Typography";
 import { useEffect } from "react";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { Select, Option } from "@mui/joy";
@@ -31,11 +32,22 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const notificationsPopover = usePopover<HTMLButtonElement>();
   const userPopover = usePopover<HTMLButtonElement>();
   const { userInfo } = useUserInfo();
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState<number | null>(null);
 
   const { data: customers, isLoading: isCustomersLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: getCustomers,
   });
+
+  React.useEffect(() => {
+    const storedCustomerId = localStorage.getItem('selectedCustomerId');
+    console.log('Stored customer ID:', storedCustomerId);
+    if (storedCustomerId) {
+      const numericId = parseInt(storedCustomerId, 10);
+      console.log('Parsed numeric ID:', numericId);
+      setSelectedCustomerId(numericId);
+    }
+  }, []);
 
   return (
     <React.Fragment>
@@ -88,20 +100,51 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             }}
           >
             {userInfo?.isSuperadmin || userInfo?.isCustomerSuccess ? (
-              <Select
-                placeholder="Select customer"
-                sx={{
-                  borderRadius: "6px",
-                  fontSize: { xs: "12px", sm: "14px" },
-                  minWidth: "150px",
-                }}
-              >
-                {customers?.map((customer) => (
-                  <Option key={customer.id} value={customer.name}>
-                    {customer.name.slice(0, 20)}
-                  </Option>
-                ))}
-              </Select>
+              <FormControl>
+                {selectedCustomerId && (
+                  <Typography
+                    level="body-xs"
+                    sx={{
+                      position: 'absolute',
+                      top: '-8px',
+                      left: '8px',
+                      backgroundColor: 'var(--joy-palette-background-body)',
+                      px: '4px',
+                      zIndex: 1,
+                      color: 'var(--joy-palette-text-secondary)',
+                      fontSize: '10px',
+                      fontWeight: '300',
+                    }}
+                  >
+                    Select customer
+                  </Typography>
+                )}
+                <Select
+                  placeholder="Select customer"
+                  value={selectedCustomerId}
+                  sx={{
+                    borderRadius: "6px",
+                    fontSize: { xs: "12px", sm: "14px" },
+                    minWidth: "200px",
+                  }}
+                  onChange={(_, value) => {
+                    console.log('Selected value:', value);
+                    if (value) {
+                      const numericValue = parseInt(value.toString(), 10);
+                      console.log('Setting numeric value:', numericValue);
+                      setSelectedCustomerId(numericValue);
+                      localStorage.setItem('selectedCustomerId', numericValue.toString());
+                      window.location.reload();
+                    }
+                  }}
+                >
+                  {customers?.map((customer) => (
+                    <Option key={customer.id} value={customer.id}>
+                      {customer.name.slice(0, 20)}
+                    </Option>
+                  ))}
+                </Select>
+              </FormControl>
             ) : null}
             <Badge
               color="danger"

@@ -38,6 +38,7 @@ export async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const idToken = await getAccessToken(config.auth.strategy);
+  const customerId = typeof window !== 'undefined' ? localStorage.getItem('selectedCustomerId') : null;
 
   const response = await fetch(path, {
     ...options,
@@ -45,6 +46,7 @@ export async function apiFetch<T>(
       ...options.headers,
       Authorization: `Bearer ${idToken}`,
       "Content-Type": "application/json",
+      ...(customerId && { "x-customer-id": customerId }),
     },
   });
 
