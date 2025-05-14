@@ -39,10 +39,31 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const supabaseClient = createClient(cookieStore);
 
   try {
-    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+    const { error, data: {user} } = await supabaseClient.auth.exchangeCodeForSession(code);
 
     if (error) {
       return NextResponse.json({ error: error.message });
+    }
+
+    if (!user || !user.email) {
+      return NextResponse.json({ error: 'User is missing' });
+    }
+
+    const validateEmailUrl = `${config.site.apiUrl}/register/validate-email/${encodeURIComponent(user.email)}`;
+    const emailValidationResponse = await fetch(validateEmailUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!emailValidationResponse.ok) {
+      await supabaseClient.auth.signOut();
+
+      const errorData = await emailValidationResponse.json();
+      const url = new URL(paths.auth.supabase.signUp, origin);
+      url.searchParams.set('error', errorData.message || 'Email validation failed');
+      return NextResponse.redirect(url);
     }
   } catch (err) {
     if (err instanceof AuthApiError && err.message.includes('code and code verifier should be non-empty')) {

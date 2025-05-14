@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import RouterLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Alert from '@mui/joy/Alert';
 import Box from '@mui/joy/Box';
@@ -29,6 +29,7 @@ import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
 import {OAuthProvider, oAuthProviders} from "@/lib/auth/supabase/auth-providers";
 import {Typography} from "@mui/joy";
+import {config} from "@/config";
 
 const schema = zod.object({
   firstName: zod.string().min(1, { message: 'First name is required' }),
@@ -44,7 +45,8 @@ const defaultValues = { firstName: '', lastName: '', email: '', password: '', te
 
 export function SignUpForm(): React.JSX.Element {
   const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
-
+  const searchParams = useSearchParams();
+  const hasShownErrorMessage = React.useRef(false);
   const router = useRouter();
 
   const [isPending, setIsPending] = React.useState<boolean>(false);
@@ -55,6 +57,19 @@ export function SignUpForm(): React.JSX.Element {
     setError,
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+
+  React.useEffect(() => {
+    const errorMessage = searchParams.get('error');
+    if (errorMessage && !hasShownErrorMessage.current) {
+      hasShownErrorMessage.current = true;
+      toast.error(errorMessage);
+
+      const params = new URLSearchParams(window.location.search);
+      params.delete('error');
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   const onAuth = React.useCallback(
     async (providerId: OAuthProvider['id']): Promise<void> => {
@@ -83,37 +98,61 @@ export function SignUpForm(): React.JSX.Element {
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
-      // It is really important that you read the official notes
-      // under "If signUp() is called for an existing confirmed user"
-      // https://supabase.com/docs/reference/javascript/auth-signup
-      // If a user already exists with this email, they will not
-      // receive a confirmation email.
+      try {
+        const validateEmailUrl = `${
+          config.site.apiUrl
+        }/register/validate-email/${encodeURIComponent(values.email)}`;
+        const emailValidationResponse = await fetch(validateEmailUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
-      redirectToUrl.searchParams.set('next', paths.dashboard.overview);
+        if (!emailValidationResponse.ok) {
+          const errorData = await emailValidationResponse.json();
+          throw new Error(errorData.message || "Email validation failed");
+        }
 
-      const {data, error} = await supabaseClient.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {emailRedirectTo: redirectToUrl.href, data: {firstName: values.firstName, lastName: values.lastName}},
-      });
+        // It is really important that you read the official notes
+        // under "If signUp() is called for an existing confirmed user"
+        // https://supabase.com/docs/reference/javascript/auth-signup
+        // If a user already exists with this email, they will not
+        // receive a confirmation email.
 
-      if (error) {
-        setError('root', { type: 'server', message: error.message });
-        setIsPending(false);
-        return;
-      }
+        const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
+        redirectToUrl.searchParams.set('next', paths.dashboard.overview);
 
-      if (data.session) {
-        // UserProvider will handle Router refresh
-        // After refresh, GuestGuard will handle the redirect
-        return;
-      }
+        const {data, error} = await supabaseClient.auth.signUp({
+          email: values.email,
+          password: values.password,
+          options: {emailRedirectTo: redirectToUrl.href, data: {firstName: values.firstName, lastName: values.lastName}},
+        });
 
-      if (data.user) {
-        const searchParams = new URLSearchParams({ email: values.email });
-        router.push(`${paths.auth.supabase.signUpConfirm}?${searchParams.toString()}`);
-        return;
+        if (error) {
+          setError('root', { type: 'server', message: error.message });
+          setIsPending(false);
+          return;
+        }
+
+        if (data.session) {
+          // UserProvider will handle Router refresh
+          // After refresh, GuestGuard will handle the redirect
+          return;
+        }
+
+        if (data.user) {
+          const searchParams = new URLSearchParams({ email: values.email });
+          router.push(`${paths.auth.supabase.signUpConfirm}?${searchParams.toString()}`);
+          return;
+        }
+      } catch (error) {
+        const errorMessage = (error as { message: string }).message;
+        toast.error(errorMessage);
+        setError("root", {
+          type: "server",
+          message: errorMessage,
+        });
       }
 
       setIsPending(false);
