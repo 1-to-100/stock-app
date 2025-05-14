@@ -329,7 +329,7 @@ const CategoryInfo: React.FC = () => {
       <Box
         sx={{
           position: { xs: "static", sm: "fixed" },
-          top: { xs: "0", sm: "1.5%", md: "1.5%", lg: "4%" },
+          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
           left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
           zIndex: 1000,
         }}
