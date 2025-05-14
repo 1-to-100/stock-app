@@ -23,7 +23,7 @@ import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlas
 import ChangePasswordModal from "../modals/ChangePasswordModal";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { editUserInfo } from "@/lib/api/users";
-import { FormActionsContext } from "@/app/dashboard/profile/layout";
+import { FormActionsContext } from "@/contexts/form-actions";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 

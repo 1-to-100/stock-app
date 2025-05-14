@@ -7,6 +7,7 @@ import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
 
 import { SettingsTabs } from '@/components/dashboard/settings/settings-tabs';
+import { FormActionsContext } from '@/contexts/form-actions';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,8 +18,6 @@ interface FormActions {
   onSubmit?: () => void;
   setSubmitHandler?: (handler: () => void) => void;
 }
-
-export const FormActionsContext = React.createContext<FormActions>({});
 
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
   const [formActions, setFormActions] = React.useState<FormActions>({});

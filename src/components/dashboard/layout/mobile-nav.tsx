@@ -27,6 +27,7 @@ import { CurrentUser } from './current-user';
 import { icons } from './nav-icons';
 import { WorkspaceSwitch } from './workspace-switch';
 import { useUserInfo } from "@/hooks/use-user-info";
+import { CustomerSelect } from "./customer-select";
 
 export interface MobileNavProps {
   items: NavItemConfig[];
@@ -111,14 +112,15 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
           '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
-        {/* <WorkspaceSwitch /> */}
+        {userInfo?.isSuperadmin || userInfo?.isCustomerSuccess ? (
+          <CustomerSelect />
+        ) : null}
         <Box component="nav" sx={{ flex: '1 1 auto' }}>
           {renderNavGroups({ items: filteredItems, onClose, pathname })}
         </Box>
         <NoSsr>
           <ColorSchemeSwitch />
         </NoSsr>
-        {/* <CurrentUser onNavigate={onClose} /> */}
       </Stack>
     </Drawer>
   );

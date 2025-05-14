@@ -18,10 +18,10 @@ export const layoutConfig: LayoutConfig = {
       items: [
         // { key: 'overview', title: 'Dashboard', href: paths.dashboard.overview, icon: 'grid-four' },
         { key: 'management', title: 'User Management', href: paths.dashboard.userManagement, icon: 'user' },
+        { key: 'documentation', title: 'Documentation', href: paths.dashboard.documentation.list, icon: 'documentation' },
         { key: 'role', title: 'Role Settings', href: paths.dashboard.roleSettings.list, icon: 'role' },
         { key: 'customer', title: 'Customer Management', href: paths.dashboard.customerManagement.list, icon: 'customer' },
-        { key: 'documentation', title: 'Documentation', href: paths.dashboard.documentation.list, icon: 'documentation' },
-        { key: 'test', title: 'User Test', href: paths.dashboard.test.list, icon: 'help' },
+        // { key: 'test', title: 'User Test', href: paths.dashboard.test.list, icon: 'help' },
         // { key: 'accounting', title: 'Accounting', href: paths.dashboard.crypto, icon: 'accounting' },
         // { key: 'help', title: 'Help Centre', href: paths.dashboard.crypto, icon: 'help' },
       ],

@@ -75,14 +75,14 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
           height: "100%",
           pb: "197px",
           position: "relative",
-          pt: "38px",
+          pt: "58px",
         }}
       >
         <Stack
           sx={{
             left: "-15px",
             position: "absolute",
-            top: 0,
+            top: "15px",
             width: "100%",
             zIndex: 2,
           }}
