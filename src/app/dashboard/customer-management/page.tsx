@@ -594,9 +594,13 @@ export default function Page(): React.JSX.Element {
                         <td>
                           <Checkbox
                             checked={selectedRows.includes(customer.id)}
-                            onChange={() =>
+                            onChange={(event) => {
+                              event.stopPropagation();
                               handleRowCheckboxChange(customer.id)
-                            }
+                            }}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
                             sx={{
                               transform: { xs: "scale(0.9)", sm: "scale(1)" },
                             }}

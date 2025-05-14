@@ -16,8 +16,11 @@ import { MobileNav } from "./mobile-nav";
 import { NotificationsPopover } from "./notifications-popover";
 import { UserPopover } from "./user-popover/user-popover";
 import Typography from "@mui/joy/Typography";
-import { useAuth } from "@/contexts/auth/user-context";
 import { useEffect } from "react";
+import { useUserInfo } from "@/hooks/use-user-info";
+import { Select, Option } from "@mui/joy";
+import { useQuery } from "@tanstack/react-query";
+import { getCustomers } from "@/lib/api/customers";
 
 export interface MainNavProps {
   items: NavItemConfig[];
@@ -27,7 +30,12 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
   const notificationsPopover = usePopover<HTMLButtonElement>();
   const userPopover = usePopover<HTMLButtonElement>();
-  const { user } = useAuth();
+  const { userInfo } = useUserInfo();
+
+  const { data: customers, isLoading: isCustomersLoading } = useQuery({
+    queryKey: ["customers"],
+    queryFn: getCustomers,
+  });
 
   return (
     <React.Fragment>
@@ -79,6 +87,22 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
               justifyContent: "flex-end",
             }}
           >
+            {userInfo?.isSuperadmin || userInfo?.isCustomerSuccess ? (
+              <Select
+                placeholder="Select customer"
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: { xs: "12px", sm: "14px" },
+                  minWidth: "150px",
+                }}
+              >
+                {customers?.map((customer) => (
+                  <Option key={customer.id} value={customer.name}>
+                    {customer.name.slice(0, 20)}
+                  </Option>
+                ))}
+              </Select>
+            ) : null}
             <Badge
               color="danger"
               sx={{ "& .MuiBadge-badge": { top: "6px", right: "6px" } }}
@@ -102,7 +126,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
                 "& .MuiBadge-badge": { bottom: "4px", right: "4px" },
               }}
             >
-              <Avatar src={user?.avatar} />
+              <Avatar src={userInfo?.avatar} />
             </Badge>
             <Box
               sx={{
@@ -112,10 +136,10 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
               }}
             >
               <Typography fontWeight="lg" textColor="inherit">
-                {user?.name}
+                {userInfo?.firstName} {userInfo?.lastName}
               </Typography>
               <Typography level="body-xs" textColor="neutral.500">
-                {user?.email}
+                {userInfo?.email}
               </Typography>
             </Box>
           </Stack>

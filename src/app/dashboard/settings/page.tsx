@@ -27,14 +27,18 @@ export default function Page(): React.JSX.Element {
   };
 
   return (
-    <Box sx={{ p: "var(--Content-padding)", overflowX: "auto" }}>
-      <Stack spacing={3}>
-        <Typography fontSize={{ xs: "xl3", lg: "xl4" }} level="h1">
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, overflowX: "auto" }}>
+      <Stack spacing={{ xs: 2, sm: 3 }}>
+        <Typography
+          fontSize={{ xs: "xl2", sm: "xl3", lg: "xl4" }}
+          level="h1"
+        >
           Settings
         </Typography>
         <Box
           sx={{
             width: "100%",
+            maxWidth: "700px",
             overflowX: "auto",
             minWidth: 0,
             "&::-webkit-scrollbar": {
@@ -49,27 +53,27 @@ export default function Page(): React.JSX.Element {
           <Table
             sx={{
               width: "100%",
-              maxWidth: 700,
+              maxWidth: "100%",
               border: "none !important",
               "& th, & td": {
                 border: "none !important",
                 backgroundColor: "transparent !important",
               },
-              minWidth: { xs: 500, sm: 600 },
+              minWidth: { xs: "auto", sm: 400 },
               "& thead th": {
-                padding: "8px",
+                padding: { xs: "6px", sm: "8px" },
               },
               "& tbody td": {
-                padding: "8px",
+                padding: { xs: "6px", sm: "8px" },
               },
             }}
           >
             <thead>
               <tr>
-                <th style={{ width: "60%" }}>
+                <th style={{ width: "50%", textAlign: "left" }}>
                   <Typography
                     sx={{
-                      fontSize: "16px",
+                      fontSize: { xs: "14px", sm: "16px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -77,10 +81,10 @@ export default function Page(): React.JSX.Element {
                     Type
                   </Typography>
                 </th>
-                <th style={{ width: "20%", textAlign: "center" }}>
+                <th style={{ width: "25%", textAlign: "center" }}>
                   <Typography
                     sx={{
-                      fontSize: "16px",
+                      fontSize: { xs: "14px", sm: "16px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -88,10 +92,10 @@ export default function Page(): React.JSX.Element {
                     Email
                   </Typography>
                 </th>
-                <th style={{ width: "20%", textAlign: "center" }}>
+                <th style={{ width: "25%", textAlign: "center" }}>
                   <Typography
                     sx={{
-                      fontSize: "16px",
+                      fontSize: { xs: "14px", sm: "16px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -106,7 +110,7 @@ export default function Page(): React.JSX.Element {
                 <td>
                   <Typography
                     sx={{
-                      fontSize: "14px",
+                      fontSize: { xs: "12px", sm: "14px" },
                       fontWeight: "300",
                       color: "var(--joy-palette-text-primary)",
                     }}
@@ -115,7 +119,7 @@ export default function Page(): React.JSX.Element {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -160,7 +164,7 @@ export default function Page(): React.JSX.Element {
                 <td>
                   <Typography
                     sx={{
-                      fontSize: "14px",
+                      fontSize: { xs: "12px", sm: "14px" },
                       fontWeight: "300",
                       color: "var(--joy-palette-text-primary)",
                     }}
@@ -169,7 +173,7 @@ export default function Page(): React.JSX.Element {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -214,7 +218,7 @@ export default function Page(): React.JSX.Element {
                 <td>
                   <Typography
                     sx={{
-                      fontSize: "14px",
+                      fontSize: { xs: "12px", sm: "14px" },
                       fontWeight: "300",
                       color: "var(--joy-palette-text-primary)",
                     }}
@@ -223,7 +227,7 @@ export default function Page(): React.JSX.Element {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -264,7 +268,7 @@ export default function Page(): React.JSX.Element {
                 <td>
                   <Typography
                     sx={{
-                      fontSize: "14px",
+                      fontSize: { xs: "12px", sm: "14px" },
                       fontWeight: "300",
                       color: "var(--joy-palette-text-primary)",
                     }}
@@ -273,7 +277,7 @@ export default function Page(): React.JSX.Element {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}
@@ -314,7 +318,7 @@ export default function Page(): React.JSX.Element {
                 <td>
                   <Typography
                     sx={{
-                      fontSize: "14px",
+                      fontSize: { xs: "12px", sm: "14px" },
                       fontWeight: "300",
                       color: "var(--joy-palette-text-primary)",
                     }}
@@ -323,7 +327,7 @@ export default function Page(): React.JSX.Element {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "12px",
+                      fontSize: { xs: "10px", sm: "12px" },
                       fontWeight: "400",
                       color: "var(--joy-palette-text-secondary)",
                     }}

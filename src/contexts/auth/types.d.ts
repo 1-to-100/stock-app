@@ -34,6 +34,7 @@ export interface ApiUser {
   createdAt?: string;
   phoneNumber?: string;
   isSuperadmin?: boolean;
+  isCustomerSuccess?: boolean;
   activity?: {
     id: number;
     browserOs: string;

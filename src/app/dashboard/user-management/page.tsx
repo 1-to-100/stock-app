@@ -704,7 +704,13 @@ export default function Page(): React.JSX.Element {
                           <td>
                             <Checkbox
                               checked={selectedRows.includes(user.id)}
-                              onChange={() => handleRowCheckboxChange(user.id)}
+                              onChange={(event) => {
+                                event.stopPropagation();
+                                handleRowCheckboxChange(user.id)
+                              }}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
                             />
                           </td>
                           <td>
@@ -842,8 +848,8 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
-                              {user.customer?.name.slice(0, 75)}
+                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
+                              {user.customer?.name.slice(0, 45)}
                             </Box>
                           </td>
                           <td
@@ -851,7 +857,7 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
+                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
                               {user.role?.name.slice(0, 75)}
                             </Box>
                           </td>
