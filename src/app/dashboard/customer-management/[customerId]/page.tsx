@@ -371,11 +371,17 @@ const Customer: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: "24px" }}>
-      <SearchInput
-        onSearch={handleSearch}
-        style={{ position: "fixed", top: "4%", zIndex: "1000" }}
-      />
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
+      <Box
+        sx={{
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
+        }}
+      >
+        <SearchInput onSearch={handleSearch} />
+      </Box>
       <Box
         sx={{
           display: "flex",

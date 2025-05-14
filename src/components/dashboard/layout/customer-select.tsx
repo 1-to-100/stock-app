@@ -25,7 +25,7 @@ export function CustomerSelect(): React.JSX.Element {
 
   return (
     <FormControl>
-      {selectedCustomerId && (
+      {/* {selectedCustomerId && (
         <Typography
           level="body-xs"
           sx={{
@@ -41,7 +41,7 @@ export function CustomerSelect(): React.JSX.Element {
         >
           Select customer
         </Typography>
-      )}
+      )} */}
       <Autocomplete
         placeholder="Select customer"
         options={customers || []}
@@ -52,20 +52,24 @@ export function CustomerSelect(): React.JSX.Element {
           if (newValue) {
             setSelectedCustomerId(newValue.id);
             localStorage.setItem('selectedCustomerId', newValue.id.toString());
-            window.location.reload();
+          } else {
+            setSelectedCustomerId(null);
+            localStorage.removeItem('selectedCustomerId');
           }
+          window.location.reload();
         }}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={{
-          borderRadius: "6px",
+          borderRadius: "25px",
           fontSize: { xs: "12px", sm: "14px" },
-          minWidth: { xs: "100%", md: "200px" },
-          maxWidth: { xs: "100%", md: "200px" },
+          minWidth: { xs: "100%", md: "220px" },
+          maxWidth: { xs: "100%", md: "220px" },
           '& .MuiInput-root': {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-          }
+          },
+          padding: '0px 16px',
         }}
       />
     </FormControl>

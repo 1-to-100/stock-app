@@ -43,12 +43,12 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
             background: "var(--joy-palette-background-mainBg)",
           },
           "& .MuiInput-input": {
-            padding: "8px 0px",
-            fontSize: "16px",
-            color: "var(--joy-palette-text-primary)",
+            padding: '0px 16px',
+            fontSize: "14px",
+            color: "var(--joy-palette-neutral-out)",
           },
           "& .MuiInput-startDecorator": {
-            color: "var(--joy-palette-text-primary)",
+            color: "var(--joy-palette-neutral-out)",
             marginLeft: "2px",
           },
         }}
