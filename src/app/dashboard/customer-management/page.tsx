@@ -277,7 +277,22 @@ export default function Page(): React.JSX.Element {
     marginRight: { xs: "10px", sm: "14px" },
   };
 
-  if (error || !userInfo?.isSuperadmin) {
+  if (isLoading || !userInfo) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: { xs: "40vh", sm: "50vh" },
+        }}
+      >
+        <CircularProgress size="lg" />
+      </Box>
+    );
+  }
+
+  if (error || !userInfo.isSuperadmin) {
     const httpError = error as HttpError;
     let status: number | undefined = httpError?.response?.status;
 
@@ -286,7 +301,7 @@ export default function Page(): React.JSX.Element {
       status = match ? parseInt(match[1] ?? "0", 10) : undefined;
     }
 
-    if (status === 403 || !userInfo?.isSuperadmin) {
+    if (status === 403 || !userInfo.isSuperadmin) {
       return (
         <Box sx={{ textAlign: "center", mt: { xs: 10, sm: 20, md: 35 } }}>
           <Typography

@@ -81,7 +81,9 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             }}
           >
             {userInfo?.isSuperadmin || userInfo?.isCustomerSuccess ? (
-              <CustomerSelect />
+              <Box sx={{ display: { xs: "none", md: "block" } }} >
+                <CustomerSelect />
+              </Box>
             ) : null}
             <Badge
               color="danger"

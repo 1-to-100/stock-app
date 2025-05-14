@@ -113,7 +113,9 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
         }}
       >
         {userInfo?.isSuperadmin || userInfo?.isCustomerSuccess ? (
-          <CustomerSelect />
+          <Box sx={{ mt: '10px' }}>
+            <CustomerSelect />
+          </Box>
         ) : null}
         <Box component="nav" sx={{ flex: '1 1 auto' }}>
           {renderNavGroups({ items: filteredItems, onClose, pathname })}

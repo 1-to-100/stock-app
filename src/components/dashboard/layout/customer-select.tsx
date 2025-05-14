@@ -31,7 +31,7 @@ export function CustomerSelect(): React.JSX.Element {
             top: '-8px',
             left: '8px',
             px: '4px',
-            zIndex: 1,
+            zIndex: 10000,
             color: 'var(--joy-palette-text-secondary)',
             fontSize: '10px',
             fontWeight: '300',
@@ -46,7 +46,13 @@ export function CustomerSelect(): React.JSX.Element {
         sx={{
           borderRadius: "6px",
           fontSize: { xs: "12px", sm: "14px" },
-          minWidth: "200px",
+          minWidth: { xs: "100%", md: "200px" },
+          maxWidth: { xs: "100%", md: "200px" },
+          '& .MuiSelect-select': {
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }
         }}
         onChange={(_, value) => {
           if (value) {
