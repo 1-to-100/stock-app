@@ -33,7 +33,7 @@ import { useCallback, useState, useEffect } from "react";
 import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import Pagination from "@/components/dashboard/layout/pagination";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Article } from "@/contexts/auth/types";
 import { getCategoryById } from "@/lib/api/categories";
 import { deleteArticle, editArticle, getArticlesList } from "@/lib/api/articles";
@@ -41,6 +41,14 @@ import { useRouter } from "next/navigation";
 import {toast} from '@/components/core/toaster';
 
 const RouterLink = Link;
+
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 const CategoryInfo: React.FC = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -174,9 +182,26 @@ const CategoryInfo: React.FC = () => {
     }
   };
 
+  const deleteArticleMutation = useMutation({
+    mutationFn: (id: number) => deleteArticle(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("Articles have been deleted successfully!");
+    },
+    onError: (error: HttpError) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while deleting articles.");
+      }
+    },
+  });
+
   const confirmDelete = async () => {
     try {
-      await Promise.all(rowsToDelete.map((id) => deleteArticle(id)));
+      await Promise.all(rowsToDelete.map((id) => deleteArticleMutation.mutate(id)));
       setOpenDeleteModal(false);
       setRowsToDelete([]);
       setSelectedRows([]);
@@ -220,20 +245,28 @@ const CategoryInfo: React.FC = () => {
     setSortDirection(newDirection);
   };
 
+  const editArticleMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { status: "draft" | "published" } }) => editArticle(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("Article status has been updated successfully!");
+    },
+    onError: (error: HttpError) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while updating article status.");
+      }
+    },
+  });
+
   const handleSaveDraft = async (articleId: number) => {
-
-    const payload = {
-      status: "draft",
-    };
-
-    try {
-      const response = await editArticle(Number(articleId), payload);
-      toast.success("Article has been saved as draft!");
-      getArticlesList();
-    } catch (error) {
-      console.error("Failed to save draft:", error);
-      toast.error("Failed to save draft.");
-    }
+    editArticleMutation.mutate({ 
+      id: articleId, 
+      data: { status: "draft" } 
+    });
   };
 
   const articlesToDelete = rowsToDelete

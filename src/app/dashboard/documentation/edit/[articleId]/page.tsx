@@ -8,7 +8,7 @@ import { Breadcrumbs, Button, Select, Option, Checkbox, Input } from "@mui/joy";
 import { Box, Stack } from "@mui/system";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { getCategoriesList, getSubcategories } from "@/lib/api/categories";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
@@ -16,9 +16,30 @@ import { editArticle, getArticleById } from "@/lib/api/articles";
 import { toast } from "@/components/core/toaster";
 import { useParams } from "next/navigation";
 
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+type ArticleStatus = "draft" | "published";
+
+interface ArticlePayload {
+  title: string;
+  articleCategoryId: number;
+  subcategory: string;
+  status: ArticleStatus;
+  content: string;
+  videoUrl: string;
+}
+
 const EditArticlePage = () => {
   const params = useParams();
   const articleId = params.articleId;
+
+  const queryClient = useQueryClient();
 
   const { data: subcategories, isLoading: isSubcategoriesLoading } = useQuery({
     queryKey: ["subcategories"],
@@ -86,13 +107,31 @@ const EditArticlePage = () => {
     setVideoId(id);
   };
 
+  const editArticleMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ArticlePayload }) => editArticle(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["article", articleId] });
+      toast.success("Article has been updated successfully!");
+    },
+    onError: (error: HttpError) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while updating the article.");
+      }
+    },
+  });
+
   const handleSaveDraft = async () => {
     if (!title || !selectedCategory || !selectedSubcategory || !content) {
       toast.error("Please fill in all required fields: title, category, subcategory, and content.");
       return;
     }
 
-    const payload = {
+    const payload: ArticlePayload = {
       title,
       articleCategoryId: Number(selectedCategory),
       subcategory: selectedSubcategory,
@@ -101,13 +140,7 @@ const EditArticlePage = () => {
       videoUrl: videoLink,
     };
 
-    try {
-      const response = await editArticle(Number(articleId), payload);
-      toast.success("Article has been saved as draft!");
-      getCategoriesList();
-    } catch (error) {
-      toast.error("Failed to save draft.");
-    }
+    editArticleMutation.mutate({ id: Number(articleId), data: payload });
   };
 
   const handlePublish = async () => {
@@ -116,7 +149,7 @@ const EditArticlePage = () => {
       return;
     }
 
-    const payload = {
+    const payload: ArticlePayload = {
       title,
       articleCategoryId: Number(selectedCategory),
       subcategory: selectedSubcategory,
@@ -125,13 +158,7 @@ const EditArticlePage = () => {
       videoUrl: videoLink,
     };
 
-    try {
-      const response = await editArticle(Number(articleId), payload);
-      toast.success("Article has been updated!");
-      getCategoriesList();
-    } catch (error) {
-      toast.error("Failed to publish article.");
-    }
+    editArticleMutation.mutate({ id: Number(articleId), data: payload });
   };
 
   return (

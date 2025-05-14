@@ -18,11 +18,8 @@ import { isNavItemActive } from "@/lib/is-nav-item-active";
 import { Logo } from "@/components/core/logo";
 import { NoSsr } from "@/components/core/no-ssr";
 import { useUserInfo } from "@/hooks/use-user-info";
-
 import { ColorSchemeSwitch } from "./color-scheme-switch";
-import { CurrentUser } from "./current-user";
 import { icons } from "./nav-icons";
-import { WorkspaceSwitch } from "./workspace-switch";
 
 export interface SideNavProps {
   items: NavItemConfig[];
@@ -35,8 +32,8 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
   const filteredItems = items.map((group) => ({
     ...group,
     items: group.items?.filter((item) => {
-      if (!userInfo?.isSuperadmin) {
-        return item.key !== "role" && item.key !== "customer";
+      if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
+        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
       }
       return true;
     }),
@@ -234,11 +231,13 @@ function renderNavItems({
   );
 }
 
-interface NavItemProps extends Omit<NavItemConfig, "items"> {
+interface NavItemProps extends Omit<NavItemConfig, 'items'> {
   children?: React.ReactNode;
   depth: number;
   forceOpen?: boolean;
   pathname: string;
+  type?: 'divider';
+  show?: (userInfo: { isSuperadmin?: boolean; isCustomerSuccess?: boolean }) => boolean;
 }
 
 function NavItem({
@@ -252,23 +251,47 @@ function NavItem({
   matcher,
   pathname,
   title,
+  type,
 }: NavItemProps): React.JSX.Element {
   const [open, setOpen] = React.useState<boolean>(forceOpen);
-  const active = isNavItemActive({
-    disabled,
-    external,
-    href,
-    matcher,
-    pathname,
-  });
+  const active = isNavItemActive({ disabled, external, href, matcher, pathname });
   const Icon = icon ? icons[icon] : null;
   const ExpandIcon = open ? CaretUpIcon : CaretDownIcon;
   const isBranch = Boolean(children && !href);
   const isLeaf = Boolean(!children && href);
   const showChildren = Boolean(children && open);
+  const { userInfo } = useUserInfo();
+
+  if (type === 'divider') {
+    const shouldShowDivider = Boolean(userInfo?.isSuperadmin || userInfo?.isCustomerSuccess);
+    if (!shouldShowDivider) {
+      return <></>;
+    }
+    return (
+      <ListItem
+        data-depth={depth}
+        sx={{
+          '--ListItem-paddingRight': 0,
+          '--ListItem-paddingLeft': 0,
+          '--ListItem-paddingY': 0,
+          userSelect: 'none',
+          minHeight: '20px',
+        }}
+      >
+        <ListItemContent>
+          <Box
+            sx={{
+              borderTop: '1px solid var(--joy-palette-divider)',
+              my: 1,
+            }}
+          />
+        </ListItemContent>
+      </ListItem>
+    );
+  }
 
   if (!(isBranch || isLeaf)) {
-    throw new Error("Children or href required");
+    throw new Error('Children or href required');
   }
 
   return (

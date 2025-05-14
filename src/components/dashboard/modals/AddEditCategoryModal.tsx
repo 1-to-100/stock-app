@@ -29,7 +29,16 @@ import {
   getCategoryById,
   editCategory,
 } from "@/lib/api/categories";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/core/toaster";
+
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 interface AddEditCategoryProps {
   open: boolean;
@@ -38,18 +47,21 @@ interface AddEditCategoryProps {
   fetchCategories: () => void;
 }
 
+interface CategoryFormData {
+  name: string;
+  subcategory: string;
+  about: string;
+  icon: string;
+}
+
 export default function AddEditCategory({
   open,
   onClose,
   categoryId,
   fetchCategories,
 }: AddEditCategoryProps) {
-  const [formData, setFormData] = useState<{
-    name: string;
-    subcategory: string;
-    about: string;
-    icon: string;
-  }>({
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<CategoryFormData>({
     name: "",
     subcategory: "",
     about: "",
@@ -146,17 +158,48 @@ export default function AddEditCategory({
     setIsSelectOpen(false);
   };
 
-  const handleSave = async () => {
-    try {
-      if (categoryId) {
-        await editCategory(categoryId, formData);
-      } else {
-        await createCategory(formData);
-      }
-      fetchCategories();
+  const createCategoryMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
       onClose();
-    } catch (error) {
-      console.error("Error saving category:", error);
+      toast.success("Category created successfully.");
+    },
+    onError: (error: HttpError) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while creating the category.");
+      }
+    },
+  });
+
+  const editCategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: CategoryFormData }) => editCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
+      queryClient.invalidateQueries({ queryKey: ["category", categoryId] });
+      onClose();
+      toast.success("Category updated successfully.");
+    },
+    onError: (error: HttpError) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while updating the category.");
+      }
+    },
+  });
+
+  const handleSave = async () => {
+    if (categoryId) {
+      editCategoryMutation.mutate({ id: categoryId, data: formData });
+    } else {
+      createCategoryMutation.mutate(formData);
     }
   };
 
@@ -430,7 +473,7 @@ export default function AddEditCategory({
                 "&:hover": { bgcolor: "#4338CA" },
               }}
             >
-              Add category
+              {categoryId ? "Update category" : "Add category"}
             </Button>
           </Stack>
         </Stack>

@@ -62,6 +62,10 @@ export const paths = {
       user: '/dashboard/role-settings/user',
     },
     userManagement: '/dashboard/user-management',
+    systemUsers: {
+      list: '/dashboard/system-users',
+      details: (userId: string) => `/dashboard/system-users/${userId}`,
+    },
     tasks: '/dashboard/tasks',
     blank: '/dashboard/blank',
     customers: {

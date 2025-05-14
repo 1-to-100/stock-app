@@ -43,8 +43,8 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
   const filteredItems = items.map((group) => ({
     ...group,
     items: group.items?.filter((item) => {
-      if (!userInfo?.isSuperadmin) {
-        return item.key !== "role" && item.key !== "customer";
+      if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
+        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
       }
       return true;
     }),
@@ -202,6 +202,7 @@ interface NavItemProps extends Omit<NavItemConfig, 'items'> {
   forceOpen?: boolean;
   onClose?: () => void;
   pathname: string;
+  type?: 'divider';
 }
 
 function NavItem({
@@ -216,6 +217,7 @@ function NavItem({
   onClose,
   pathname,
   title,
+  type,
 }: NavItemProps): React.JSX.Element {
   const [open, setOpen] = React.useState<boolean>(forceOpen);
   const active = isNavItemActive({ disabled, external, href, matcher, pathname });
@@ -224,6 +226,35 @@ function NavItem({
   const isBranch = Boolean(children && !href);
   const isLeaf = Boolean(!children && href);
   const showChildren = Boolean(children && open);
+  const { userInfo } = useUserInfo();
+
+  if (type === 'divider') {
+    const shouldShowDivider = Boolean(userInfo?.isSuperadmin || userInfo?.isCustomerSuccess);
+    if (!shouldShowDivider) {
+      return <></>;
+    }
+    return (
+      <ListItem
+        data-depth={depth}
+        sx={{
+          '--ListItem-paddingRight': 0,
+          '--ListItem-paddingLeft': 0,
+          '--ListItem-paddingY': 0,
+          userSelect: 'none',
+          minHeight: '20px',
+        }}
+      >
+        <ListItemContent>
+          <Box
+            sx={{
+              borderTop: '1px solid var(--joy-palette-divider)',
+              my: '5px',
+            }}
+          />
+        </ListItemContent>
+      </ListItem>
+    );
+  }
 
   if (!(isBranch || isLeaf)) {
     throw new Error('Children or href required');
