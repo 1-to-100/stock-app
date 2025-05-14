@@ -1,19 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { Select, Option, FormControl, Typography } from "@mui/joy";
+import { Autocomplete, FormControl, Typography } from "@mui/joy";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomers } from "@/lib/api/customers";
+import { useEffect } from 'react';
+import { useState } from 'react';
 
 export function CustomerSelect(): React.JSX.Element {
-  const [selectedCustomerId, setSelectedCustomerId] = React.useState<number | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
 
   const { data: customers } = useQuery({
     queryKey: ["customers"],
     queryFn: getCustomers,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const storedCustomerId = localStorage.getItem('selectedCustomerId');
     if (storedCustomerId) {
       const numericId = parseInt(storedCustomerId, 10);
@@ -40,35 +42,32 @@ export function CustomerSelect(): React.JSX.Element {
           Select customer
         </Typography>
       )}
-      <Select
+      <Autocomplete
         placeholder="Select customer"
-        value={selectedCustomerId}
+        options={customers || []}
+        getOptionLabel={(customer) => customer.name.slice(0, 20)}
+        getOptionKey={(customer) => customer.id}
+        value={customers?.find((customer) => customer.id === selectedCustomerId) || null}
+        onChange={(_, newValue) => {
+          if (newValue) {
+            setSelectedCustomerId(newValue.id);
+            localStorage.setItem('selectedCustomerId', newValue.id.toString());
+            window.location.reload();
+          }
+        }}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
         sx={{
           borderRadius: "6px",
           fontSize: { xs: "12px", sm: "14px" },
           minWidth: { xs: "100%", md: "200px" },
           maxWidth: { xs: "100%", md: "200px" },
-          '& .MuiSelect-select': {
+          '& .MuiInput-root': {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
           }
         }}
-        onChange={(_, value) => {
-          if (value) {
-            const numericValue = parseInt(value.toString(), 10);
-            setSelectedCustomerId(numericValue);
-            localStorage.setItem('selectedCustomerId', numericValue.toString());
-            window.location.reload();
-          }
-        }}
-      >
-        {customers?.map((customer) => (
-          <Option key={customer.id} value={customer.id}>
-            {customer.name.slice(0, 20)}
-          </Option>
-        ))}
-      </Select>
+      />
     </FormControl>
   );
 } 
