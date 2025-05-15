@@ -17,11 +17,11 @@ export const dynamic = 'force-dynamic';
 // NOTE: This is not a `Page` because we only redirect and it will never render React content.
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { searchParams, origin } = req.nextUrl;
+  const { searchParams } = req.nextUrl;
 
   if (searchParams.get('error')) {
     const description = searchParams.get('error_description') || 'Something went wrong';
-    const url = new URL(paths.auth.supabase.signUp, origin);
+    const url = new URL(paths.auth.supabase.signUp, config.site.url);
     url.searchParams.set('error', description);
     return NextResponse.redirect(url);
   }
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       await supabaseClient.auth.signOut();
 
       const errorData = await emailValidationResponse.json();
-      const url = new URL(paths.auth.supabase.signUp, origin);
+      const url = new URL(paths.auth.supabase.signUp, config.site.url);
       url.searchParams.set('error', errorData.message || 'Email validation failed');
       return NextResponse.redirect(url);
     }
