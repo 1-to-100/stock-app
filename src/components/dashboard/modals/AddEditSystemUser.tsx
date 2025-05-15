@@ -27,11 +27,10 @@ import {
   updateSystemUser,
   getSystemUserById,
 } from "./../../../lib/api/system-users";
-import { getRoles } from "./../../../lib/api/roles";
+import { getSystemRoles } from "./../../../lib/api/system-users";
 import { getCustomers } from "./../../../lib/api/customers";
-import { getManagers, Manager } from "./../../../lib/api/managers";
-import { ApiUser, Role, Customer } from "@/contexts/auth/types";
 import { toast } from "@/components/core/toaster";
+import { SystemRole } from "@/contexts/auth/types";
 
 interface HttpError {
   response?: {
@@ -52,8 +51,7 @@ interface FormErrors {
   lastName?: string;
   email?: string;
   customer?: string;
-  role?: string;
-  additionalEmails?: string[];
+  systemRole?: string;
 }
 
 export default function AddEditSystemUser({
@@ -66,16 +64,11 @@ export default function AddEditSystemUser({
     lastName: "",
     email: "",
     customer: "",
-    role: "",
-    manager: "",
-    isCustomerSuccess: false,
-    isSystemAdmin: false,
+    systemRole: "customer_success",
   });
-  const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
+
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isActive, setIsActive] = useState<boolean>(true);
-  const [isCustomerSuccess, setIsCustomerSuccess] = useState<boolean>(false);
-  const [isSystemAdmin, setIsSystemAdmin] = useState<boolean>(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] =
     useState<boolean>(false);
   const [errors, setErrors] = useState<FormErrors | null>(null);
@@ -83,20 +76,23 @@ export default function AddEditSystemUser({
   const { colorScheme } = useColorScheme();
   const isLightTheme = colorScheme === "light";
   const queryClient = useQueryClient();
+  const [localSystemRoles, setLocalSystemRoles] = useState<SystemRole[]>([]);
+
+  const formatSystemRole = (role: string): string => {
+    return role
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   const { data: roles, isLoading: isRolesLoading } = useQuery({
-    queryKey: ["roles"],
-    queryFn: getRoles,
+    queryKey: ["system-roles"],
+    queryFn: getSystemRoles,
   });
 
   const { data: customers, isLoading: isCustomersLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: getCustomers,
-  });
-
-  const { data: managers, isLoading: isManagersLoading } = useQuery({
-    queryKey: ["managers"],
-    queryFn: getManagers,
   });
 
   const { data: userData, isLoading: isUserLoading } = useQuery({
@@ -106,16 +102,21 @@ export default function AddEditSystemUser({
   });
 
   useEffect(() => {
+    if (Array.isArray(roles)) {
+      setLocalSystemRoles(roles);
+    } else {
+      setLocalSystemRoles([]);
+    }
+  }, [roles]);
+
+  useEffect(() => {
     if (userId && userData && open) {
       setFormData({
         firstName: userData.firstName || "",
         lastName: userData.lastName || "",
         email: userData.email || "",
-        customer: userData?.customer?.name || "",
-        role: userData?.role?.name || "",
-        manager: userData?.manager?.id.toString() || "",
-        isCustomerSuccess: userData.isCustomerSuccess || false,
-        isSystemAdmin: userData.isSystemAdmin || false,
+        customer: userData.customer?.name || "",
+        systemRole: userData.isSuperadmin ? "super_admin" : "customer_success",
       });
       setAvatarPreview(userData.avatar || null);
       setIsActive(userData.status === "active");
@@ -127,16 +128,10 @@ export default function AddEditSystemUser({
         lastName: "",
         email: "",
         customer: "",
-        role: "",
-        manager: "",
-        isCustomerSuccess: false,
-        isSystemAdmin: false,
+        systemRole: "",
       });
-      setAdditionalEmails([]);
       setAvatarPreview(null);
       setIsActive(false);
-      setIsCustomerSuccess(false);
-      setIsSystemAdmin(false);
       setErrors(null);
       setEmailWarnings([]);
     }
@@ -145,7 +140,8 @@ export default function AddEditSystemUser({
   const createUserMutation = useMutation({
     mutationFn: createSystemUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["system-users"] });
+      // queryClient.invalidateQueries({ queryKey: ["system-users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       onClose();
       toast.success("User created successfully.");
     },
@@ -162,7 +158,8 @@ export default function AddEditSystemUser({
   const updateUserMutation = useMutation({
     mutationFn: updateSystemUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["system-users"] });
+      // queryClient.invalidateQueries({ queryKey: ["system-users"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["system-user", userId] });
       onClose();
       toast.success("User updated successfully.");
@@ -223,15 +220,8 @@ export default function AddEditSystemUser({
       newErrors.email = emailError;
     }
 
-    const additionalEmailErrors = additionalEmails.map((email) => {
-      if (email) {
-        return validateEmail(email) || "";
-      }
-      return "";
-    });
-
-    if (additionalEmailErrors.some((error) => error)) {
-      newErrors.additionalEmails = additionalEmailErrors;
+    if (!formData.systemRole) {
+      newErrors.systemRole = "System role is required";
     }
 
     return newErrors;
@@ -239,11 +229,6 @@ export default function AddEditSystemUser({
 
   const handleInputChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({
-      ...prev,
-      [field]: undefined,
-      additionalEmails: field === "email" ? undefined : prev?.additionalEmails,
-    }));
 
     if (field === "email" && value) {
       const emailError = validateEmail(value);
@@ -282,10 +267,15 @@ export default function AddEditSystemUser({
     return customer ? customer.id : 0;
   };
 
-  const getRoleId = (roleName: string): number => {
-    if (!roles) return 0;
-    const role = roles.find((r) => r.name === roleName);
-    return role ? role.id : 0;
+  const handleSystemRoleChange = (newValue: string) => {
+    const isSuperadmin = newValue === "super_admin";
+    setFormData((prev) => ({
+      ...prev,
+      systemRole: newValue as SystemRole,
+      isSuperadmin,
+      isCustomerSuccess: !isSuperadmin,
+      customer: isSuperadmin ? "" : prev.customer, // Clear customer if superadmin
+    }));
   };
 
   const handleSave = async () => {
@@ -302,11 +292,7 @@ export default function AddEditSystemUser({
         customerId: formData.customer
           ? getCustomerId(formData.customer)
           : undefined,
-        roleId: formData.role ? getRoleId(formData.role) : undefined,
-        managerId: formData.manager ? parseInt(formData.manager) : undefined,
-        additionalEmails: additionalEmails.filter((email) => email.trim()),
-        isCustomerSuccess,
-        isSystemAdmin,
+        systemRole: formData.systemRole,
       };
 
       if (userId) {
@@ -494,45 +480,6 @@ export default function AddEditSystemUser({
             </Stack>
           )}
 
-          <Stack direction="column" spacing={1} alignItems="left" mb={{ xs: 1, sm: 2 }}>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            mb={{ xs: 1, sm: 2 }}
-          >
-            <Switch
-              checked={isCustomerSuccess}
-              onChange={(event) => setIsCustomerSuccess(event.target.checked)}
-              sx={{ transform: { xs: "scale(0.9)", sm: "scale(1)" } }}
-            />
-            <Typography
-              level="body-sm"
-              sx={{ fontSize: { xs: "12px", sm: "14px" }, color: "var(--joy-palette-text-secondary)" }}
-            >
-              Customer Success
-            </Typography>
-          </Stack>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            mb={{ xs: 1, sm: 2 }}
-          >
-            <Switch
-              checked={isSystemAdmin}
-              onChange={(event) => setIsSystemAdmin(event.target.checked)}
-              sx={{ transform: { xs: "scale(0.9)", sm: "scale(1)" } }}
-            />
-            <Typography
-              level="body-sm"
-              sx={{ fontSize: { xs: "12px", sm: "14px" }, color: "var(--joy-palette-text-secondary)" }}
-            >
-              System Admin
-            </Typography>
-          </Stack>
-          </Stack>
-
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={{ xs: 1.5, sm: 2 }}
@@ -674,12 +621,14 @@ export default function AddEditSystemUser({
                 onChange={(e, newValue) =>
                   handleInputChange("customer", newValue as string)
                 }
+                disabled={formData.systemRole === "super_admin"}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
                   border: errors?.customer
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
+                  opacity: formData.systemRole === "super_admin" ? 0.5 : 1,
                 }}
               >
                 {customers &&
@@ -719,33 +668,28 @@ export default function AddEditSystemUser({
                 System Role
               </Typography>
               <Select
-                placeholder="Select role"
-                value={formData.role}
+                placeholder="Select system role"
+                value={formData.systemRole}
                 onChange={(e, newValue) =>
-                  handleInputChange("role", newValue as string)
+                  handleSystemRoleChange(newValue as SystemRole)
                 }
+                color={errors?.systemRole ? "danger" : "neutral"}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
-                  border: errors?.role
-                    ? "1px solid var(--joy-palette-danger-500)"
-                    : undefined,
                 }}
               >
-                {roles?.map((role) => (
-                  <Option key={role.id} value={role.name}>
-                    {role.name}
-                  </Option>
-                ))}
+                <Option value="super_admin">Super admin</Option>
+                <Option value="customer_success">Customer Success</Option>
               </Select>
-              {errors?.role && (
+              {errors?.systemRole && (
                 <FormHelperText
                   sx={{
                     color: "var(--joy-palette-danger-500)",
                     fontSize: { xs: "10px", sm: "12px" },
                   }}
                 >
-                  {errors.role}
+                  {errors.systemRole}
                 </FormHelperText>
               )}
             </Stack>

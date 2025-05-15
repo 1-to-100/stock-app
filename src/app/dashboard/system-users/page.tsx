@@ -32,7 +32,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSystemUsers, getSystemUserById } from "../../../lib/api/system-users";
 import { getRoles } from "../../../lib/api/roles";
 import { getCustomers } from "../../../lib/api/customers";
-import { ApiUser } from "@/contexts/auth/types";
+import { ApiUser, SystemUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
@@ -71,11 +71,13 @@ export default function Page(): React.JSX.Element {
   const [filters, setFilters] = useState<{
     statusId: string[];
     customerId: number[];
-    roleId: number[];
+    isSuperadmin: boolean;
+    isCustomerSuccess: boolean;
   }>({
     statusId: [],
     customerId: [],
-    roleId: [],
+    isSuperadmin: false,
+    isCustomerSuccess: false,
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -91,7 +93,7 @@ export default function Page(): React.JSX.Element {
     queryFn: getCustomers,
   });
 
-  const transformUser = (apiUser: ApiUser): ApiUser => {
+  const transformUser = (apiUser: SystemUser): SystemUser => {
     const customer = customers?.find((c) => c.id === apiUser.customerId);
     const role = roles?.find((r) => r.id === apiUser.roleId);
     return {
@@ -109,6 +111,8 @@ export default function Page(): React.JSX.Element {
       status: apiUser.status,
       avatar: apiUser.avatar || undefined,
       activity: apiUser.activity,
+      isSuperadmin: apiUser.isSuperadmin,
+      isCustomerSuccess: apiUser.isCustomerSuccess,
     };
   };
 
@@ -121,7 +125,8 @@ export default function Page(): React.JSX.Element {
       sortDirection,
       filters.statusId,
       filters.customerId,
-      filters.roleId,
+      filters.isSuperadmin,
+      filters.isCustomerSuccess,
     ],
     queryFn: async () => {
       const response = await getSystemUsers({
@@ -133,7 +138,8 @@ export default function Page(): React.JSX.Element {
         statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
         customerId:
           filters.customerId.length > 0 ? filters.customerId : undefined,
-        roleId: filters.roleId.length > 0 ? filters.roleId : undefined,
+        isSuperadmin: filters.isSuperadmin,
+        isCustomerSuccess: filters.isCustomerSuccess,
       });
       return {
         ...response,
@@ -325,7 +331,8 @@ export default function Page(): React.JSX.Element {
   const handleFilter = (filters: {
     statusId: string[];
     customerId: number[];
-    roleId: number[];
+    isSuperadmin: boolean;
+    isCustomerSuccess: boolean;
   }) => {
     setFilters(filters);
     setCurrentPage(1);
@@ -501,13 +508,13 @@ export default function Page(): React.JSX.Element {
                 </Stack>
               </Box>
             ) : null}
-            <Filter
+            {/* <Filter
               users={users}
               onFilter={handleFilter}
               onClose={handleCloseFilter}
               open={isFilterOpen}
               onOpen={handleOpenFilter}
-            />
+            /> */}
             <Button
               variant="solid"
               color="primary"
@@ -858,7 +865,7 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.role?.name.slice(0, 75)}
+                              {user.isSuperadmin ? "Super admin" : "Customer Success"}
                             </Box>
                           </td>
                           <td>

@@ -134,13 +134,14 @@ export interface SystemUser {
   phoneNumber?: string;
   isSuperadmin?: boolean;
   isCustomerSuccess?: boolean;
+  systemRole?: SystemRole;
   activity?: {
     id: number;
     browserOs: string;
     locationTime: string;
   }[];
-  isSystemAdmin?: boolean;
-  isCustomerSuccess?: boolean;
 }
+
+export type SystemRole =  "customer_success" | "super_admin";
 
 export type Status = "active" | "inactive" | "suspended";

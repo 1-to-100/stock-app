@@ -1,5 +1,5 @@
 import { apiFetch } from './api-fetch';
-import { SystemUser } from '@/contexts/auth/types';
+import { SystemUser, SystemRole } from '@/contexts/auth/types';
 
 
 
@@ -8,11 +8,8 @@ interface CreateUserPayload {
   firstName: string;
   lastName: string;
   customerId?: number;
-  roleId?: number;
-  managerId?: number;
   status?: 'active' | 'inactive';
-  isCustomerSuccess?: boolean;
-  isSystemAdmin?: boolean;
+  systemRole: string;
 }
 
 interface UpdateUserPayload extends Partial<CreateUserPayload> {
@@ -20,8 +17,12 @@ interface UpdateUserPayload extends Partial<CreateUserPayload> {
 }
 
 interface EditUserInfoPayload extends Partial<CreateUserPayload> {
+  id: number;
   firstName: string;
   lastName: string;
+  customerId?: number;
+  status?: 'active' | 'inactive';
+  systemRole: string;
 }
 
 export interface GetUsersParams {
@@ -30,7 +31,8 @@ export interface GetUsersParams {
   search?: string;
   orderBy?: string;
   orderDirection?: 'asc' | 'desc';
-  roleId?: number[];
+  isSuperadmin?: boolean;
+  isCustomerSuccess?: boolean;
   customerId?: number[];
   statusId?: string[];
 }
@@ -57,10 +59,19 @@ export async function createSystemUser(payload: CreateUserPayload): Promise<Syst
   });
 }
 
-export async function updateSystemUser(payload: UpdateUserPayload): Promise<SystemUser> {
+export async function updateSystemUser(payload: EditUserInfoPayload): Promise<SystemUser> {
   return apiFetch<SystemUser>(`${API_URL}/system-users/${payload.id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
+  });
+}
+
+export async function getSystemRoles(): Promise<SystemRole[]> {
+  return apiFetch<SystemRole[]>(`${API_URL}/taxonomies/user-system-roles`, {
+    method: "GET",
+    headers: {
+      accept: "*/*",
+    },
   });
 }
 
@@ -72,9 +83,8 @@ export async function getSystemUsers(params: GetUsersParams = {}): Promise<GetUs
   if (params.orderBy) query.set('orderBy', params.orderBy);
   if (params.orderDirection) query.set('orderDirection', params.orderDirection);
   
-  if (params.roleId && params.roleId.length > 0) {
-    params.roleId.forEach(id => query.append('roleId', id.toString()));
-  }
+  if (params.isSuperadmin) query.set('isSuperadmin', params.isSuperadmin.toString());
+  if (params.isCustomerSuccess) query.set('isCustomerSuccess', params.isCustomerSuccess.toString());
   if (params.customerId && params.customerId.length > 0) {
     params.customerId.forEach(id => query.append('customerId', id.toString()));
   }

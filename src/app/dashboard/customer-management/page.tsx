@@ -277,7 +277,7 @@ export default function Page(): React.JSX.Element {
     marginRight: { xs: "10px", sm: "14px" },
   };
 
-  if (isLoading || !userInfo) {
+  if (!userInfo) {
     return (
       <Box
         sx={{
@@ -408,6 +408,7 @@ export default function Page(): React.JSX.Element {
               onClose={handleCloseFilter}
               open={isFilterOpen}
               onOpen={handleOpenFilter}
+              initialFilters={filters}
             />
             <Button
               variant="solid"

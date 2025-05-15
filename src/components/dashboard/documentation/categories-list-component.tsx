@@ -25,19 +25,47 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { deleteCategory } from "@/lib/api/categories";
 import DeleteDeactivateUserModal from "../modals/DeleteItemModal";
-
+import {toast} from '@/components/core/toaster';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CategoriesListProps {
   categories: Category[];
   fetchCategories: () => void;
 }
 
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fetchCategories }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openEditCategoryModal, setOpenEditCategoryModal] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [openDeleteCategoryModal, setOpenDeleteCategoryModal] = useState(false);
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      handleDeleteCategoryModalClose();
+      toast.success("Category has been deleted successfully!");
+    },
+    onError: (error: unknown) => {
+      const httpError = error as HttpError;
+      const errorMessage = httpError.response?.data?.message;
+      if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("An error occurred while deleting the category.");
+      }
+    },
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,13 +123,7 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
   };
 
   const handleDeleteCategory = async (categoryId: number) => {
-    try {
-      await deleteCategory(categoryId);
-      fetchCategories();
-      handleDeleteCategoryModalClose();
-    } catch (error) {
-      console.error("Error deleting category:", error); 
-    }
+    deleteCategoryMutation.mutate(categoryId);
   };
 
   const menuItemStyle = {
@@ -118,9 +140,6 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
   const iconStyle = {
     marginRight: "14px",
   };
-
- 
-
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -195,6 +214,7 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
                   fontWeight: "500",
                   fontSize: "14px",
                   color: "var(--joy-palette-text-primary)",
+                  wordBreak: "break-word",
                 }}
               >
                 {category.name.slice(0, 59)}
@@ -270,6 +290,7 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
                 fontWeight: "300",
                 fontSize: "14px",
                 lineHeight: "1.5",
+                wordBreak: "break-word",
               }}
             >
               {category.about.slice(0, 89)}

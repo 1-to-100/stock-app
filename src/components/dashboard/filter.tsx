@@ -34,6 +34,11 @@ interface FilterProps {
     subscriptionId: number[];
     statusId: string[];
   }) => void;
+  initialFilters?: {
+    managerId: number[];
+    subscriptionId: number[];
+    statusId: string[];
+  };
 }
 
 const Filter = ({
@@ -44,18 +49,25 @@ const Filter = ({
   onClose,
   open = false,
   onOpen,
+  initialFilters,
 }: FilterProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialFilters?.statusId || []);
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<number[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
-  const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>([]);
-  const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<
-    number[]
-  >([]);
+  const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>(initialFilters?.managerId || []);
+  const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<number[]>(initialFilters?.subscriptionId || []);
   const [activeCategory, setActiveCategory] = useState<string | null>("Status");
 
   const sheetRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (initialFilters) {
+      setSelectedStatuses(initialFilters.statusId);
+      setSelectedManagerIds(initialFilters.managerId);
+      setSelectedSubscriptionIds(initialFilters.subscriptionId);
+    }
+  }, [initialFilters]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
