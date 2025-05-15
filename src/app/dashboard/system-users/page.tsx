@@ -24,18 +24,18 @@ import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import { useState, useCallback, useEffect } from "react";
-import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
-import { getUsers, getUserById } from "../../../lib/api/users";
+import { getSystemUsers, getSystemUserById } from "../../../lib/api/system-users";
 import { getRoles } from "../../../lib/api/roles";
 import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
+import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
 
 interface HttpError extends Error {
   response?: {
@@ -124,7 +124,7 @@ export default function Page(): React.JSX.Element {
       filters.roleId,
     ],
     queryFn: async () => {
-      const response = await getUsers({
+      const response = await getSystemUsers({
         page: currentPage,
         perPage: rowsPerPage,
         search: searchTerm || undefined,
@@ -282,7 +282,7 @@ export default function Page(): React.JSX.Element {
     event.persist();
     const targetElement = event.currentTarget;
     try {
-      const userData = await getUserById(userId);
+      const userData = await getSystemUserById(userId);
       const transformedUser = transformUser(userData);
       setSelectedUser(transformedUser);
       setPopoverAnchorEl(targetElement);
@@ -518,7 +518,7 @@ export default function Page(): React.JSX.Element {
                 py: { xs: 1, sm: 0.75 },
               }}
             >
-              Add user
+              Add system user
             </Button>
           </Stack>
         </Stack>
@@ -667,7 +667,7 @@ export default function Page(): React.JSX.Element {
                             "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
-                          Role
+                          System role
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -984,13 +984,13 @@ export default function Page(): React.JSX.Element {
         userId={selectedUser?.id ?? 0}
       />
 
-      <AddEditUser
+      <AddEditSystemUser
         open={openEditModal}
         onClose={handleCloseEditModal}
         userId={userToEditId}
       />
 
-      <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
+      <AddEditSystemUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
     </Box>
   );
 }

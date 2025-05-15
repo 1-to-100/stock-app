@@ -112,4 +112,35 @@ export interface Article {
   };
 }
 
+export interface SystemUser {
+  managerId: number;
+  manager?: {
+    id: number;
+    name: string;
+  };
+  id: number;
+  firstName: string;
+  lastName: string;
+  name: string;
+  email: string;
+  customerId?: number;
+  customer?: Customer;
+  roleId?: number;
+  role?: Role;
+  persona?: string;
+  status: string;
+  avatar?: string;
+  createdAt?: string;
+  phoneNumber?: string;
+  isSuperadmin?: boolean;
+  isCustomerSuccess?: boolean;
+  activity?: {
+    id: number;
+    browserOs: string;
+    locationTime: string;
+  }[];
+  isSystemAdmin?: boolean;
+  isCustomerSuccess?: boolean;
+}
+
 export type Status = "active" | "inactive" | "suspended";
