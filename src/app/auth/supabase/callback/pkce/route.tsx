@@ -20,14 +20,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams, origin } = req.nextUrl;
 
   if (searchParams.get('error')) {
-    let description = searchParams.get('error_description');
-
-    if (!description) {
-      description = 'Something went wrong';
-    }
-
-    return NextResponse.json({ error: description });
+    let description = searchParams.get('error_description') || 'Something went wrong';
+    const url = new URL(paths.auth.supabase.signUp, origin);
+    url.searchParams.set('error', description);
+    return NextResponse.redirect(url);
   }
+
   const code = searchParams.get('code');
   let next = searchParams.get('next');
 
