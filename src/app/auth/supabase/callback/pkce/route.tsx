@@ -20,7 +20,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams, origin } = req.nextUrl;
 
   if (searchParams.get('error')) {
-    let description = searchParams.get('error_description') || 'Something went wrong';
+    const description = searchParams.get('error_description') || 'Something went wrong';
     const url = new URL(paths.auth.supabase.signUp, origin);
     url.searchParams.set('error', description);
     return NextResponse.redirect(url);
