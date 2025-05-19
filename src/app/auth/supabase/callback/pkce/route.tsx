@@ -18,10 +18,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = req.nextUrl;
+  const url = new URL(paths.auth.supabase.signUp, config.site.url);
 
   if (searchParams.get('error')) {
     const description = searchParams.get('error_description') || 'Something went wrong';
-    const url = new URL(paths.auth.supabase.signUp, config.site.url);
     url.searchParams.set('error', description);
     return NextResponse.redirect(url);
   }
@@ -30,7 +30,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   let next = searchParams.get('next');
 
   if (!code) {
-    return NextResponse.json({ error: 'Code is missing' });
+    url.searchParams.set('error', 'Code is missing');
+    return NextResponse.redirect(url);
+    // return NextResponse.json({ error: 'Code is missing' });
   }
 
   const cookieStore = cookies();
@@ -40,11 +42,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { error, data: {user} } = await supabaseClient.auth.exchangeCodeForSession(code);
 
     if (error) {
-      return NextResponse.json({ error: error.message });
+      url.searchParams.set('error', error.message);
+      return NextResponse.redirect(url);
+      // return NextResponse.json({ error: error.message });
     }
 
     if (!user || !user.email) {
-      return NextResponse.json({ error: 'User is missing' });
+      url.searchParams.set('error', 'User is missing');
+      return NextResponse.redirect(url);
+      // return NextResponse.json({ error: 'User is missing' });
     }
 
     const validateEmailUrl = `${config.site.apiUrl}/register/validate-email/${encodeURIComponent(user.email)}`;
@@ -59,18 +65,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       await supabaseClient.auth.signOut();
 
       const errorData = await emailValidationResponse.json();
-      const url = new URL(paths.auth.supabase.signUp, config.site.url);
       url.searchParams.set('error', errorData.message || 'Email validation failed');
       return NextResponse.redirect(url);
     }
   } catch (err) {
     if (err instanceof AuthApiError && err.message.includes('code and code verifier should be non-empty')) {
-      return NextResponse.json({ error: 'Please open the link in the same browser' });
+      url.searchParams.set('error', 'Please open the link in the same browser');
+      return NextResponse.redirect(url);
+      // return NextResponse.json({ error: 'Please open the link in the same browser' });
     }
 
     logger.error('Callback error', err);
-
-    return NextResponse.json({ error: 'Something went wrong' });
+    url.searchParams.set('error', 'Something went wrong');
+    return NextResponse.redirect(url);
+    // return NextResponse.json({ error: 'Something went wrong' });
   }
 
 
