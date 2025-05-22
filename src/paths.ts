@@ -38,6 +38,7 @@ export const paths = {
       resetPassword: '/auth/supabase/reset-password',
       recoveryLinkSent: '/auth/supabase/recovery-link-sent',
       updatePassword: '/auth/supabase/update-password',
+      setNewPassword: '/auth/supabase/set-new-password',
     },
   },
   dashboard: {

@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,12 +35,11 @@ type Values = zod.infer<typeof schema>;
 
 const defaultValues = { password: '', confirmPassword: '' } satisfies Values;
 
-export function UpdatePasswordForm(): React.JSX.Element {
-  const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
-
+export function UpdatePasswordForm({title}: {title?: string}) {
+  const [supabaseClient] = useState<SupabaseClient>(createSupabaseClient());
   const router = useRouter();
-
-  const [isPending, setIsPending] = React.useState<boolean>(false);
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const titleForm = title || 'Update Password';
 
   const {
     control,
@@ -49,7 +48,7 @@ export function UpdatePasswordForm(): React.JSX.Element {
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
-  const onSubmit = React.useCallback(
+  const onSubmit = useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
@@ -75,7 +74,7 @@ export function UpdatePasswordForm(): React.JSX.Element {
       </Box>
       <Stack spacing={3}>
         <Typography level="h3" textAlign="center">
-          Update Password
+          {titleForm}
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
