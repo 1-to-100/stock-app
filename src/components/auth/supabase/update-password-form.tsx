@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useState, useEffect} from 'react';
+import {useCallback, useState} from 'react';
 import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,7 +60,8 @@ export function UpdatePasswordForm({title}: {title?: string}) {
         return;
       }
 
-      router.push(paths.dashboard.overview);
+      await supabaseClient.auth.signOut();
+      router.push(paths.auth.supabase.signIn);
     },
     [supabaseClient, router, setError]
   );
