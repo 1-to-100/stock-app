@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import RouterLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Alert from '@mui/joy/Alert';
 import Box from '@mui/joy/Box';
@@ -42,12 +42,11 @@ const defaultValues = { email: '', password: '' } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
   const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
-
   const router = useRouter();
-
   const [showPassword, setShowPassword] = React.useState<boolean>();
-
   const [isPending, setIsPending] = React.useState<boolean>(false);
+  const searchParams = useSearchParams();
+  const hasShownMessage = React.useRef(false);
 
   const {
     control,
@@ -55,6 +54,14 @@ export function SignInForm(): React.JSX.Element {
     setError,
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+
+  React.useEffect(() => {
+    const message = searchParams.get('message');
+    if (message && !hasShownMessage.current) {
+      hasShownMessage.current = true;
+      toast.success(message);
+    }
+  }, []);
 
   const onAuth = React.useCallback(
     async (providerId: OAuthProvider['id']): Promise<void> => {

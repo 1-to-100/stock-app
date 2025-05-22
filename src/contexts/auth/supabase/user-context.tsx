@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import type { User } from '@/types/user';
@@ -10,6 +10,8 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 
 import type { UserContextValue } from '../types';
 import {apiFetch} from "@/lib/api/api-fetch";
+import {paths} from "@/paths";
+import {config} from "@/config";
 
 export const UserContext = React.createContext<UserContextValue | undefined>(undefined);
 
@@ -19,21 +21,23 @@ export interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
   const router = useRouter();
-
   const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
-
+  const searchParams = useSearchParams();
+  const isInvite = searchParams.get('type') === 'invite';
   const [state, setState] = React.useState<{ user: User | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
     isLoading: true,
   });
 
+
   const syncUser = React.useCallback(async (session: Session | null) => {
     console.log("[syncUser]" );
     const user = session?.user;
     if(!user) return;
 
-    return apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sync/supabase`, {
+    const syncUserUrl = new URL(paths.auth.supabase.syncUser, config.site.apiUrl);
+    return apiFetch(syncUserUrl.href, {
       method: 'POST',
     })
   }, [])
@@ -86,8 +90,11 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     const {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange((event, session) => {
-      logger.debug('[Auth] onAuthStateChange:', event, session);
+      if(isInvite) {
+        return;
+      }
 
+      logger.debug('[Auth] onAuthStateChange:', event, session);
       if (event === 'INITIAL_SESSION') {
         handleInitialSession(session);
         syncUser(session).then();
@@ -106,7 +113,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     return () => {
       subscription?.unsubscribe();
     };
-  }, [router, supabaseClient, syncUser]);
+  }, [router, supabaseClient, syncUser, isInvite]);
 
   return <UserContext.Provider value={{ ...state }}>{children}</UserContext.Provider>;
 }
