@@ -24,6 +24,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
   const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
   const searchParams = useSearchParams();
   const isInvite = searchParams.get('type') === 'invite';
+  console.log('xxx', isInvite, searchParams.get('type'));
   const [state, setState] = React.useState<{ user: User | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
