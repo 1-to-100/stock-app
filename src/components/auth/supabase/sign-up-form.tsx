@@ -63,11 +63,6 @@ export function SignUpForm(): React.JSX.Element {
     if (errorMessage && !hasShownErrorMessage.current) {
       hasShownErrorMessage.current = true;
       toast.error(errorMessage);
-
-      const params = new URLSearchParams(window.location.search);
-      params.delete('error');
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState({}, '', newUrl);
     }
   }, []);
 
