@@ -13,13 +13,12 @@ import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
 import Stack from '@mui/joy/Stack';
 import Typography from '@mui/joy/Typography';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 
 import { paths } from '@/paths';
-import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { DynamicLogo } from '@/components/core/logo';
+import {useCheckSessionInvite} from "@/components/auth/supabase/check-session-invite";
 
 const schema = zod
   .object({
@@ -36,7 +35,7 @@ type Values = zod.infer<typeof schema>;
 const defaultValues = { password: '', confirmPassword: '' } satisfies Values;
 
 export function UpdatePasswordForm({title}: {title?: string}) {
-  const [supabaseClient] = useState<SupabaseClient>(createSupabaseClient());
+  const {message, supabaseClient} = useCheckSessionInvite();
   const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
   const titleForm = title || 'Update Password';
@@ -61,10 +60,16 @@ export function UpdatePasswordForm({title}: {title?: string}) {
       }
 
       await supabaseClient.auth.signOut();
-      router.push(paths.auth.supabase.signIn);
+      const redirectToUrl = new URL(paths.auth.supabase.signIn, window.location.origin);
+      redirectToUrl.searchParams.set('message', 'Password updated successfully. Please sign in again.');
+      router.push(redirectToUrl.href);
     },
     [supabaseClient, router, setError]
   );
+
+  if(message) {
+    return null;
+  }
 
   return (
     <Stack spacing={5}>
