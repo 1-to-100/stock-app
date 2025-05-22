@@ -60,7 +60,7 @@ export function UpdatePasswordForm({title}: {title?: string}) {
       }
 
       await supabaseClient.auth.signOut();
-      router.push(`${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`);
+      router.replace(`${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`);
     },
     [supabaseClient, router, setError]
   );
