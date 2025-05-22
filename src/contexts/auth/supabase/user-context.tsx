@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {useRouter, useSearchParams} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
 import type { User } from '@/types/user';
@@ -21,16 +21,19 @@ export interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
   const router = useRouter();
-  const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
-  const searchParams = useSearchParams();
-  const isInvite = searchParams.get('type') === 'invite';
-  console.log('xxx', isInvite, searchParams.get('type'));
+  const [supabaseClient] = React.useState<SupabaseClient>(() => createSupabaseClient());
+  const isInvite = React.useMemo(() => {
+    const { type } = Object.fromEntries(
+      new URLSearchParams(typeof window !== 'undefined' ? window.location.hash.slice(1) : '')
+    );
+    return type === 'invite';
+  }, []);
+
   const [state, setState] = React.useState<{ user: User | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
     isLoading: true,
   });
-
 
   const syncUser = React.useCallback(async (session: Session | null) => {
     console.log("[syncUser]" );
