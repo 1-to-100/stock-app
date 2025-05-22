@@ -10,8 +10,9 @@ export const CheckSessionInvite = ({children}: { children: ReactNode }) => {
   const [message, setMessage] = useState<string | null>('');
 
   useEffect(() => {
-    supabaseClient.auth.getSession().then(({data: {session}}) => {
-      setMessage(session ? null : 'Invalid or expired invitation link. Please request a new invitation.');
+    supabaseClient.auth.getSession().then((data) => {
+      setMessage(data?.data?.session ? null : 'Invalid or expired invitation link. Please request a new invitation.');
+      console.log('xxx', data);
     });
   }, [supabaseClient]);
 
