@@ -36,6 +36,7 @@ import { ApiUser, SystemUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
+import {SystemRoles} from "@/lib/constants/system-roles";
 
 interface HttpError extends Error {
   response?: {
@@ -865,7 +866,7 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.isSuperadmin ? "Super admin" : "Customer Success"}
+                              {user.isSuperadmin ? "System Admin" : "Customer Success"}
                             </Box>
                           </td>
                           <td>
