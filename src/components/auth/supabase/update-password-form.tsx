@@ -19,6 +19,7 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { DynamicLogo } from '@/components/core/logo';
 import {useCheckSessionInvite} from "@/components/auth/supabase/check-session-invite";
+import {config} from "@/config";
 
 const schema = zod
   .object({
@@ -60,7 +61,9 @@ export function UpdatePasswordForm({title}: {title?: string}) {
       }
 
       await supabaseClient.auth.signOut();
-      router.replace(`${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`);
+      window.location.href = `${config.site.url}${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`;
+      // чомусь пуста біла стоірнка при router.replace або router.push
+      // router.replace(`${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`);
     },
     [supabaseClient, router, setError]
   );
