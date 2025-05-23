@@ -178,11 +178,6 @@ export default function AddEditSystemUser({
       return "Email is required";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Invalid email format";
-    }
-
     if (email.startsWith(".") || email.endsWith(".")) {
       return "Invalid email format";
     }
@@ -196,7 +191,12 @@ export default function AddEditSystemUser({
     }
 
     const atIndex = email.indexOf("@");
-    if (email[atIndex - 1] === ".") {
+    if (atIndex > 0 && email[atIndex - 1] === ".") {
+      return "Invalid email format";
+    }
+    
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(email)) {
       return "Invalid email format";
     }
 
@@ -229,11 +229,9 @@ export default function AddEditSystemUser({
   const handleInputChange = async (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    if (field === "email" && value) {
+    if (field === "email") {
       const emailError = validateEmail(value);
-      if (emailError) {
-        setErrors((prev) => ({ ...prev, email: emailError }));
-      }
+      setErrors((prev) => ({ ...prev, email: emailError || undefined }));
     }
   };
 

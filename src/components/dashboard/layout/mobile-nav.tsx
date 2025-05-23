@@ -43,6 +43,9 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
   const filteredItems = items.map((group) => ({
     ...group,
     items: group.items?.filter((item) => {
+      if (userInfo?.isCustomerSuccess) {
+        return item.key !== "role" && item.key !== "system-users";
+      }
       if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
         return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
       }

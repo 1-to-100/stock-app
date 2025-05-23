@@ -32,6 +32,9 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
   const filteredItems = items.map((group) => ({
     ...group,
     items: group.items?.filter((item) => {
+      if (userInfo?.isCustomerSuccess) {
+        return item.key !== "role" && item.key !== "system-users";
+      }
       if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
         return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
       }
