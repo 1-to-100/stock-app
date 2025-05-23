@@ -142,6 +142,6 @@ export interface SystemUser {
   }[];
 }
 
-export type SystemRole =  "customer_success" | "super_admin";
+export type SystemRole =  "customer_success" | "system_admin";
 
 export type Status = "active" | "inactive" | "suspended";

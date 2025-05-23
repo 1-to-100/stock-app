@@ -61,7 +61,9 @@ export function UpdatePasswordForm({title}: {title?: string}) {
       }
 
       await supabaseClient.auth.signOut();
-      window.location.href = `${config.site.url}${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`;
+      const redirectUrl = new URL(paths.auth.supabase.signIn, config.site.url);
+      redirectUrl.searchParams.set('message', 'Password updated successfully. Please sign in again.');
+      window.location.href = redirectUrl.href;
       // чомусь пуста біла стоірнка при router.replace або router.push
       // router.replace(`${paths.auth.supabase.signIn}?message=${encodeURIComponent('Password updated successfully. Please sign in again.')}`);
     },

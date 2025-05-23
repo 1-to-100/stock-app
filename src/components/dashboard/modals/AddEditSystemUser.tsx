@@ -15,11 +15,9 @@ import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
 import Switch from "@mui/joy/Switch";
-import Tooltip from "@mui/joy/Tooltip";
 import FormHelperText from "@mui/joy/FormHelperText";
 import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
-import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import { Box } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import {
@@ -30,7 +28,8 @@ import {
 import { getSystemRoles } from "./../../../lib/api/system-users";
 import { getCustomers } from "./../../../lib/api/customers";
 import { toast } from "@/components/core/toaster";
-import { SystemRole } from "@/contexts/auth/types";
+import {SystemRolesHumanNames} from "@/lib/constants/system-roles";
+import {SystemRole} from "@/contexts/auth/types";
 
 interface HttpError {
   response?: {
@@ -116,7 +115,7 @@ export default function AddEditSystemUser({
         lastName: userData.lastName || "",
         email: userData.email || "",
         customer: userData.customer?.name || "",
-        systemRole: userData.isSuperadmin ? "super_admin" : "customer_success",
+        systemRole: userData.isSuperadmin ? 'system_admin' : 'customer_success',
       });
       setAvatarPreview(userData.avatar || null);
       setIsActive(userData.status === "active");
@@ -268,7 +267,7 @@ export default function AddEditSystemUser({
   };
 
   const handleSystemRoleChange = (newValue: string) => {
-    const isSuperadmin = newValue === "super_admin";
+    const isSuperadmin = newValue === "system_admin";
     setFormData((prev) => ({
       ...prev,
       systemRole: newValue as SystemRole,
@@ -621,14 +620,14 @@ export default function AddEditSystemUser({
                 onChange={(e, newValue) =>
                   handleInputChange("customer", newValue as string)
                 }
-                disabled={formData.systemRole === "super_admin"}
+                disabled={formData.systemRole === "system_admin"}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
                   border: errors?.customer
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
-                  opacity: formData.systemRole === "super_admin" ? 0.5 : 1,
+                  opacity: formData.systemRole === "system_admin" ? 0.5 : 1,
                 }}
               >
                 {customers &&
@@ -679,8 +678,13 @@ export default function AddEditSystemUser({
                   fontSize: { xs: "12px", sm: "14px" },
                 }}
               >
-                <Option value="super_admin">Super admin</Option>
-                <Option value="customer_success">Customer Success</Option>
+                {Object.entries(SystemRolesHumanNames).map(([systemRole, systemRoleName]) => {
+                  return (
+                    <Option key={systemRole} value={systemRole}>
+                      {systemRoleName}
+                    </Option>
+                  );
+                })}
               </Select>
               {errors?.systemRole && (
                 <FormHelperText
