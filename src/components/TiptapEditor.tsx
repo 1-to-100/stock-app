@@ -33,6 +33,8 @@ import {
   TextAlignRight,
   TextAlignLeft,
   Video,
+  TextH,
+  CaretDown,
 } from "@phosphor-icons/react/dist/ssr";
 
 declare module "@tiptap/core" {
@@ -145,10 +147,40 @@ const FontSize = Extension.create({
   },
 });
 
+const HeadingWithId = Extension.create({
+  name: "headingWithId",
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["heading"],
+        attributes: {
+          id: {
+            default: null,
+            parseHTML: (element) => element.getAttribute("id"),
+            renderHTML: (attributes) => {
+              if (!attributes.id) {
+                const text = attributes.node?.textContent || "";
+                const level = attributes.node?.attrs?.level || 1;
+                attributes.id = `heading-${text
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")}-${level}`;
+              }
+              return {
+                id: attributes.id,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
+
 interface TiptapEditorProps {
   content?: string;
   onChange?: (html: string) => void;
   isPreview: boolean;
+  onTocChange?: (toc: { id: string; text: string; level: number }[]) => void;
 }
 
 const fontFamilies = [
@@ -171,10 +203,13 @@ const fontFamilies = [
 
 const fontSizes = ["12px", "14px", "16px", "18px", "24px", "32px"];
 
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
 const TiptapEditor: React.FC<TiptapEditorProps> = ({
   content,
   onChange,
   isPreview,
+  onTocChange,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -184,13 +219,24 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   const [isLinkInputOpen, setIsLinkInputOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isHeadingDropdownOpen, setIsHeadingDropdownOpen] = useState(false);
+  const [isFontSizeDropdownOpen, setIsFontSizeDropdownOpen] = useState(false);
+  const [isFontFamilyDropdownOpen, setIsFontFamilyDropdownOpen] =
+    useState(false);
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         bulletList: { keepMarks: true, keepAttributes: false },
         orderedList: { keepMarks: true, keepAttributes: false },
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6],
+          HTMLAttributes: {
+            class: "heading",
+          },
+        },
       }),
+      HeadingWithId,
       CodeBlock.configure({
         HTMLAttributes: {
           class: "custom-code-block",
@@ -205,7 +251,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       }),
       Image.configure({
         inline: true,
-        allowBase64: true, 
+        allowBase64: true,
       }),
       Underline,
       TextStyle,
@@ -229,6 +275,44 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  useEffect(() => {
+    if (!isPreview || !editor) return;
+    const html = editor.getHTML();
+    const parser = new window.DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const headings: { id: string; text: string; level: number }[] = [];
+    const headingCounts: { [key: string]: number } = {};
+    let changed = false;
+
+    Array.from(doc.body.querySelectorAll("h1, h2, h3, h4, h5, h6")).forEach(
+      (el) => {
+        const level = Number(el.tagName[1]);
+        const text = el.textContent || "";
+        const baseId = `heading-${text
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")}-${level}`;
+
+        headingCounts[baseId] = (headingCounts[baseId] || 0) + 1;
+        const count = headingCounts[baseId];
+
+        const id = count > 1 ? `${baseId}-${count}` : baseId;
+
+        if (el.getAttribute("id") !== id) {
+          el.setAttribute("id", id);
+          changed = true;
+        }
+
+        headings.push({ id, text, level });
+      }
+    );
+
+    if (onTocChange) onTocChange(headings);
+
+    if (changed) {
+      editor.commands.setContent(doc.body.innerHTML, false);
+    }
+  }, [isPreview, editor, onTocChange]);
 
   const applyLink = () => {
     if (linkUrl) {
@@ -409,32 +493,140 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             <span className="tooltip">Subscript</span>
           </div>
           <div className="tooltip-wrapper">
-            <select
-              onChange={(e) => editor?.commands.setFontSize(e.target.value)}
-              value={editor?.getAttributes("textStyle").fontSize || "16px"}
-              disabled={isPreview}
-            >
-              {fontSizes.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
+            <div className="custom-select">
+              <button
+                onClick={() =>
+                  setIsFontSizeDropdownOpen(!isFontSizeDropdownOpen)
+                }
+                disabled={isPreview}
+                className="select-button"
+              >
+                {editor?.getAttributes("textStyle").fontSize || "16px"}
+                <CaretDown size={16} />
+              </button>
+              {isFontSizeDropdownOpen && !isPreview && (
+                <div className="select-dropdown  w-75">
+                  {fontSizes.map((size) => (
+                    <div
+                      key={size}
+                      className="select-option"
+                      onClick={() => {
+                        editor?.commands.setFontSize(size);
+                        setIsFontSizeDropdownOpen(false);
+                      }}
+                    >
+                      {size}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <span className="tooltip">Font Size</span>
           </div>
-          <div className="tooltip-wrapperther">
-            <select
-              onChange={(e) => editor?.commands.setFontFamily(e.target.value)}
-              value={editor?.getAttributes("textStyle").fontFamily || "inherit"}
-              disabled={isPreview}
-            >
-              {fontFamilies.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
+          <div className="tooltip-wrapper">
+            <div className="custom-select">
+              <button
+                onClick={() =>
+                  setIsFontFamilyDropdownOpen(!isFontFamilyDropdownOpen)
+                }
+                disabled={isPreview}
+                className="select-button"
+              >
+                {fontFamilies.find(
+                  (f) =>
+                    f.value === editor?.getAttributes("textStyle").fontFamily
+                )?.label || "Default"}
+                <CaretDown size={16} />
+              </button>
+              {isFontFamilyDropdownOpen && !isPreview && (
+                <div className="select-dropdown">
+                  {fontFamilies.map((f) => (
+                    <div
+                      key={f.value}
+                      className="select-option"
+                      style={{ fontFamily: f.value }}
+                      onClick={() => {
+                        editor?.commands.setFontFamily(f.value);
+                        setIsFontFamilyDropdownOpen(false);
+                      }}
+                    >
+                      {f.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <span className="tooltip">Font Family</span>
+          </div>
+          <div className="tooltip-wrapper">
+            <div className="custom-select">
+              <button
+                onClick={() => setIsHeadingDropdownOpen(!isHeadingDropdownOpen)}
+                disabled={isPreview}
+                className="select-button"
+              >
+                {editor?.isActive("heading", { level: 1 })
+                  ? "Heading 1"
+                  : editor?.isActive("heading", { level: 2 })
+                  ? "Heading 2"
+                  : editor?.isActive("heading", { level: 3 })
+                  ? "Heading 3"
+                  : editor?.isActive("heading", { level: 4 })
+                  ? "Heading 4"
+                  : "Paragraph"}
+                <CaretDown size={16} />
+              </button>
+              {isHeadingDropdownOpen && !isPreview && (
+                <div className="select-dropdown">
+                  <div
+                    className="select-option"
+                    onClick={() => {
+                      editor?.chain().focus().setParagraph().run();
+                      setIsHeadingDropdownOpen(false);
+                    }}
+                  >
+                    Paragraph
+                  </div>
+                  <div
+                    className="select-option heading-1"
+                    onClick={() => {
+                      editor?.chain().focus().toggleHeading({ level: 1 }).run();
+                      setIsHeadingDropdownOpen(false);
+                    }}
+                  >
+                    Heading 1
+                  </div>
+                  <div
+                    className="select-option heading-2"
+                    onClick={() => {
+                      editor?.chain().focus().toggleHeading({ level: 2 }).run();
+                      setIsHeadingDropdownOpen(false);
+                    }}
+                  >
+                    Heading 2
+                  </div>
+                  <div
+                    className="select-option heading-3"
+                    onClick={() => {
+                      editor?.chain().focus().toggleHeading({ level: 3 }).run();
+                      setIsHeadingDropdownOpen(false);
+                    }}
+                  >
+                    Heading 3
+                  </div>
+                  <div
+                    className="select-option heading-4"
+                    onClick={() => {
+                      editor?.chain().focus().toggleHeading({ level: 4 }).run();
+                      setIsHeadingDropdownOpen(false);
+                    }}
+                  >
+                    Heading 4
+                  </div>
+                </div>
+              )}
+            </div>
+            <span className="tooltip">Heading</span>
           </div>
           <div className="tooltip-wrapper">
             <button
@@ -675,6 +867,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           scrollbar-width: thin;
           scrollbar-color: #e0e0e0 #fff;
           white-space: pre-wrap;
+          position: sticky;
+          top: 100px;
+          z-index: 100;
+          background: var(--joy-palette-background-body);
         }
         .tiptap-toolbar::-webkit-scrollbar {
           height: 6px;
@@ -903,6 +1099,67 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           .tooltip {
             font-size: 10px;
           }
+        }
+        .custom-select {
+          position: relative;
+        }
+        .select-button {
+          background: var(--joy-palette-background-body);
+          border: 1px solid var(--joy-palette-divider) !important;
+          min-width: 120px;
+          text-align: left;
+          padding: 6px 8px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .select-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .select-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          margin-top: 4px;
+          background: var(--joy-palette-background-body);
+          border: 1px solid var(--joy-palette-divider);
+          border-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          z-index: 1000;
+          min-width: 130px;
+        }
+        .select-dropdown.w-75 {
+          min-width: 75px !important;
+        }
+        .select-option {
+          padding: 2px 8px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          font-size: 14px;
+        }
+        .select-option:hover {
+          background-color: var(--joy-palette-neutral-100);
+        }
+        .select-option.heading-1 {
+          font-size: 22px;
+          font-weight: bold;
+        }
+        .select-option.heading-2 {
+          font-size: 20px;
+          font-weight: bold;
+        }
+        .select-option.heading-3 {
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .select-option.heading-4 {
+          font-size: 16px;
+          font-weight: bold;
         }
       `}</style>
     </div>

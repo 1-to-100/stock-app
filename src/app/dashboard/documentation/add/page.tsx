@@ -12,8 +12,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
-import { createArticle } from "@/lib/api/articles"; 
-import {toast} from '@/components/core/toaster';
+import { createArticle } from "@/lib/api/articles";
+import { toast } from "@/components/core/toaster";
 
 interface HttpError {
   response?: {
@@ -38,12 +38,19 @@ const AddArticlePage = () => {
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
+    null
+  );
   const [videoLink, setVideoLink] = useState<string>("");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [isPreview, setIsPreview] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>(
+    []
+  );
+  const [activeTocId, setActiveTocId] = useState<string>("");
+  const [isTocFixed, setIsTocFixed] = useState(false);
 
   const togglePreview = () => {
     setIsPreview((prev) => !prev);
@@ -83,7 +90,9 @@ const AddArticlePage = () => {
 
   const handleSaveDraft = async () => {
     if (!title || !selectedCategory || !selectedSubcategory || !content) {
-      toast.error("Please fill in all required fields: title, category, subcategory, and content.");
+      toast.error(
+        "Please fill in all required fields: title, category, subcategory, and content."
+      );
       return;
     }
 
@@ -101,7 +110,9 @@ const AddArticlePage = () => {
 
   const handlePublish = async () => {
     if (!title || !selectedCategory || !selectedSubcategory || !content) {
-      toast.error("Please fill in all required fields: title, category, subcategory, and content.");
+      toast.error(
+        "Please fill in all required fields: title, category, subcategory, and content."
+      );
       return;
     }
 
@@ -196,6 +207,38 @@ const AddArticlePage = () => {
         </Breadcrumbs>
       </Stack>
 
+      {toc.length > 0 && isPreview && (
+        <Box sx={{ mt: 4, display: { xs: 'block', sm: 'none' } }}>
+          <Typography
+            sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+          >
+            On this article
+          </Typography>
+          <Select
+            value={activeTocId || ""}
+            placeholder="Select a section"
+          >
+            {toc.map((item) => (
+              <Option 
+                key={item.id} 
+                value={item.id} 
+                onClick={() => {
+                  const el = document.getElementById(item.id);
+                  if (el) {
+                    const yOffset = -100;
+                    const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: "smooth" });
+                    setActiveTocId(item.id);
+                  }
+                }}
+              >
+                {item.text}
+              </Option>
+            ))}
+          </Select>
+        </Box>
+      )}
+
       <Box
         sx={{
           display: { xs: "block", sm: "flex" },
@@ -242,6 +285,8 @@ const AddArticlePage = () => {
           <TiptapEditor
             isPreview={isPreview}
             onChange={setContent}
+            content={content}
+            onTocChange={setToc}
           />
         </Box>
 
@@ -469,6 +514,62 @@ const AddArticlePage = () => {
               </Box>
             </>
           ) : null}
+
+          {isPreview && toc.length > 0 && (
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                borderRadius: "8px",
+                border: "1px solid #eee",
+                position: isTocFixed ? "sticky" : "static",
+                top: "150px",
+                transition: "all 0.3s ease",
+                display: { xs: 'block', sm: 'none' }
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+              >
+                On this article
+              </Typography>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {toc.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{ marginBottom: "15px", marginLeft: "10px" }}
+                  >
+                    <a
+                      href={`#${item.id}`}
+                      style={{
+                        color: activeTocId === item.id ? "#3d37dd" : "#222",
+                        fontWeight: item.level === 1 ? 600 : 400,
+                        fontSize: 14,
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById(item.id);
+                        if (el) {
+                          const yOffset = -100;
+                          const y =
+                            el.getBoundingClientRect().top +
+                            window.pageYOffset +
+                            yOffset;
+                          window.scrollTo({ top: y, behavior: "smooth" });
+                          setActiveTocId(item.id);
+                          setIsTocFixed(true);
+                        }
+                      }}
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

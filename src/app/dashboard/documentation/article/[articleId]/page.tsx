@@ -4,7 +4,7 @@ import Typography from "@mui/joy/Typography";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
 import { paths } from "@/paths";
-import { Breadcrumbs } from "@mui/joy";
+import { Breadcrumbs, Select, Option } from "@mui/joy";
 import { Box, Stack } from "@mui/system";
 import { getCategoryById } from "@/lib/api/categories";
 import { useQuery } from "@tanstack/react-query";
@@ -16,10 +16,14 @@ import { useParams } from "next/navigation";
 const ArticlePageDetails = () => {
   const params = useParams();
   const articleId = params.articleId;
- 
+
   const [videoId, setVideoId] = useState<string | null>(null);
   const [content, setContent] = useState<string>("");
- 
+  const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>(
+    []
+  );
+  const [activeTocId, setActiveTocId] = useState<string>("");
+  const [isTocFixed, setIsTocFixed] = useState(false);
 
   const {
     data: articleData,
@@ -50,7 +54,7 @@ const ArticlePageDetails = () => {
     },
     enabled: !!articleData?.Category.id,
   });
-  
+
   useEffect(() => {
     if (articleData?.videoUrl) {
       const id = extractVideoId(articleData.videoUrl);
@@ -92,8 +96,7 @@ const ArticlePageDetails = () => {
               width: { xs: "100%", sm: "auto" },
               position: "relative",
             }}
-          >
-          </Stack>
+          ></Stack>
         </Stack>
       </Stack>
       <Stack sx={{ mt: { xs: 3, sm: 2 } }}>
@@ -105,10 +108,48 @@ const ArticlePageDetails = () => {
           <BreadcrumbsItem href={paths.dashboard.documentation.list}>
             Documentation
           </BreadcrumbsItem>
-          <BreadcrumbsItem href={paths.dashboard.documentation.details(categoryData?.id?.toString() || '')}>{categoryData?.name}</BreadcrumbsItem>
+          <BreadcrumbsItem
+            href={paths.dashboard.documentation.details(
+              categoryData?.id?.toString() || ""
+            )}
+          >
+            {categoryData?.name}
+          </BreadcrumbsItem>
           <BreadcrumbsItem type="end">{articleData?.title}</BreadcrumbsItem>
         </Breadcrumbs>
       </Stack>
+
+      {toc.length > 0 && (
+        <Box sx={{ mt: 4, display: { xs: 'block', sm: 'none' } }}>
+          <Typography
+            sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+          >
+            On this article
+          </Typography>
+          <Select
+            value={activeTocId || ""}
+            placeholder="Select a section"
+          >
+            {toc.map((item) => (
+              <Option 
+                key={item.id} 
+                value={item.id} 
+                onClick={() => {
+                  const el = document.getElementById(item.id);
+                  if (el) {
+                    const yOffset = -100;
+                    const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: "smooth" });
+                    setActiveTocId(item.id);
+                  }
+                }}
+              >
+                {item.text}
+              </Option>
+            ))}
+          </Select>
+        </Box>
+      )}
 
       <Box
         sx={{
@@ -134,6 +175,7 @@ const ArticlePageDetails = () => {
             isPreview={true}
             onChange={setContent}
             content={articleData?.content || ""}
+            onTocChange={setToc}
           />
         </Box>
 
@@ -179,6 +221,62 @@ const ArticlePageDetails = () => {
               )}
             </Box>
           </Box>
+
+          {toc.length > 0 && (
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                borderRadius: "8px",
+                border: "1px solid #eee",
+                position: isTocFixed ? "sticky" : "static",
+                top: "150px",
+                transition: "all 0.3s ease",
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              <Typography
+                sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+              >
+                On this article
+              </Typography>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {toc.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{ marginBottom: "15px", marginLeft: "10px" }}
+                  >
+                    <a
+                      href={`#${item.id}`}
+                      style={{
+                        color: activeTocId === item.id ? "#3d37dd" : "#222",
+                        fontWeight: item.level === 1 ? 600 : 400,
+                        fontSize: 14,
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById(item.id);
+                        if (el) {
+                          const yOffset = -100;
+                          const y =
+                            el.getBoundingClientRect().top +
+                            window.pageYOffset +
+                            yOffset;
+                          window.scrollTo({ top: y, behavior: "smooth" });
+                          setActiveTocId(item.id);
+                          setIsTocFixed(true);
+                        }
+                      }}
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
