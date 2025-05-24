@@ -61,7 +61,7 @@ export async function validateEmail(email: string): Promise<boolean> {
     },
   });
 
-  if (!response.ok) {0
+  if (!response.ok) {
     const errorData = await response.json();
     const errorMessage = errorData.message
       || `Failed to validate email: ${response.statusText}`
