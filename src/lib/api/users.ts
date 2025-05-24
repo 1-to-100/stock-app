@@ -52,14 +52,24 @@ interface GetUsersResponse {
   };
 }
 
-export async function validateEmail(email: string): Promise<any> {
+export async function validateEmail(email: string): Promise<boolean> {
   const validateEmailUrl = `${config.site.apiUrl}/register/validate-email/${encodeURIComponent(email)}`;
-  return fetch(validateEmailUrl, {
+  const response = await fetch(validateEmailUrl, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+  if (!response.ok) {0
+    const errorData = await response.json();
+    const errorMessage = errorData.message
+      || `Failed to validate email: ${response.statusText}`
+      || 'An error occurred during email validation';
+    throw new Error(errorMessage);
+  }
+
+  return true;
 }
 
 export async function registerUser(payload: RegisterUserPayload): Promise<ApiUser> {

@@ -97,10 +97,9 @@ export function SignUpForm(): React.JSX.Element {
       setIsPending(true);
 
       try {
-        const emailValidationResponse = await validateEmail(values.email);
-        if (!emailValidationResponse.ok) {
-          const errorData = await emailValidationResponse.json();
-          throw new Error(errorData.message || "Email validation failed");
+        const isSuccessEmail = await validateEmail(values.email);
+        if (!isSuccessEmail) {
+          throw new Error("Email validation failed");
         }
 
         await registerUser({
