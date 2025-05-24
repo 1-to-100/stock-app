@@ -1,3 +1,4 @@
+import { config } from '@/config';
 import { apiFetch } from './api-fetch';
 import { SystemUser, SystemRole } from '@/contexts/auth/types';
 
@@ -50,24 +51,22 @@ interface GetUsersResponse {
   };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export async function createSystemUser(payload: CreateUserPayload): Promise<SystemUser> {
-  return apiFetch<SystemUser>(`${API_URL}/system-users`, {
+  return apiFetch<SystemUser>(`${config.site.apiUrl}/system-users`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export async function updateSystemUser(payload: EditUserInfoPayload): Promise<SystemUser> {
-  return apiFetch<SystemUser>(`${API_URL}/system-users/${payload.id}`, {
+  return apiFetch<SystemUser>(`${config.site.apiUrl}/system-users/${payload.id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
 }
 
 export async function getSystemRoles(): Promise<SystemRole[]> {
-  return apiFetch<SystemRole[]>(`${API_URL}/taxonomies/user-system-roles`, {
+  return apiFetch<SystemRole[]>(`${config.site.apiUrl}/taxonomies/user-system-roles`, {
     method: "GET",
     headers: {
       accept: "*/*",
@@ -92,13 +91,13 @@ export async function getSystemUsers(params: GetUsersParams = {}): Promise<GetUs
     params.statusId.forEach(status => query.append('status', status));
   }
 
-  return apiFetch<GetUsersResponse>(`${API_URL}/system-users?${query.toString()}`, {
+  return apiFetch<GetUsersResponse>(`${config.site.apiUrl}/system-users?${query.toString()}`, {
     method: 'GET',
   });
 }
 
 export async function getSystemUserById(id: number): Promise<SystemUser> {
-  return apiFetch<SystemUser>(`${API_URL}/system-users/${id}`, {
+  return apiFetch<SystemUser>(`${config.site.apiUrl}/system-users/${id}`, {
     method: 'GET',
   });
 }

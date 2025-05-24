@@ -1,4 +1,5 @@
 import { apiFetch } from "./api-fetch";
+import {config} from "@/config";
 
 export interface SystemModules {
     name: string;
@@ -11,10 +12,8 @@ export interface SystemModules {
     }[];
   }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export async function getSystemModules(): Promise<SystemModules[]> {
-  return apiFetch<SystemModules[]>(`${API_URL}/system-modules`, {
+  return apiFetch<SystemModules[]>(`${config.site.apiUrl}/system-modules`, {
     method: "GET",
     headers: {
       accept: "*/*",

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api-fetch";
+import {config} from "@/config";
 
 export interface Manager {
   id: number;
@@ -7,10 +8,8 @@ export interface Manager {
   updatedAt: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export async function getManagers(): Promise<Manager[]> {
-  return apiFetch<Manager[]>(`${API_URL}/taxonomies/managers`, {
+  return apiFetch<Manager[]>(`${config.site.apiUrl}/taxonomies/managers`, {
     method: "GET",
     headers: {
       accept: "*/*",

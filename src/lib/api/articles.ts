@@ -1,5 +1,6 @@
 import { apiFetch } from "./api-fetch";
 import { Article } from "@/contexts/auth/types";
+import {config} from "@/config";
 
 interface CreateArticlePayload {
   title?: string;
@@ -34,8 +35,6 @@ export interface GetArticlesParams {
   }
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export async function getArticlesList(params: GetArticlesParams = {}): Promise<GetArticlesResponse> {
     const query = new URLSearchParams();
     if (params.page) query.set('page', params.page.toString());
@@ -52,7 +51,7 @@ export async function getArticlesList(params: GetArticlesParams = {}): Promise<G
       params.statusId.forEach(status => query.append('status', status));
     }
   
-    return apiFetch<GetArticlesResponse>(`${API_URL}/documents/articles?${query.toString()}`, {
+    return apiFetch<GetArticlesResponse>(`${config.site.apiUrl}/documents/articles?${query.toString()}`, {
       method: 'GET',
     });
   }
@@ -60,20 +59,20 @@ export async function getArticlesList(params: GetArticlesParams = {}): Promise<G
 export async function createArticle(
   payload: CreateArticlePayload
 ): Promise<Article> {
-  return apiFetch<Article>(`${API_URL}/documents/articles`, {
+  return apiFetch<Article>(`${config.site.apiUrl}/documents/articles`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export async function getArticleById(id: number): Promise<Article> {
-  return apiFetch<Article>(`${API_URL}/documents/articles/${id}`, {
+  return apiFetch<Article>(`${config.site.apiUrl}/documents/articles/${id}`, {
     method: "GET",
   });
 }
 
 export async function deleteArticle(id: number): Promise<Article> {
-  return apiFetch<Article>(`${API_URL}/documents/articles/${id}`, {
+  return apiFetch<Article>(`${config.site.apiUrl}/documents/articles/${id}`, {
     method: "DELETE",
   });
 }
@@ -82,7 +81,7 @@ export async function editArticle(
   articleId: number,
   payload: CreateArticlePayload
 ): Promise<Article> {
-  return apiFetch<Article>(`${API_URL}/documents/articles/${articleId}`, {
+  return apiFetch<Article>(`${config.site.apiUrl}/documents/articles/${articleId}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

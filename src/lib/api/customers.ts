@@ -1,7 +1,6 @@
+import { config } from "@/config";
 import { apiFetch } from "./api-fetch";
 import { Customer } from "@/contexts/auth/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface GetCustomersParams {
   page?: number;
@@ -40,14 +39,14 @@ interface UpdateCustomerPayload extends Partial<CreateCustomerPayload> {
 }
 
 export async function createCustomer(payload: CreateCustomerPayload): Promise<Customer> {
-  return apiFetch<Customer>(`${API_URL}/customers`, {
+  return apiFetch<Customer>(`${config.site.apiUrl}/customers`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export async function getCustomers(): Promise<Customer[]> {
-  return apiFetch<Customer[]>(`${API_URL}/taxonomies/customers`, {
+  return apiFetch<Customer[]>(`${config.site.apiUrl}/taxonomies/customers`, {
     method: "GET",
     headers: {
       accept: "*/*",
@@ -56,7 +55,7 @@ export async function getCustomers(): Promise<Customer[]> {
 }
 
 export async function getSubscriptions(): Promise<Customer[]> {
-  return apiFetch<Customer[]>(`${API_URL}/taxonomies/subscriptions`, {
+  return apiFetch<Customer[]>(`${config.site.apiUrl}/taxonomies/subscriptions`, {
     method: "GET",
     headers: {
       accept: "*/*",
@@ -82,26 +81,26 @@ export async function getCustomersList(params: GetCustomersParams = {}): Promise
     params.statusId.forEach(status => query.append('status', status));
   }
 
-  return apiFetch<GetCustomersResponse>(`${API_URL}/customers?${query.toString()}`, {
+  return apiFetch<GetCustomersResponse>(`${config.site.apiUrl}/customers?${query.toString()}`, {
     method: 'GET',
   });
 }
 
 export async function getCustomerById(id: number): Promise<Customer> {
-  return apiFetch<Customer>(`${API_URL}/customers/${id}`, {
+  return apiFetch<Customer>(`${config.site.apiUrl}/customers/${id}`, {
     method: 'GET',
   });
 }
 
 export async function updateCustomer(payload: UpdateCustomerPayload): Promise<Customer> {
-  return apiFetch<Customer>(`${API_URL}/customers/${payload.id}`, {
+  return apiFetch<Customer>(`${config.site.apiUrl}/customers/${payload.id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
 }
 
 export async function deleteCustomer(id: number): Promise<Customer> {
-  return apiFetch<Customer>(`${API_URL}/customers/${id}`, {
+  return apiFetch<Customer>(`${config.site.apiUrl}/customers/${id}`, {
     method: 'DELETE',
   });
 }

@@ -1,7 +1,13 @@
+import { config } from '@/config';
 import { apiFetch } from './api-fetch';
 import { ApiUser, Status } from '@/contexts/auth/types';
 
-
+interface RegisterUserPayload {
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string
+}
 
 interface CreateUserPayload {
   email: string;
@@ -46,17 +52,50 @@ interface GetUsersResponse {
   };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export async function validateEmail(email: string): Promise<any> {
+  const validateEmailUrl = `${config.site.apiUrl}/register/validate-email/${encodeURIComponent(email)}`;
+  return fetch(validateEmailUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+export async function registerUser(payload: RegisterUserPayload): Promise<ApiUser> {
+  const response = await fetch(`${config.site.apiUrl}/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      password: payload.password,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const errorMessage = errorData.message
+      || `Failed to register user: ${response.statusText}`
+      || 'An error occurred during registration';
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<ApiUser>;
+}
 
 export async function createUser(payload: CreateUserPayload): Promise<ApiUser> {
-  return apiFetch<ApiUser>(`${API_URL}/users`, {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export async function updateUser(payload: UpdateUserPayload): Promise<ApiUser> {
-  return apiFetch<ApiUser>(`${API_URL}/users/${payload.id}`, {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users/${payload.id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
@@ -80,32 +119,32 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
     params.statusId.forEach(status => query.append('status', status));
   }
 
-  return apiFetch<GetUsersResponse>(`${API_URL}/users?${query.toString()}`, {
+  return apiFetch<GetUsersResponse>(`${config.site.apiUrl}/users?${query.toString()}`, {
     method: 'GET',
   });
 }
 
 export async function getUserById(id: number): Promise<ApiUser> {
-  return apiFetch<ApiUser>(`${API_URL}/users/${id}`, {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users/${id}`, {
     method: 'GET',
   });
 }
 
 export async function getUserInfo(): Promise<ApiUser> {
-  return apiFetch<ApiUser>(`${API_URL}/users/me`, {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users/me`, {
     method: 'GET',
   });
 }
 
 export async function editUserInfo(payload: EditUserInfoPayload): Promise<ApiUser> {
-  return apiFetch<ApiUser>(`${API_URL}/users/me`, {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users/me`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   });
 }
 
 export async function getStatuses(): Promise<Status[]> {
-  return apiFetch<Status[]>(`${API_URL}/taxonomies/statuses`, {
+  return apiFetch<Status[]>(`${config.site.apiUrl}/taxonomies/statuses`, {
     method: "GET",
     headers: {
       accept: "*/*",

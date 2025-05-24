@@ -30,6 +30,9 @@ import { toast } from '@/components/core/toaster';
 import {OAuthProvider, oAuthProviders} from "@/lib/auth/supabase/auth-providers";
 import {Typography} from "@mui/joy";
 import {config} from "@/config";
+import {apiFetch} from "@/lib/api/api-fetch";
+import {ApiUser} from "@/contexts/auth/types";
+import {registerUser, validateEmail} from "@/lib/api/users";
 
 const schema = zod.object({
   firstName: zod.string().min(1, { message: 'First name is required' }),
@@ -94,20 +97,18 @@ export function SignUpForm(): React.JSX.Element {
       setIsPending(true);
 
       try {
-        const validateEmailUrl = `${
-          config.site.apiUrl
-        }/register/validate-email/${encodeURIComponent(values.email)}`;
-        const emailValidationResponse = await fetch(validateEmailUrl, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
+        const emailValidationResponse = await validateEmail(values.email);
         if (!emailValidationResponse.ok) {
           const errorData = await emailValidationResponse.json();
           throw new Error(errorData.message || "Email validation failed");
         }
+
+        await registerUser({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+        });
 
         // It is really important that you read the official notes
         // under "If signUp() is called for an existing confirmed user"

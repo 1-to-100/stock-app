@@ -1,5 +1,6 @@
 import { apiFetch } from "./api-fetch";
 import { Role } from "@/contexts/auth/types";
+import {config} from "@/config";
 
 export interface ModulePermission {
   id: number;
@@ -21,10 +22,8 @@ interface PermissionsByModule {
     permissionNames: string[];
   }
   
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  
   export async function getRoles(): Promise<Role[]> {
-    return apiFetch<Role[]>(`${API_URL}/taxonomies/roles`, {
+    return apiFetch<Role[]>(`${config.site.apiUrl}/taxonomies/roles`, {
       method: "GET",
       headers: {
         accept: "*/*",
@@ -33,7 +32,7 @@ interface PermissionsByModule {
   }
 
   export async function getRolesList(): Promise<Role[]> {
-    return apiFetch<Role[]>(`${API_URL}/roles`, {
+    return apiFetch<Role[]>(`${config.site.apiUrl}/roles`, {
       method: "GET",
       headers: {
         accept: "*/*",
@@ -42,27 +41,27 @@ interface PermissionsByModule {
   }
   
   export async function createRole(payload: CreateRolePayload): Promise<Role> {
-    return apiFetch<Role>(`${API_URL}/roles`, {
+    return apiFetch<Role>(`${config.site.apiUrl}/roles`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   }
   
   export async function addRolePermissions(payload: AddRolePermissionsPayload): Promise<Role> {
-    return apiFetch<Role>(`${API_URL}/roles/${payload.id}/permissions`, {
+    return apiFetch<Role>(`${config.site.apiUrl}/roles/${payload.id}/permissions`, {
       method: "POST",
       body: JSON.stringify({ permissionNames: payload.permissionNames }),
     });
   }
   
   export async function getRoleById(id: number): Promise<Role> {
-    return apiFetch<Role>(`${API_URL}/roles/${id}`, {
+    return apiFetch<Role>(`${config.site.apiUrl}/roles/${id}`, {
       method: "GET",
     });
   }
 
   export async function editRole(roleId: number, payload: CreateRolePayload): Promise<Role> {
-    return apiFetch<Role>(`${API_URL}/roles/${roleId}`, {
+    return apiFetch<Role>(`${config.site.apiUrl}/roles/${roleId}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });

@@ -1,5 +1,6 @@
 import { apiFetch } from "./api-fetch";
 import { Category } from "@/contexts/auth/types";
+import {config} from "@/config";
 
 export interface ModulePermission {
   id: number;
@@ -22,11 +23,9 @@ interface PermissionsByModule {
     id: number;
     permissionNames: string[];
   }
-  
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  
+
   export async function getSubcategories(): Promise<string[]> {
-    return apiFetch<string[]>(`${API_URL}/documents/categories/subcategories`, {
+    return apiFetch<string[]>(`${config.site.apiUrl}/documents/categories/subcategories`, {
       method: "GET",
       headers: {
         accept: "*/*",
@@ -35,7 +34,7 @@ interface PermissionsByModule {
   }
 
   export async function getCategoriesList(): Promise<Category[]> {
-    return apiFetch<Category[]>(`${API_URL}/documents/categories`, {
+    return apiFetch<Category[]>(`${config.site.apiUrl}/documents/categories`, {
       method: "GET",
       headers: {
         accept: "*/*",
@@ -44,7 +43,7 @@ interface PermissionsByModule {
   }
   
   export async function createCategory(payload: CreateCategoryPayload): Promise<Category> {
-    return apiFetch<Category>(`${API_URL}/documents/categories`, {
+    return apiFetch<Category>(`${config.site.apiUrl}/documents/categories`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -52,19 +51,19 @@ interface PermissionsByModule {
  
   
   export async function getCategoryById(id: number): Promise<Category> {
-    return apiFetch<Category>(`${API_URL}/documents/categories/${id}`, {
+    return apiFetch<Category>(`${config.site.apiUrl}/documents/categories/${id}`, {
       method: "GET",
     });
   }
 
   export async function deleteCategory(id: number): Promise<Category> {
-    return apiFetch<Category>(`${API_URL}/documents/categories/${id}`, {
+    return apiFetch<Category>(`${config.site.apiUrl}/documents/categories/${id}`, {
       method: "DELETE",
     });
   }
 
   export async function editCategory(categoryId: number, payload: CreateCategoryPayload): Promise<Category> {
-    return apiFetch<Category>(`${API_URL}/documents/categories/${categoryId}`, {
+    return apiFetch<Category>(`${config.site.apiUrl}/documents/categories/${categoryId}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
