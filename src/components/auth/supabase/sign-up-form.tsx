@@ -102,7 +102,7 @@ export function SignUpForm(): React.JSX.Element {
           throw new Error("Email validation failed");
         }
 
-        await registerUser({
+        const registeredUser = await registerUser({
           firstName: values.firstName,
           lastName: values.lastName,
           email: values.email,
@@ -114,7 +114,7 @@ export function SignUpForm(): React.JSX.Element {
         // https://supabase.com/docs/reference/javascript/auth-signup
         // If a user already exists with this email, they will not
         // receive a confirmation email.
-
+        /*
         const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
         redirectToUrl.searchParams.set('next', paths.dashboard.overview);
 
@@ -135,8 +135,9 @@ export function SignUpForm(): React.JSX.Element {
           // After refresh, GuestGuard will handle the redirect
           return;
         }
+         */
 
-        if (data.user) {
+        if (registeredUser) {
           const searchParams = new URLSearchParams({ email: values.email });
           router.push(`${paths.auth.supabase.signUpConfirm}?${searchParams.toString()}`);
           return;
