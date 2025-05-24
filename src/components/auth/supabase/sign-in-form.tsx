@@ -73,7 +73,7 @@ export function SignInForm(): React.JSX.Element {
       const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: providerId,
         options: {
-          ...(providerId == 'azure' ? { scopes: 'email' } : {}),
+          ...(providerId == 'azure' ? { scopes: 'email profile' } : {}),
           redirectTo: redirectToUrl.href
         },
       });
