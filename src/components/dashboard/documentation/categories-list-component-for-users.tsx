@@ -236,7 +236,7 @@ const CategoriesListComponentForUsers: React.FC<CategoriesListComponentForUsersP
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", maxWidth: 620 }}>
             <Input
               placeholder="Search in  knowledge base"
-              sx={{ flex: 1, background: "#fff", borderRadius: "30px", px: 2, color: "var(--joy-palette-text-secondary)", fontSize: 14, fontWeight: 400 }}
+              sx={{ flex: 1, backgroundColor: "var(--joy-palette-background-mainBg)", borderRadius: "30px", px: 2, color: "var(--joy-palette-text-secondary)", fontSize: 14, fontWeight: 400 }}
               size="lg"
               endDecorator={null}
               startDecorator={<SearchIcon size={18} color="var(--joy-palette-text-secondary)" />}
