@@ -578,10 +578,10 @@ const EditArticlePage = () => {
                 p: 2,
                 borderRadius: "8px",
                 border: "1px solid #eee",
-                position: isTocFixed ? "sticky" : "static",
+                position: "sticky",
                 top: "150px",
                 transition: "all 0.3s ease",
-                display: { xs: 'block', sm: 'none' }
+                display: { xs: 'none', sm: 'block' }
               }}
             >
               <Typography
@@ -615,7 +615,6 @@ const EditArticlePage = () => {
                             yOffset;
                           window.scrollTo({ top: y, behavior: "smooth" });
                           setActiveTocId(item.id);
-                          setIsTocFixed(true);
                         }
                       }}
                     >

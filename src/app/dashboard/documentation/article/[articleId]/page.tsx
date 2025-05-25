@@ -64,6 +64,38 @@ const ArticlePageDetails = () => {
     }
   }, [articleData?.videoUrl]);
 
+  useEffect(() => {
+    if (articleData?.content) {
+      const parser = new window.DOMParser();
+      const doc = parser.parseFromString(articleData.content, "text/html");
+      const headings: { id: string; text: string; level: number }[] = [];
+      const headingCounts: Record<string, number> = {};
+
+      Array.from(doc.body.querySelectorAll("h1, h2, h3, h4, h5, h6")).forEach(
+        (el) => {
+          const level = Number(el.tagName[1]);
+          const text = el.textContent || "";
+          const baseId = `heading-${text
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")}-${level}`;
+
+          headingCounts[baseId] = (headingCounts[baseId] || 0) + 1;
+          const count = headingCounts[baseId];
+
+          const id = count > 1 ? `${baseId}-${count}` : baseId;
+
+          if (el.getAttribute("id") !== id) {
+            el.setAttribute("id", id);
+          }
+
+          headings.push({ id, text, level });
+        }
+      );
+
+      setToc(headings);
+    }
+  }, [articleData?.content]);
+
   const extractVideoId = (url: string): string | null => {
     const regex =
       /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;

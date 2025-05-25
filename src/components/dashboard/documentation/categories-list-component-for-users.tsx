@@ -13,7 +13,7 @@ import Button from "@mui/joy/Button";
 import Input from "@mui/joy/Input";
 import Image from "next/image";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { paths } from "@/paths";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
@@ -56,7 +56,7 @@ function formatDate(dateString: string) {
   return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
 }
 
-interface KnowledgeBaseViewProps {
+interface CategoriesListComponentForUsersProps {
   categories: Category[];
   fetchCategories: () => void;
 }
@@ -69,12 +69,13 @@ interface HttpError {
     };
   }
 
-const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetchCategories }) => {
+const CategoriesListComponentForUsers: React.FC<CategoriesListComponentForUsersProps> = ({ categories, fetchCategories }) => {
   const { colorScheme } = useColorScheme();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const categoryToDeleteRef = useRef<number | null>(null);
   const [openEditCategoryModal, setOpenEditCategoryModal] = useState(false);
   const [openDeleteCategoryModal, setOpenDeleteCategoryModal] = useState(false);
   const [pendingEditId, setPendingEditId] = useState<number | null>(null);
@@ -136,6 +137,7 @@ const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetch
   }, [pendingEditId]);
 
   const handleDeleteCategoryModalOpen = (categoryId: number) => {
+    categoryToDeleteRef.current = categoryId;
     setSelectedCategoryId(categoryId);
     setOpenDeleteCategoryModal(true);
     handleMenuClose();
@@ -149,13 +151,16 @@ const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetch
   const handleCloseDeleteCategoryModal = () => {
     setOpenDeleteCategoryModal(false);
     setSelectedCategoryId(null);
+    categoryToDeleteRef.current = null;
   };
 
   const deleteCategoryMutation = useMutation({
-    mutationFn: (id: number) => deleteCategory(id),
+    mutationFn: (id: number) => {
+      return deleteCategory(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      handleDeleteCategoryModalClose();
+      handleCloseDeleteCategoryModal();
       toast.success("Category has been deleted successfully!");
     },
     onError: (error: unknown) => {
@@ -169,13 +174,10 @@ const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetch
     },
   });
 
-  const handleDeleteCategoryModalClose = () => {
-    setOpenDeleteCategoryModal(false);
-    setSelectedCategoryId(null);
-  };
-
   const handleDeleteCategory = async (categoryId: number) => {
-    deleteCategoryMutation.mutate(categoryId);
+    if (categoryId) {
+      deleteCategoryMutation.mutate(categoryId);
+    }
   };
 
   const menuItemStyle = {
@@ -476,7 +478,12 @@ const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetch
       <DeleteDeactivateUserModal
         open={openDeleteCategoryModal}
         onClose={handleCloseDeleteCategoryModal}
-        onConfirm={() => handleDeleteCategory(selectedCategoryId!)}
+        onConfirm={() => {
+          console.log('Delete confirmation clicked, categoryToDelete:', categoryToDeleteRef.current);
+          if (categoryToDeleteRef.current) {
+            handleDeleteCategory(categoryToDeleteRef.current);
+          }
+        }}
         usersToDelete={selectedCategoryId ? [categories.find(cat => cat.id === selectedCategoryId)?.name || ''] : undefined}
         isDeactivate={false}
         title="Delete Category"
@@ -486,4 +493,4 @@ const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ categories, fetch
   );
 };
 
-export default KnowledgeBaseView; 
+export default CategoriesListComponentForUsers; 

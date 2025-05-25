@@ -517,16 +517,16 @@ const AddArticlePage = () => {
 
           {isPreview && toc.length > 0 && (
             <Box
-              sx={{
-                mt: 3,
-                p: 2,
-                borderRadius: "8px",
-                border: "1px solid #eee",
-                position: isTocFixed ? "sticky" : "static",
-                top: "150px",
-                transition: "all 0.3s ease",
-                display: { xs: 'block', sm: 'none' }
-              }}
+            sx={{
+              mt: 3,
+              p: 2,
+              borderRadius: "8px",
+              border: "1px solid #eee",
+              position: "sticky",
+              top: "150px",
+              transition: "all 0.3s ease",
+              display: { xs: 'none', sm: 'block' }
+            }}
             >
               <Typography
                 sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}

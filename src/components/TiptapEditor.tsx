@@ -871,6 +871,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           top: 100px;
           z-index: 100;
           background: var(--joy-palette-background-body);
+          max-width: 100%;
         }
         .tiptap-toolbar::-webkit-scrollbar {
           height: 6px;
@@ -1008,6 +1009,12 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           color: var(--joy-palette-text-primary);
           font-size: 16px;
           min-height: 200px;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          position: relative;
         }
         :global(.ProseMirror-focused) {
           outline: none;
@@ -1024,9 +1031,30 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           font-size: 14px;
           margin: 8px 0;
         }
+        :global(.custom-code-block pre) {
+          margin: 0;
+          padding: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-all;
+        }
+        :global(.custom-code-block code) {
+          display: block;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-all;
+        }
         :global(.custom-code-block.ProseMirror-selectednode) {
           border: 1px solid var(--joy-palette-divider);
           background: var(--Layout-bg);
+        }
+        :global(.tiptap-preview) {
+          min-height: 200px;
+          border-radius: 8px;
+          padding: 16px;
+          color: #222;
+          font-size: 16px;
+          margin-top: 8px;
         }
         :global(.tiptap-preview pre) {
           border: 1px solid var(--joy-palette-divider);
@@ -1035,6 +1063,9 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           font-family: monospace;
           font-size: 14px;
           margin: 8px 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          word-break: break-all;
         }
         .tiptap-preview {
           min-height: 200px;
