@@ -9,6 +9,8 @@ import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { toast } from '@/components/core/toaster';
+import {config} from "@/config";
+import {NextResponse} from "next/server";
 
 // NOTE: This is a `Page` and not a `GET` route because
 //  Supabase has endpoints that still use
@@ -38,6 +40,8 @@ export default function Page(): React.JSX.Element | null {
     if (hashParams.get('error')) {
       logger.debug(hashParams.get('error_description'));
       setDisplayError('Something went wrong');
+      const errorParams = new URLSearchParams({ error: 'Something went wrong' });
+      router.replace(`${paths.auth.supabase.signUp}?${errorParams.toString()}`);
       return;
     }
 
@@ -46,6 +50,8 @@ export default function Page(): React.JSX.Element | null {
 
     if (!accessToken || !refreshToken) {
       setDisplayError('Access token or refresh token is missing');
+      const errorParams = new URLSearchParams({ error: 'Access token or refresh token is missing' });
+      router.replace(`${paths.auth.supabase.signUp}?${errorParams.toString()}`);
       return;
     }
 
@@ -54,7 +60,7 @@ export default function Page(): React.JSX.Element | null {
     if (error) {
       logger.debug(error.message);
       toast.error('Something went wrong');
-      router.push(paths.auth.supabase.signIn);
+      router.replace(paths.auth.supabase.signIn);
       return;
     }
 
@@ -64,7 +70,7 @@ export default function Page(): React.JSX.Element | null {
       next = paths.dashboard.overview;
     }
 
-    router.push(next);
+    router.replace(next);
   }, [supabaseClient, router]);
 
   React.useEffect((): void => {
