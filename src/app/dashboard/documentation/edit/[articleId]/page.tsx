@@ -423,7 +423,7 @@ const EditArticlePage = () => {
                     }}
                   >
                     {categories.map((option: Category) => (
-                        <Option key={option.id} value={option.id}>
+                        <Option key={option.id} value={option.id.toString()}>
                           {option.name}
                         </Option>
                       ))}
