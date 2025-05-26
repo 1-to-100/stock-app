@@ -39,6 +39,7 @@ import { getCategoryById } from "@/lib/api/categories";
 import { deleteArticle, editArticle, getArticlesList } from "@/lib/api/articles";
 import { useRouter } from "next/navigation";
 import {toast} from '@/components/core/toaster';
+import { useColorScheme } from '@mui/joy/styles';
 
 const RouterLink = Link;
 
@@ -68,6 +69,7 @@ const CategoryInfo: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const { colorScheme } = useColorScheme();
 
   const queryClient = useQueryClient();
   const params = useParams();
@@ -603,11 +605,12 @@ const CategoryInfo: React.FC = () => {
                                 sx={{
                                   bgcolor:
                                     article.status === "draft"
-                                      ? "#FFF8C5"
-                                      : "#EEEFF0",
+                                      ? colorScheme === "light" ? "#FFF8C5" : "#fffad2"
+                                      : colorScheme === "light" ? "#EEEFF0" : "#e9e9e9",
                                   display: "inline-block",
                                   padding: "8px 8px",
-                                  borderRadius: "25px",
+                                  borderRadius: "25px", 
+                                  color: colorScheme === "light" ? "var(--joy-palette-text-primary)" : "#000",
                                 }}
                               >
                                 {article.status.charAt(0).toUpperCase() +

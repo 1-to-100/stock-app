@@ -233,7 +233,7 @@ const CategoriesListComponentForUsers: React.FC<CategoriesListComponentForUsersP
           >
             Discover step-by-step guides, best practices, and expert tips to streamline your workflow, solve challenges, and make the most of every feature.
           </Typography>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", maxWidth: 620 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, alignItems: "center", maxWidth: 620 }}>
             <Input
               placeholder="Search in  knowledge base"
               sx={{ flex: 1, backgroundColor: "var(--joy-palette-background-mainBg)", borderRadius: "30px", px: 2, color: "var(--joy-palette-text-secondary)", fontSize: 14, fontWeight: 400 }}
