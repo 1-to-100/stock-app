@@ -24,6 +24,7 @@ import {
 } from "../../../lib/api/roles";
 import { Box, CircularProgress } from "@mui/joy";
 import { Role } from "@/contexts/auth/types";
+import { toast } from "@/components/core/toaster";
 
 interface Permission {
   enabled: boolean;
@@ -50,6 +51,14 @@ interface Errors {
   roleName?: string;
   description?: string;
   permissions?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message: string | string[];
+    };
+  };
 }
 
 interface AddRoleModalProps {
@@ -134,6 +143,9 @@ export default function AddRoleModal({
   }, [systemModules, roleData, open, isModulesLoading, roleId]);
 
   const handleInputChange = (field: string, value: string) => {
+    if (field === "description" && value.length > 255) {
+      return;
+    }
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -186,9 +198,13 @@ export default function AddRoleModal({
     const newErrors: Errors = {};
     if (!formData.roleName.trim()) {
       newErrors.roleName = "Role name is required";
+    } else if (formData.roleName.length > 96) {
+      newErrors.roleName = "Role name must be shorter than or equal to 96 characters";
     }
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
+    } else if (formData.description.length > 255) {
+      newErrors.description = "Description cannot exceed 255 characters";
     }
 
     let hasValidPermissions = false;
@@ -260,6 +276,7 @@ export default function AddRoleModal({
         await queryClient.invalidateQueries({
           queryKey: ["role", roleId],
         });
+        toast.success("Role has been successfully updated");
       }
       
       await queryClient.invalidateQueries({
@@ -275,10 +292,30 @@ export default function AddRoleModal({
         "Error creating or editing role or adding permissions:",
         error
       );
-      setErrors({
-        ...errors,
-        permissions: "Failed to save role. Please try again.",
-      });
+      
+      const apiError = error as ApiError;
+      if (apiError.response?.data?.message) {
+        const errorMessage = Array.isArray(apiError.response.data.message) 
+          ? apiError.response.data.message[0] 
+          : apiError.response.data.message;
+        
+        if (errorMessage && errorMessage.includes("name")) {
+          setErrors({
+            ...errors,
+            roleName: errorMessage
+          });
+        } else {
+          setErrors({
+            ...errors,
+            permissions: errorMessage || "Failed to save role. Please try again."
+          });
+        }
+      } else {
+        setErrors({
+          ...errors,
+          permissions: "Failed to save role. Please try again."
+        });
+      }
     }
   };
 
@@ -383,7 +420,7 @@ export default function AddRoleModal({
                 About
               </Typography>
               <Textarea
-                placeholder="Describe this role’s permissions and responsibilities"
+                placeholder="Describe this role's permissions and responsibilities"
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 minRows={3}
@@ -397,14 +434,26 @@ export default function AddRoleModal({
                   },
                 }}
               />
-              {errors.description && (
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                {errors.description && (
+                  <Typography
+                    level="body-sm"
+                    sx={{ fontSize: "12px", color: "red" }}
+                  >
+                    {errors.description}
+                  </Typography>
+                )}
                 <Typography
                   level="body-sm"
-                  sx={{ fontSize: "12px", color: "red", mt: 0.5 }}
+                  sx={{
+                    fontSize: "12px",
+                    color: formData.description.length > 255 ? "red" : "var(--joy-palette-text-secondary)",
+                    ml: "auto"
+                  }}
                 >
-                  {errors.description}
+                  {formData.description.length}/255 characters
                 </Typography>
-              )}
+              </Stack>
             </Stack>
 
             <Stack spacing={1}>

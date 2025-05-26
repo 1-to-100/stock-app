@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { paths } from "@/paths";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Popper } from "@mui/base/Popper";
 import AddRoleModal from "../modals/AddRoleModal";
 import type { ColorPaletteProp, VariantProp } from "@mui/joy";
@@ -37,6 +37,19 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
   const [openEditRoleModal, setOpenEditRoleModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (anchorEl && !anchorEl.contains(event.target as Node)) {
+        handleMenuClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [anchorEl]);
+
   const handleCardClick = async (roleId: string) => {
     try {
       router.push(paths.dashboard.roleSettings.details(roleId.toString()));
@@ -50,8 +63,12 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
     roleId: string
   ) => {
     event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setActiveRoleId(roleId);
+    if (activeRoleId === roleId) {
+      handleMenuClose();
+    } else {
+      setAnchorEl(event.currentTarget);
+      setActiveRoleId(roleId);
+    }
   };
 
   const handleEditRole = (roleId: string) => {
@@ -139,6 +156,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
             "&:hover": {
               borderColor: "var(--joy-palette-text-secondary)",
             },
+            maxWidth: { xs: "100%", sm: "336px" },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -233,6 +251,9 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
                 fontWeight: "300",
                 fontSize: "14px",
                 lineHeight: "1.5",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal"
               }}
             >
               {role.description.slice(0, 89)}

@@ -953,7 +953,7 @@ const SystemAdminSettings: React.FC = () => {
                       ))}
                     </tbody>
                   </Table>
-                  {(users.length > 0 || isLoading) && (
+                  {/* {(users.length > 0 || isLoading) && (
                     <Box
                       sx={{
                         position: { xs: "static", sm: "static" },
@@ -972,7 +972,7 @@ const SystemAdminSettings: React.FC = () => {
                         disabled={!hasResults}
                       />
                     </Box>
-                  )}
+                  )} */}
                 </Box>
               ) : (
                 <Box
@@ -1140,11 +1140,31 @@ const SystemAdminSettings: React.FC = () => {
                   ))}
                 </Box>
               )}
+              {(users.length > 0 || isLoading) && (
+                    <Box
+                      sx={{
+                        position: { xs: "static", sm: "static" },
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        padding: "12px 24px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Pagination
+                        totalPages={totalPages}
+                        currentPage={currentPage}
+                        onPageChange={handlePageChange}
+                        disabled={!hasResults}
+                      />
+                    </Box>
+                  )}
             </Box>
           )}
         </Box>
 
-        <Box sx={{ flex: 0.7, mt: { xs: 4, sm: 2 } }}>
+        <Box sx={{ flex: 0.7, mt: { xs: 4, sm: 2 }, maxWidth: { xs: "100%", sm: "336px" } }}>
           <Box
             sx={{
               mb: 3,
@@ -1168,6 +1188,9 @@ const SystemAdminSettings: React.FC = () => {
                 color: "var(--joy-palette-text-primary)",
                 fontWeight: "300",
                 fontSize: "14px",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal"
               }}
             >
               {roleData?.description}

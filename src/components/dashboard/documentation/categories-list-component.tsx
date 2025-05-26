@@ -290,7 +290,9 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
                 fontWeight: "300",
                 fontSize: "14px",
                 lineHeight: "1.5",
-                wordBreak: "break-word",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal"
               }}
             >
               {category.about.slice(0, 89)}
