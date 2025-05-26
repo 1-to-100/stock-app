@@ -579,7 +579,7 @@ const CategoryInfo: React.FC = () => {
                                 "&:hover .sort-icon": { opacity: 1 },
                               }}
                             >
-                              Perfomance
+                              Performance
                             </Box>
                           </th>
                           <th style={{ width: "60px" }}></th>
@@ -596,7 +596,7 @@ const CategoryInfo: React.FC = () => {
                                 }
                               />
                             </td>
-                            <td>{article.title}</td>
+                            <td>{article.title.slice(0, 80)}</td>
                             <td>{formatDate(article.updatedAt)}</td>
                             <td>
                               <Box

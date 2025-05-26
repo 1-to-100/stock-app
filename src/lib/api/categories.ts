@@ -24,6 +24,25 @@ interface PermissionsByModule {
     permissionNames: string[];
   }
 
+  export interface GetCategoriesListParams {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    orderBy?: string;
+    orderDirection?: 'asc' | 'desc';
+    roleId?: number[];
+    customerId?: number[];
+    statusId?: string[];
+  }
+
+  export interface GetCategoriesListResponse {
+    data: Category[];
+    meta: {
+      total: number;
+      page: number;
+    };
+  }
+
   export async function getSubcategories(): Promise<string[]> {
     return apiFetch<string[]>(`${config.site.apiUrl}/documents/categories/subcategories`, {
       method: "GET",
@@ -33,12 +52,21 @@ interface PermissionsByModule {
     });
   }
 
-  export async function getCategoriesList(): Promise<Category[]> {
-    return apiFetch<Category[]>(`${config.site.apiUrl}/documents/categories`, {
-      method: "GET",
-      headers: {
-        accept: "*/*",
-      },
+  // export async function getCategoriesList(): Promise<Category[]> {
+  //   return apiFetch<Category[]>(`${config.site.apiUrl}/documents/categories`, {
+  //     method: "GET",
+  //     headers: {
+  //       accept: "*/*",
+  //     },
+  //   });
+  // }
+
+  export async function getCategoriesList(params: GetCategoriesListParams = {}): Promise<GetCategoriesListResponse> {
+    const query = new URLSearchParams();
+    if (params.search) query.set('search', params.search);
+  
+    return apiFetch<GetCategoriesListResponse>(`${config.site.apiUrl}/documents/categories?${query.toString()}`, {
+      method: 'GET',
     });
   }
   

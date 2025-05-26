@@ -30,15 +30,22 @@ export default function Page(): React.JSX.Element {
   const { userInfo } = useUserInfo();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const {
-    data: categories = [],
-    isLoading,
-    error,
-  } = useQuery<Category[], HttpError>({
-    queryKey: ["categories"],
-    queryFn: getCategoriesList,
+  const { data, isLoading, error } = useQuery<Category[]>({
+    queryKey: [
+      "categories",
+      searchTerm,
+    ],
+    queryFn: async () => {
+      const response = await getCategoriesList({
+        search: searchTerm || undefined,
+      });
+      return Array.isArray(response) ? response : response.data;
+    },
   });
+ 
+  const categories = data || [];
 
   const handleAddCategoryModal = () => {
     setOpenAddCategoryModal(true);
@@ -52,37 +59,49 @@ export default function Page(): React.JSX.Element {
     queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
 
-  const handleSearch = (searchTerm: string) => {};
+  const handleSearch = (searchTerm: string) => {
+    setSearchTerm(searchTerm);
+  };
 
   const handleAddArticle = () => {
     router.push("/dashboard/documentation/add");
   };
 
-  if (error && error.response?.status === 403) {
-    return (
-      <Box sx={{ textAlign: "center", mt: 20 }}>
-        <Typography
-          sx={{
-            fontSize: "24px",
-            fontWeight: "600",
-            color: "var(--joy-palette-text-primary)",
-          }}
-        >
-          Access Denied
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            fontWeight: "300",
-            color: "var(--joy-palette-text-secondary)",
-            mt: 1,
-          }}
-        >
-          You do not have the required permissions to view this page. <br />{" "}
-          Please contact your administrator if you believe this is a mistake.
-        </Typography>
-      </Box>
-    );
+  if (error) {
+    const httpError = error as HttpError;
+    let status: number | undefined = httpError.response?.status;
+
+    if (!status && httpError.message.includes("status:")) {
+      const match = httpError.message.match(/status: (\d+)/);
+      status = match ? parseInt(match[1] ?? "0", 10) : undefined;
+    }
+
+    if (status === 403) {
+      return (
+        <Box sx={{ textAlign: "center", mt: { xs: 10, sm: 20, md: 35 } }}>
+          <Typography
+            sx={{
+              fontSize: { xs: "20px", sm: "24px" },
+              fontWeight: "600",
+              color: "var(--joy-palette-text-primary)",
+            }}
+          >
+            Access Denied
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: { xs: "12px", sm: "14px" },
+              fontWeight: "300",
+              color: "var(--joy-palette-text-secondary)",
+              mt: 1,
+            }}
+          >
+            You do not have the required permissions to view this page. <br />
+            Please contact your administrator if you believe this is a mistake.
+          </Typography>
+        </Box>
+      );
+    }
   }
 
   return (

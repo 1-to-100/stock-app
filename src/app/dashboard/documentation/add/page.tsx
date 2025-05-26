@@ -7,13 +7,14 @@ import { paths } from "@/paths";
 import { Breadcrumbs, Button, Select, Option, Checkbox, Input } from "@mui/joy";
 import { Box, Stack } from "@mui/system";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { getCategoriesList, getSubcategories } from "@/lib/api/categories";
+import { getCategoriesList, getSubcategories, GetCategoriesListResponse } from "@/lib/api/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
 import { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 import { createArticle } from "@/lib/api/articles";
 import { toast } from "@/components/core/toaster";
+import { Category } from "@/contexts/auth/types";
 
 interface HttpError {
   response?: {
@@ -31,11 +32,16 @@ const AddArticlePage = () => {
     enabled: true,
   });
 
-  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+  const { data: categoriesResponse, isLoading: isCategoriesLoading } = useQuery<Category[]>({
     queryKey: ["categories"],
-    queryFn: getCategoriesList,
+    queryFn: async () => {
+      const response = await getCategoriesList();
+      return Array.isArray(response) ? response : response.data;
+    },
     enabled: true,
   });
+
+  const categories = categoriesResponse || [];
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
@@ -360,11 +366,11 @@ const AddArticlePage = () => {
                       fontSize: "14px",
                     }}
                   >
-                    {categories?.map((option) => (
-                      <Option key={option.id} value={option.id}>
-                        {option.name}
-                      </Option>
-                    ))}
+                    {categories.map((option: Category) => (
+                        <Option key={option.id} value={option.id}>
+                          {option.name}
+                        </Option>
+                      ))}
                   </Select>
                 </Stack>
                 <Stack sx={{ flex: 1, mt: 2 }}>
