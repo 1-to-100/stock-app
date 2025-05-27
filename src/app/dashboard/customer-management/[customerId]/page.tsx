@@ -744,7 +744,8 @@ const Customer: React.FC = () => {
                               >
                                 {user.name
                                   .split(" ")
-                                  .map((n) => n[0])
+                                  .slice(0, 2)
+                                  .map((n) => n[0]?.toUpperCase() || "")
                                   .join("")}
                               </Avatar>
                             )}
@@ -970,7 +971,8 @@ const Customer: React.FC = () => {
                         >
                           {user.name
                             .split(" ")
-                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .map((n) => n[0]?.toUpperCase() || "")
                             .join("")}
                         </Avatar>
 

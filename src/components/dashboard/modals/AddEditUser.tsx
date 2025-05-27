@@ -15,18 +15,15 @@ import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
 import Switch from "@mui/joy/Switch";
-import Tooltip from "@mui/joy/Tooltip";
 import FormHelperText from "@mui/joy/FormHelperText";
 import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
-import { WarningCircle as WarningCircle } from "@phosphor-icons/react/dist/ssr/WarningCircle";
 import { Box } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { createUser, updateUser, getUserById } from "./../../../lib/api/users";
 import { getRoles } from "./../../../lib/api/roles";
 import { getCustomers } from "./../../../lib/api/customers";
 import { getManagers, Manager } from "./../../../lib/api/managers";
-import { ApiUser, Role, Customer } from "@/contexts/auth/types";
 import { toast } from "@/components/core/toaster";
 
 interface HttpError {

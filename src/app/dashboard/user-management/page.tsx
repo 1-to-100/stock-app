@@ -20,6 +20,7 @@ import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
+import { CaretDown } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { config } from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
@@ -36,6 +37,8 @@ import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
+import { useUserInfo } from "@/hooks/use-user-info";
+import InviteUserModal from "@/components/dashboard/modals/InviteUserModal";
 
 interface HttpError extends Error {
   response?: {
@@ -77,7 +80,10 @@ export default function Page(): React.JSX.Element {
     customerId: [],
     roleId: [],
   });
+  const { userInfo } = useUserInfo();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [openInviteModal, setOpenInviteModal] = useState(false);
+  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
 
   const rowsPerPage = 10;
 
@@ -381,6 +387,45 @@ export default function Page(): React.JSX.Element {
     };
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (addUserAnchorEl && !addUserAnchorEl.contains(event.target as Node)) {
+        handleAddUserClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [addUserAnchorEl]);
+
+  const handleAddUserClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (addUserAnchorEl) {
+      handleAddUserClose();
+    } else {
+      setAddUserAnchorEl(event.currentTarget);
+    }
+  };
+
+  const handleAddUserClose = () => {
+    setAddUserAnchorEl(null);
+  };
+
+  const handleInviteUser = () => {
+    setOpenInviteModal(true);
+    handleAddUserClose();
+  };
+
+  const handleCloseInviteModal = () => {
+    setOpenInviteModal(false);
+  };
+
+  const handleInviteConfirm = () => {
+    // Handle invite confirmation
+    handleCloseInviteModal();
+  };
+
   if (error) {
     const httpError = error as HttpError;
     let status: number | undefined = httpError.response?.status;
@@ -508,18 +553,76 @@ export default function Page(): React.JSX.Element {
               open={isFilterOpen}
               onOpen={handleOpenFilter}
             />
-            <Button
-              variant="solid"
-              color="primary"
-              onClick={handleAddUser}
-              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-              sx={{
-                width: { xs: "100%", sm: "auto" },
-                py: { xs: 1, sm: 0.75 },
-              }}
-            >
-              Add user
-            </Button>
+            {userInfo?.isSuperadmin ? (
+              <Box sx={{ position: 'relative' }}>
+                <Button
+                  variant="solid"
+                  color="primary"
+                  onClick={handleAddUserClick}
+                  endDecorator={<CaretDown fontSize="var(--Icon-fontSize)" />}
+                  sx={{
+                    width: { xs: "100%", sm: "auto" },
+                    py: { xs: 1, sm: 0.75 },
+                  }}
+                >
+                  Add user
+                </Button>
+                <Popper
+                  open={Boolean(addUserAnchorEl)}
+                  anchorEl={addUserAnchorEl}
+                  placement="bottom-start"
+                  style={{
+                    minWidth: "150px",
+                    borderRadius: "8px",
+                    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: "var(--joy-palette-background-surface)",
+                    zIndex: 1300,
+                    border: "1px solid var(--joy-palette-divider)",
+                  }}
+                >
+                  <Box
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      handleAddUser();
+                      handleAddUserClose();
+                    }}
+                    sx={{
+                      ...menuItemStyle,
+                      gap: { xs: "10px", sm: "14px" },
+                    }}
+                  >
+                    <PlusIcon fontSize="18px" />
+                    Add User
+                  </Box>
+                  <Box
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      handleInviteUser();
+                    }}
+                    sx={{
+                      ...menuItemStyle,
+                      gap: { xs: "10px", sm: "14px" },
+                    }}
+                  >
+                    <PlusIcon fontSize="18px" />
+                    Invite User
+                  </Box>
+                </Popper>
+              </Box>
+            ) : (
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={handleAddUser}
+                startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  py: { xs: 1, sm: 0.75 },
+                }}
+              >
+                Add user
+              </Button>
+            )}
           </Stack>
         </Stack>
 
@@ -730,7 +833,8 @@ export default function Page(): React.JSX.Element {
                               >
                                 {user.name
                                   .split(" ")
-                                  .map((n) => n[0])
+                                  .slice(0, 2)
+                                  .map((n) => n[0]?.toUpperCase() || "")
                                   .join("")}
                               </Avatar>
                               <Typography
@@ -991,6 +1095,12 @@ export default function Page(): React.JSX.Element {
       />
 
       <AddEditUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
+
+      <InviteUserModal
+        open={openInviteModal}
+        onClose={handleCloseInviteModal}
+        onConfirm={handleInviteConfirm}
+      />
     </Box>
   );
 }

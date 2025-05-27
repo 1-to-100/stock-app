@@ -44,9 +44,9 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [anchorEl]);
 
@@ -102,7 +102,6 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
     marginRight: "14px",
   };
 
- 
   const avatarColors: ColorPaletteProp[] = [
     "primary",
     "neutral",
@@ -110,7 +109,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
     "warning",
     "success",
   ];
-  
+
   const getAvatarProps = (name: string) => {
     const hash = Array.from(name).reduce(
       (acc: number, char: string) => acc + char.charCodeAt(0),
@@ -169,7 +168,11 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
               }}
               {...getAvatarProps(role.name)}
             >
-              {role.name.slice(0, 2).toUpperCase()}
+              {role.name
+                .split(" ")
+                .slice(0, 2)
+                .map((n) => n[0]?.toUpperCase() || "")
+                .join("")}
             </Avatar>
             <Box sx={{ flex: 1 }}>
               <Typography
@@ -253,7 +256,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
                 lineHeight: "1.5",
                 wordWrap: "break-word",
                 overflowWrap: "break-word",
-                whiteSpace: "normal"
+                whiteSpace: "normal",
               }}
             >
               {role.description.slice(0, 89)}

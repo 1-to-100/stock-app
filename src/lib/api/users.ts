@@ -52,6 +52,18 @@ interface GetUsersResponse {
   };
 }
 
+interface InviteUserPayload {
+  email: string;
+  customerId: number;
+  roleId: number;
+}
+
+interface InviteMultipleUsersPayload {
+  emails: string[];
+  customerId: number;
+  roleId: number;
+}
+
 export async function validateEmail(email: string): Promise<boolean> {
   const validateEmailUrl = `${config.site.apiUrl}/register/validate-email/${encodeURIComponent(email)}`;
   const response = await fetch(validateEmailUrl, {
@@ -159,5 +171,19 @@ export async function getStatuses(): Promise<Status[]> {
     headers: {
       accept: "*/*",
     },
+  });
+}
+
+export async function inviteUser(payload: InviteUserPayload): Promise<void> {
+  return apiFetch<void>(`${config.site.apiUrl}/users/invite`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function inviteMultipleUsers(payload: InviteMultipleUsersPayload): Promise<void> {
+  return apiFetch<void>(`${config.site.apiUrl}/users/invite-multiple`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }

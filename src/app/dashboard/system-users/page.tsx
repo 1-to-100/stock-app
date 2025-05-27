@@ -738,7 +738,8 @@ export default function Page(): React.JSX.Element {
                               >
                                 {user.name
                                   .split(" ")
-                                  .map((n) => n[0])
+                                  .slice(0, 2)
+                                  .map((n) => n[0]?.toUpperCase() || "")
                                   .join("")}
                               </Avatar>
                               <Typography
