@@ -8,7 +8,6 @@ import IconButton from "@mui/joy/IconButton";
 import Stack from "@mui/joy/Stack";
 import { Bell as BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
 import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
-import FormControl from "@mui/joy/FormControl";
 import Typography from "@mui/joy/Typography";
 
 import type { NavItemConfig } from "@/types/nav";
@@ -19,6 +18,7 @@ import { NotificationsPopover } from "./notifications-popover";
 import { UserPopover } from "./user-popover/user-popover";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { CustomerSelect } from "./customer-select";
+import {useUnreadNotificationsChannel} from "@/hooks/use-notifications";
 
 export interface MainNavProps {
   items: NavItemConfig[];
@@ -26,9 +26,14 @@ export interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
+  const [invisibleBadge, setInvisibleBadge] = React.useState<boolean>(true);
   const notificationsPopover = usePopover<HTMLButtonElement>();
   const userPopover = usePopover<HTMLButtonElement>();
   const { userInfo } = useUserInfo();
+  const handleNotification = React.useCallback(({ count }: { count: number }) => {
+    setInvisibleBadge(count === 0);
+  }, []);
+  useUnreadNotificationsChannel(handleNotification)
 
   return (
     <React.Fragment>
@@ -86,6 +91,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
               </Box>
             ) : null}
             <Badge
+              invisible={invisibleBadge}
               color="danger"
               sx={{ "& .MuiBadge-badge": { top: "6px", right: "6px" } }}
             >
