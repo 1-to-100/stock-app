@@ -9,10 +9,11 @@ import { Box } from "@mui/joy";
 
 export default function Page(): React.JSX.Element {
   const [notifications, setNotifications] = React.useState({
-    importantNotices: { email: false, inApp: true },
-    authentication: { email: true, inApp: true },
-    sharing: { email: false, inApp: true },
-    billing: { email: true, inApp: false },
+    documentation: { email: false, inApp: true },
+    importantNotices: { email: false, inApp: false },
+    authentication: { email: false, inApp: false },
+    sharing: { email: false, inApp: false },
+    billing: { email: false, inApp: false },
     subscription: { email: false, inApp: false },
   });
 
@@ -106,6 +107,60 @@ export default function Page(): React.JSX.Element {
               </tr>
             </thead>
             <tbody>
+            <tr>
+              <td>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "12px", sm: "14px" },
+                    fontWeight: "300",
+                    color: "var(--joy-palette-text-primary)",
+                  }}
+                >
+                  Documentation updates
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "10px", sm: "12px" },
+                    fontWeight: "400",
+                    color: "var(--joy-palette-text-secondary)",
+                  }}
+                >
+                  New articles, guides
+                </Typography>
+              </td>
+              <td style={{ textAlign: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Checkbox
+                    checked={notifications.documentation.email}
+                    onChange={() =>
+                      handleCheckboxChange("documentation", "email")
+                    }
+                  />
+                </Box>
+              </td>
+              <td style={{ textAlign: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Checkbox
+                    checked={notifications.documentation.inApp}
+                    onChange={() =>
+                      handleCheckboxChange("documentation", "inApp")
+                    }
+                  />
+                </Box>
+              </td>
+            </tr>
               <tr>
                 <td>
                   <Typography
@@ -115,7 +170,7 @@ export default function Page(): React.JSX.Element {
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
-                    Important notices
+                    Important notices (coming soon)
                   </Typography>
                   <Typography
                     sx={{
@@ -169,7 +224,7 @@ export default function Page(): React.JSX.Element {
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
-                    Authentication & Access
+                    Authentication & Access (coming soon)
                   </Typography>
                   <Typography
                     sx={{
@@ -223,7 +278,7 @@ export default function Page(): React.JSX.Element {
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
-                    Sharing & Permissions
+                    Sharing & Permissions (coming soon)
                   </Typography>
                   <Typography
                     sx={{
@@ -273,7 +328,7 @@ export default function Page(): React.JSX.Element {
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
-                    Billing & Payments
+                    Billing & Payments (coming soon)
                   </Typography>
                   <Typography
                     sx={{
@@ -323,7 +378,7 @@ export default function Page(): React.JSX.Element {
                       color: "var(--joy-palette-text-primary)",
                     }}
                   >
-                    Subscription Changes
+                    Subscription Changes (coming soon)
                   </Typography>
                   <Typography
                     sx={{
