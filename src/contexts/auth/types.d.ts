@@ -142,6 +142,15 @@ export interface SystemUser {
   }[];
 }
 
+export interface ApiNotification {
+  id: number;
+  title: string;
+  message: string;
+  createdAt: string;
+  isRead: boolean;
+  channel: string;
+}
+
 export type SystemRole =  "customer_success" | "system_admin";
 
 export type Status = "active" | "inactive" | "suspended";

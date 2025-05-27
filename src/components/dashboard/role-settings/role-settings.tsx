@@ -156,6 +156,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
               borderColor: "var(--joy-palette-text-secondary)",
             },
             maxWidth: { xs: "100%", sm: "336px" },
+            minWidth: { xs: "100%", sm: "236px" },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -174,16 +175,23 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
                 .map((n) => n[0]?.toUpperCase() || "")
                 .join("")}
             </Avatar>
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 level="title-md"
                 sx={{
                   fontWeight: "500",
                   fontSize: "14px",
                   color: "var(--joy-palette-text-primary)",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                  width: "100%",
+                  maxWidth: "100%",
+                  display: "block",
+                  overflow: "hidden"
                 }}
               >
-                {role.name.slice(0, 59)}
+                {role.name.slice(0, 50)}
               </Typography>
               <Typography
                 level="body-xs"
