@@ -166,25 +166,30 @@ const ArticlePageDetails = () => {
           </Stack>
 
           {toc.length > 0 && (
-            <Box sx={{ mt: 4, display: { xs: 'block', sm: 'none' } }}>
+            <Box sx={{ mt: 4, display: { xs: "block", sm: "none" } }}>
               <Typography
-                sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+                sx={{
+                  fontWeight: 300,
+                  color: "var(--joy-palette-text-secondary)",
+                  mb: 1,
+                  fontSize: 14,
+                }}
               >
                 On this article
               </Typography>
-              <Select
-                value={activeTocId || ""}
-                placeholder="Select a section"
-              >
+              <Select value={activeTocId || ""} placeholder="Select a section">
                 {toc.map((item) => (
-                  <Option 
-                    key={item.id} 
-                    value={item.id} 
+                  <Option
+                    key={item.id}
+                    value={item.id}
                     onClick={() => {
                       const el = document.getElementById(item.id);
                       if (el) {
                         const yOffset = -100;
-                        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        const y =
+                          el.getBoundingClientRect().top +
+                          window.pageYOffset +
+                          yOffset;
                         window.scrollTo({ top: y, behavior: "smooth" });
                         setActiveTocId(item.id);
                       }
@@ -226,17 +231,18 @@ const ArticlePageDetails = () => {
             </Box>
 
             <Box sx={{ flex: 0.7, mt: { xs: 4, sm: 2 } }}>
-              <Box
-                sx={{
-                  mt: 1,
-                  border: "1px solid #E5E8EB",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                  backgroundColor: "#F9FAFB",
-                }}
-              >
-                <Box sx={{ position: "relative", paddingTop: "56.25%" }}>
-                  {videoId ? (
+              {videoId && (
+                <Box
+                  sx={{
+                    mt: 1,
+                    mb: 3,
+                    border: "1px solid #E5E8EB",
+                    borderRadius: "6px",
+                    overflow: "hidden",
+                    backgroundColor: "#F9FAFB",
+                  }}
+                >
+                  <Box sx={{ position: "relative", paddingTop: "56.25%" }}>
                     <iframe
                       src={`https://www.youtube.com/embed/${videoId}`}
                       title="YouTube video player"
@@ -251,38 +257,29 @@ const ArticlePageDetails = () => {
                         height: "100%",
                       }}
                     />
-                  ) : (
-                    <Typography
-                      level="body-sm"
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        color: "text.secondary",
-                      }}
-                    >
-                      No video available
-                    </Typography>
-                  )}
+                  </Box>
                 </Box>
-              </Box>
+              )}
 
               {toc.length > 0 && (
                 <Box
                   sx={{
-                    mt: 3,
                     p: 2,
                     borderRadius: "8px",
                     border: "1px solid #eee",
                     position: isTocFixed ? "sticky" : "static",
                     top: "150px",
                     transition: "all 0.3s ease",
-                    display: { xs: 'none', sm: 'block' }
+                    display: { xs: "none", sm: "block" },
                   }}
                 >
                   <Typography
-                    sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+                    sx={{
+                      fontWeight: 300,
+                      color: "var(--joy-palette-text-secondary)",
+                      mb: 1,
+                      fontSize: 14,
+                    }}
                   >
                     On this article
                   </Typography>
