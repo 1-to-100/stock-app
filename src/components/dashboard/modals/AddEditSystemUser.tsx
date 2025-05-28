@@ -278,21 +278,18 @@ export default function AddEditSystemUser({
 
   const handleSystemRoleChange = (newValue: string) => {
     const isSuperadmin = newValue === "system_admin";
-    setFormData((prev) => {
-      const newData = {
-        ...prev,
-        systemRole: newValue as SystemRole,
-        isSuperadmin,
-        isCustomerSuccess: !isSuperadmin,
-      };
-      
-      if (isSuperadmin) {
-        newData.customer = "";
-      }
-      
-      return newData;
-    });
-    setErrors((prev) => ({ ...prev, systemRole: undefined }));
+    setFormData((prev) => ({
+      ...prev,
+      systemRole: newValue as SystemRole,
+      isSuperadmin,
+      isCustomerSuccess: !isSuperadmin,
+      customer: isSuperadmin ? "" : prev.customer,
+    }));
+    setErrors((prev) => ({ 
+      ...prev, 
+      systemRole: undefined,
+      customer: isSuperadmin ? undefined : prev?.customer 
+    }));
   };
 
   const handleSave = async () => {
@@ -306,10 +303,10 @@ export default function AddEditSystemUser({
         firstName: formData.firstName,
         lastName: formData.lastName,
         status: isActive ? "active" : ("inactive" as "active" | "inactive"),
-        customerId: formData.customer
-          ? getCustomerId(formData.customer)
-          : undefined,
         systemRole: formData.systemRole,
+        ...(formData.systemRole !== "system_admin" && formData.customer
+          ? { customerId: getCustomerId(formData.customer) }
+          : {}),
       };
 
       if (userId) {
