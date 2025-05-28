@@ -19,6 +19,7 @@ import {
 import { ApiNotification } from "@/contexts/auth/types";
 import { Info, Article } from "@phosphor-icons/react/dist/ssr";
 import CircularProgress from "@mui/joy/CircularProgress";
+import { useInAppNotificationsChannel } from "@/hooks/use-notifications";
 
 export interface NotificationsPopoverProps {
   anchorEl?: HTMLElement | null;
@@ -33,6 +34,9 @@ export function NotificationsPopover({
 }: NotificationsPopoverProps): React.JSX.Element {
   const queryClient = useQueryClient();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  useInAppNotificationsChannel((payload) => {
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  });
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -159,6 +163,7 @@ export function NotificationsPopover({
                       direction="row"
                       key={notification.id}
                       spacing={2}
+                      flexGrow={1}
                       sx={{ p: 0, mb: 2 }}
                     >
                       <NotificationContent notification={notification} />
@@ -228,7 +233,7 @@ function NotificationContent({
   });
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center">
+    <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
       <Stack
         sx={{
           backgroundColor:
@@ -299,6 +304,7 @@ function NotificationContent({
             width: "5px",
             p: "5px",
             minHeight: "5px",
+            marginLeft: "auto",
           }}
         />
       ) : null}
