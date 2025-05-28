@@ -223,6 +223,10 @@ export default function AddEditSystemUser({
       newErrors.systemRole = "System role is required";
     }
 
+    if (formData.systemRole !== "system_admin" && !formData.customer) {
+      newErrors.customer = "Customer is required";
+    }
+
     return newErrors;
   };
 
@@ -232,6 +236,14 @@ export default function AddEditSystemUser({
     if (field === "email") {
       const emailError = validateEmail(value);
       setErrors((prev) => ({ ...prev, email: emailError || undefined }));
+    } else if (field === "firstName" && value.trim()) {
+      setErrors((prev) => ({ ...prev, firstName: undefined }));
+    } else if (field === "lastName" && value.trim()) {
+      setErrors((prev) => ({ ...prev, lastName: undefined }));
+    } else if (field === "customer" && value) {
+      setErrors((prev) => ({ ...prev, customer: undefined }));
+    } else if (field === "systemRole" && value) {
+      setErrors((prev) => ({ ...prev, systemRole: undefined }));
     }
   };
 
@@ -271,8 +283,9 @@ export default function AddEditSystemUser({
       systemRole: newValue as SystemRole,
       isSuperadmin,
       isCustomerSuccess: !isSuperadmin,
-      customer: isSuperadmin ? "" : prev.customer, // Clear customer if superadmin
+      customer: isSuperadmin ? "" : prev.customer, 
     }));
+    setErrors((prev) => ({ ...prev, systemRole: undefined }));
   };
 
   const handleSave = async () => {
