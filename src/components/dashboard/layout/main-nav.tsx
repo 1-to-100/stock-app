@@ -18,7 +18,7 @@ import { NotificationsPopover } from "./notifications-popover";
 import { UserPopover } from "./user-popover/user-popover";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { CustomerSelect } from "./customer-select";
-import {useUnreadNotificationsChannel} from "@/hooks/use-notifications";
+import {useInAppNotificationsChannel, useUnreadNotificationsChannel} from "@/hooks/use-notifications";
 
 export interface MainNavProps {
   items: NavItemConfig[];
@@ -33,7 +33,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const handleNotification = React.useCallback(({ count }: { count: number }) => {
     setInvisibleBadge(count === 0);
   }, []);
-  useUnreadNotificationsChannel(handleNotification)
+  useUnreadNotificationsChannel(handleNotification);
 
   return (
     <React.Fragment>

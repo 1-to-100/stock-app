@@ -37,3 +37,33 @@ export function useUnreadNotificationsChannel(
     }
   }, [unreadCountPayload, handleNotification]);
 }
+
+type NotificationPayload = {
+  id?: number;
+  title?: string;
+  message?: string;
+  channel: string;
+}
+
+export function useInAppNotificationsChannel(
+  handleNotification: (payload: NotificationPayload) => void
+): void {
+  const supabaseClient = useMemo<SupabaseClient>(() => createSupabaseClient(), []);
+  const { userInfo } = useUserInfo();
+
+  useEffect(() => {
+    if (!userInfo) return;
+
+    const channel = supabaseClient.channel(`main-notifications:${userInfo.id}`)
+      .on('broadcast', { event: 'new' }, ({ payload }) => {
+        if (payload && payload.title && payload.message) {
+          handleNotification(payload as NotificationPayload);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(channel).then();
+    };
+  }, [userInfo, supabaseClient, handleNotification]);
+}
