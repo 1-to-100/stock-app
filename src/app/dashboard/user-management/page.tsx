@@ -30,7 +30,7 @@ import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../lib/api/users";
 import { getRoles } from "../../../lib/api/roles";
 import { getCustomers } from "../../../lib/api/customers";
@@ -84,6 +84,7 @@ export default function Page(): React.JSX.Element {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
+  const queryClient = useQueryClient();
 
   const rowsPerPage = 10;
 
@@ -422,8 +423,8 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleInviteConfirm = () => {
-    // Handle invite confirmation
     handleCloseInviteModal();
+    queryClient.invalidateQueries({ queryKey: ["users"] });
   };
 
   if (error) {

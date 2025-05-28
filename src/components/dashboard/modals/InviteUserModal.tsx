@@ -17,6 +17,7 @@ import { getRoles } from "@/lib/api/roles";
 import { getCustomers } from "@/lib/api/customers";
 import { inviteUser, inviteMultipleUsers } from "@/lib/api/users";
 import { toast } from "@/components/core/toaster";
+import { queryClient } from "@/lib/react-query";
 
 interface InviteUserProps {
   open: boolean;
@@ -108,12 +109,17 @@ export default function InviteUser({
     setEmails(emails.filter((email) => email !== emailToDelete));
   };
 
-  const onCancel = () => {
+  const resetForm = () => {
     setSelectedRole("");
     setSelectedCustomer("");
     setEmailInput("");
     setEmails([]);
     setError("");
+    setViewMode("email");
+  };
+
+  const onCancel = () => {
+    resetForm();
     onClose();
   };
 
@@ -177,6 +183,9 @@ export default function InviteUser({
         );
       }
 
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      
+      resetForm();
       onConfirm();
       onClose();
     } catch (error) {
@@ -236,7 +245,7 @@ export default function InviteUser({
           >
             {roles?.map((role) => (
               <Option key={role.id} value={role.name}>
-                {role.name}
+                {role.name.slice(0, 45)}
               </Option>
             ))}
           </Select>
