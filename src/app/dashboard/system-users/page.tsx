@@ -867,7 +867,7 @@ export default function Page(): React.JSX.Element {
                             }}
                           >
                             <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.isSuperadmin ? "System Admin" : "Customer Success"}
+                              {user.isSuperadmin ? "System Administrator" : "Customer Success"}
                             </Box>
                           </td>
                           <td>

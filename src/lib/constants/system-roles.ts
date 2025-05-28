@@ -7,5 +7,5 @@ export const SystemRoles = {
 
 export const SystemRolesHumanNames: Record<SystemRole, string> = {
   customer_success: "Customer Success",
-  system_admin: "System Admin",
+  system_admin: "System Administrator",
 } as const;

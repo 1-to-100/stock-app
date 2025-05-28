@@ -124,7 +124,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
               }}
             >
               <Typography fontWeight="lg" textColor="inherit">
-                {userInfo?.firstName} {userInfo?.lastName}
+                {userInfo?.firstName.slice(0, 10)} {userInfo?.lastName.slice(0, 10)}
               </Typography>
               <Typography level="body-xs" textColor="neutral.500">
                 {userInfo?.email}

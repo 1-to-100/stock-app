@@ -278,13 +278,20 @@ export default function AddEditSystemUser({
 
   const handleSystemRoleChange = (newValue: string) => {
     const isSuperadmin = newValue === "system_admin";
-    setFormData((prev) => ({
-      ...prev,
-      systemRole: newValue as SystemRole,
-      isSuperadmin,
-      isCustomerSuccess: !isSuperadmin,
-      customer: isSuperadmin ? "" : prev.customer, 
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        systemRole: newValue as SystemRole,
+        isSuperadmin,
+        isCustomerSuccess: !isSuperadmin,
+      };
+      
+      if (isSuperadmin) {
+        newData.customer = "";
+      }
+      
+      return newData;
+    });
     setErrors((prev) => ({ ...prev, systemRole: undefined }));
   };
 
