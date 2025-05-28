@@ -56,11 +56,11 @@ export default function Page(): React.JSX.Element {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filters, setFilters] = useState<{
-    managerId: number[];
+    customerSuccessId: number[];
     subscriptionId: number[];
     statusId: string[];
   }>({
-    managerId: [],
+    customerSuccessId: [],
     subscriptionId: [],
     statusId: [],
   });
@@ -78,7 +78,7 @@ export default function Page(): React.JSX.Element {
       searchTerm,
       sortColumn,
       sortDirection,
-      filters.managerId,
+      filters.customerSuccessId,
       filters.subscriptionId,
       filters.statusId,
     ],
@@ -89,7 +89,7 @@ export default function Page(): React.JSX.Element {
         search: searchTerm || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
-        managerId: filters.managerId.length > 0 ? filters.managerId : undefined,
+        managerId: filters.customerSuccessId.length > 0 ? filters.customerSuccessId : undefined,
         subscriptionId:
           filters.subscriptionId.length > 0
             ? filters.subscriptionId
@@ -235,7 +235,7 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleFilter = (filters: {
-    managerId: number[];
+    customerSuccessId: number[];
     subscriptionId: number[];
     statusId: string[];
   }) => {
@@ -507,7 +507,7 @@ export default function Page(): React.JSX.Element {
                     </th>
                     <th
                       style={{ width: "25%", minWidth: "120px" }}
-                      onClick={() => handleSort("managerId")}
+                      onClick={() => handleSort("customerSuccessId")}
                     >
                       <Box
                         sx={{
@@ -681,13 +681,13 @@ export default function Page(): React.JSX.Element {
                               textOverflow: "ellipsis",
                             }}
                           >
-                            {typeof customer.manager?.name === "string"
-                              ? customer.manager?.name.slice(0, 75)
-                              : customer.manager?.name || "N/A"}
+                            {typeof customer.customerSuccess?.name === "string"
+                              ? customer.customerSuccess?.name.slice(0, 75)
+                              : customer.customerSuccess?.name || "N/A"}
                             <br />
-                            {typeof customer.manager?.email === "string"
-                              ? customer.manager?.email.slice(0, 75)
-                              : customer.manager?.email || "N/A"}
+                            {typeof customer.customerSuccess?.email === "string"
+                              ? customer.customerSuccess?.email.slice(0, 75)
+                              : customer.customerSuccess?.email || "N/A"}
                           </Box>
                         </td>
                         <td

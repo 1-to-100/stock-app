@@ -30,12 +30,12 @@ interface FilterProps {
     roleId: number[];
   }) => void;
   onFilterCustomers?: (filters: {
-    managerId: number[];
+    customerSuccessId: number[];
     subscriptionId: number[];
     statusId: string[];
   }) => void;
   initialFilters?: {
-    managerId: number[];
+    customerSuccessId: number[];
     subscriptionId: number[];
     statusId: string[];
   };
@@ -55,7 +55,7 @@ const Filter = ({
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialFilters?.statusId || []);
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<number[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
-  const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>(initialFilters?.managerId || []);
+  const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>(initialFilters?.customerSuccessId || []);
   const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<number[]>(initialFilters?.subscriptionId || []);
   const [activeCategory, setActiveCategory] = useState<string | null>("Status");
 
@@ -64,7 +64,7 @@ const Filter = ({
   useEffect(() => {
     if (initialFilters) {
       setSelectedStatuses(initialFilters.statusId);
-      setSelectedManagerIds(initialFilters.managerId);
+      setSelectedManagerIds(initialFilters.customerSuccessId);
       setSelectedSubscriptionIds(initialFilters.subscriptionId);
     }
   }, [initialFilters]);
@@ -196,7 +196,7 @@ const Filter = ({
     }
     if (customers && onFilterCustomers) {
       onFilterCustomers({
-        managerId: selectedManagerIds,
+        customerSuccessId: selectedManagerIds,
         subscriptionId: selectedSubscriptionIds,
         statusId: selectedStatuses,
       });
@@ -217,7 +217,7 @@ const Filter = ({
       onFilter({ statusId: [], customerId: [], roleId: [] });
     }
     if (customers && onFilterCustomers) {
-      onFilterCustomers({ managerId: [], subscriptionId: [], statusId: [] });
+      onFilterCustomers({ customerSuccessId: [], subscriptionId: [], statusId: [] });
     }
   };
 

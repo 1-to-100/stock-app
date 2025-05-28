@@ -58,11 +58,17 @@ export interface Customer {
   email: string;
   subscriptionId: number;
   managerId: number;
+  customerSuccessId: number;
   ownerId: number;
   numberOfUsers?: number;
   status: string;
   subscriptionName: string;
   manager: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  customerSuccess?: {
     id: number;
     name: string;
     email: string;

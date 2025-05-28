@@ -43,7 +43,7 @@ interface AddEditCustomerProps {
 interface FormErrors {
   name?: string;
   email?: string;
-  managerId?: string;
+  customerSuccessId?: string;
   subscriptionId?: string;
   status?: string;
   ownerId?: string;
@@ -63,14 +63,14 @@ export default function AddEditCustomer({
   const [formData, setFormData] = useState<{
     name: string;
     email: string;
-    managerId: number | null;
+    customerSuccessId: number | null;
     subscriptionId: number | null;
     status: string;
     ownerId: number | null;
   }>({
     name: "",
     email: "",
-    managerId: null,
+    customerSuccessId: null,
     subscriptionId: null,
     status: "",
     ownerId: null,
@@ -125,7 +125,7 @@ export default function AddEditCustomer({
             ? customerData.email
             : customerData.email[0] || "",
         subscriptionId: customerData.subscriptionId ?? null,
-        managerId: customerData.manager?.id ?? null,
+        customerSuccessId: customerData.customerSuccess?.id ?? null,
         status: customerData.status || "",
         ownerId: customerData.owner?.id ?? null,
       });
@@ -135,7 +135,7 @@ export default function AddEditCustomer({
       setFormData({
         name: "",
         email: "",
-        managerId: null,
+        customerSuccessId: null,
         subscriptionId: null,
         status: "",
         ownerId: null,
@@ -223,8 +223,8 @@ export default function AddEditCustomer({
       newErrors.email = emailError;
     }
 
-    if (!formData.managerId) {
-      newErrors.managerId = "Manager is required";
+    if (!formData.customerSuccessId) {
+      newErrors.customerSuccessId = "Manager is required";
     }
 
     if (!formData.subscriptionId) {
@@ -263,7 +263,7 @@ export default function AddEditCustomer({
         email: formData.email,
         name: formData.name,
         status: formData.status,
-        managerId: formData.managerId ?? undefined,
+        customerSuccessId: formData.customerSuccessId ?? undefined,
         ownerId: formData.ownerId ?? undefined,
         subscriptionId: formData.subscriptionId ?? undefined,
       };
@@ -516,18 +516,18 @@ export default function AddEditCustomer({
                   fontWeight: 500,
                 }}
               >
-                Support manager
+                Customer Success Manager
               </Typography>
               <Select
                 placeholder="Select user"
-                value={formData.managerId}
+                value={formData.customerSuccessId}
                 onChange={(e, newValue) =>
-                  handleInputChange("managerId", newValue)
+                  handleInputChange("customerSuccessId", newValue)
                 }
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
-                  border: errors?.managerId
+                  border: errors?.customerSuccessId
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
                 }}
@@ -539,14 +539,14 @@ export default function AddEditCustomer({
                     </Option>
                   ))}
               </Select>
-              {errors?.managerId && (
+              {errors?.customerSuccessId && (
                 <FormHelperText
                   sx={{
                     color: "var(--joy-palette-danger-500)",
                     fontSize: "12px",
                   }}
                 >
-                  {errors.managerId}
+                  {errors.customerSuccessId}
                 </FormHelperText>
               )}
             </Stack>

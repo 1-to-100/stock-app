@@ -72,7 +72,7 @@ export async function getCustomersList(params: GetCustomersParams = {}): Promise
   if (params.orderDirection) query.set('orderDirection', params.orderDirection);
 
   if (params.managerId && params.managerId.length > 0) {
-    params.managerId.forEach(id => query.append('managerId', id.toString()));
+    params.managerId.forEach(id => query.append('customerSuccessId', id.toString()));
   }
   if (params.subscriptionId && params.subscriptionId.length > 0) {
     params.subscriptionId.forEach(id => query.append('subscriptionId', id.toString()));

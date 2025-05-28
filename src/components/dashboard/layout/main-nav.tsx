@@ -18,7 +18,7 @@ import { NotificationsPopover } from "./notifications-popover";
 import { UserPopover } from "./user-popover/user-popover";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { CustomerSelect } from "./customer-select";
-import {useInAppNotificationsChannel, useUnreadNotificationsChannel} from "@/hooks/use-notifications";
+import { useUnreadNotificationsChannel } from "@/hooks/use-notifications";
 
 export interface MainNavProps {
   items: NavItemConfig[];
