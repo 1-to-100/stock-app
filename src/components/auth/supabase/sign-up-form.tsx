@@ -28,17 +28,25 @@ import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { DynamicLogo } from '@/components/core/logo';
 import { toast } from '@/components/core/toaster';
 import {OAuthProvider, oAuthProviders} from "@/lib/auth/supabase/auth-providers";
-import {Typography} from "@mui/joy";
+import {IconButton, Typography} from "@mui/joy";
 import {config} from "@/config";
 import {apiFetch} from "@/lib/api/api-fetch";
 import {ApiUser} from "@/contexts/auth/types";
 import {registerUser, validateEmail} from "@/lib/api/users";
+import { Eye as EyeIcon } from '@phosphor-icons/react/dist/ssr/Eye';
+import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlash';
 
 const schema = zod.object({
-  firstName: zod.string().min(1, { message: 'First name is required' }),
-  lastName: zod.string().min(1, { message: 'Last name is required' }),
+  firstName: zod.string().min(1, { message: 'First name is required' }).max(255, { message: 'First name must be less than 255 characters' }),
+  lastName: zod.string().min(1, { message: 'Last name is required' }).max(255, { message: 'Last name must be less than 255 characters' }),
   email: zod.string().min(1, { message: 'Email is required' }).email(),
-  password: zod.string().min(6, { message: 'Password should be at least 6 characters' }),
+  password: zod.string()
+    .min(8, { message: 'Password must be at least 8 characters long' })
+    .max(100, { message: 'Password must be less than 100 characters' })
+    .regex(/^(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
+    .regex(/^(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
+    .regex(/^(?=.*\d)/, { message: 'Password must contain at least one number' })
+    .regex(/^[^\s]*$/, { message: 'Password cannot contain spaces' }),
   terms: zod.boolean().refine((value) => value, 'You must accept the terms and conditions'),
 });
 
@@ -51,6 +59,7 @@ export function SignUpForm(): React.JSX.Element {
   const searchParams = useSearchParams();
   const hasShownErrorMessage = React.useRef(false);
   const router = useRouter();
+  const [showPassword, setShowPassword] = React.useState<boolean>();
 
   const [isPending, setIsPending] = React.useState<boolean>(false);
 
@@ -204,7 +213,7 @@ export function SignUpForm(): React.JSX.Element {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.firstName)}>
                   <FormLabel>First Name</FormLabel>
-                  <Input {...field} />
+                  <Input {...field} slotProps={{ input: { maxLength: 255 } }} />
                   {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
                 </FormControl>
               )}
@@ -215,7 +224,7 @@ export function SignUpForm(): React.JSX.Element {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.lastName)}>
                   <FormLabel>Last Name</FormLabel>
-                  <Input {...field} />
+                  <Input {...field} slotProps={{ input: { maxLength: 255 } }} />
                   {errors.lastName ? <FormHelperText>{errors.lastName.message}</FormHelperText> : null}
                 </FormControl>
               )}
@@ -237,7 +246,21 @@ export function SignUpForm(): React.JSX.Element {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.password)}>
                   <FormLabel>Password</FormLabel>
-                  <Input {...field} type="password" />
+                  <Input {...field} type={showPassword ? 'text' : 'password'}
+                    endDecorator={
+                      <IconButton
+                        onClick={(): void => {
+                          setShowPassword(!showPassword);
+                        }}
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                        ) : (
+                          <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                        )}
+                      </IconButton>
+                    }
+                  />
                   {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
                 </FormControl>
               )}
