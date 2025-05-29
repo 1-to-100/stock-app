@@ -350,7 +350,7 @@ const CategoryInfo: React.FC = () => {
               level="h1"
               sx={{ wordBreak: "break-word" }}
             >
-              {categoryData?.name}
+              {categoryData?.name.slice(0, 30)}
             </Typography>
           </Stack>
           <Stack
@@ -399,7 +399,7 @@ const CategoryInfo: React.FC = () => {
           <BreadcrumbsItem href={paths.dashboard.documentation.list}>
             Documentation
           </BreadcrumbsItem>
-          <BreadcrumbsItem type="end">{categoryData?.name}</BreadcrumbsItem>
+          <BreadcrumbsItem type="end">{categoryData?.name.slice(0, 30)}</BreadcrumbsItem>
         </Breadcrumbs>
       </Stack>
 

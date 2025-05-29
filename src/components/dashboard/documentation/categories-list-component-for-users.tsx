@@ -312,7 +312,9 @@ const CategoriesListComponentForUsers: React.FC<CategoriesListComponentForUsersP
               gridTemplateColumns: {
                 xs: "1fr",
                 sm: "1fr 1fr",
-                md: "1fr 1fr",
+                md: "1fr",
+                lg: "1fr",
+                xl: "1fr 1fr",
               },
               gap: 2,
               maxWidth: 700,

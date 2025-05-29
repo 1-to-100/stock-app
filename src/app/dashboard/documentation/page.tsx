@@ -17,7 +17,7 @@ import { getCategoriesList } from "@/lib/api/categories";
 import { Category } from "@/contexts/auth/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import KnowledgeBaseView from "@/components/dashboard/documentation/categories-list-component-for-users";
+import CategoriesListComponentForUsers from "@/components/dashboard/documentation/categories-list-component-for-users";
 
 interface HttpError extends Error {
   response?: {
@@ -201,7 +201,7 @@ export default function Page(): React.JSX.Element {
             <CircularProgress />
           </Box>
         ) : categories.length > 0 ? (
-          <KnowledgeBaseView categories={categories} fetchCategories={handleFetchCategories} />
+          <CategoriesListComponentForUsers categories={categories} fetchCategories={handleFetchCategories} />
         ) : (
           <EmptyCategoriesList fetchCategories={handleFetchCategories} />
         )}
