@@ -18,6 +18,9 @@ import { Check as CheckIcon } from "@phosphor-icons/react/dist/ssr/Check";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { EyeSlash as EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 import { toast } from "@/components/core/toaster";
+import {useMemo} from "react";
+import type {SupabaseClient} from "@supabase/supabase-js";
+import {createClient as createSupabaseClient} from "@/lib/supabase/client";
 
 interface ChangePasswordModalProps {
   open: boolean;
@@ -25,7 +28,6 @@ interface ChangePasswordModalProps {
 }
 
 interface PasswordForm {
-  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
@@ -34,8 +36,8 @@ export default function ChangePasswordModal({
   open,
   onClose,
 }: ChangePasswordModalProps) {
+  const supabaseClient = useMemo<SupabaseClient>(() => createSupabaseClient(), []);
   const [formData, setFormData] = React.useState<PasswordForm>({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -51,6 +53,7 @@ export default function ChangePasswordModal({
     lowercase: false,
     number: false,
   });
+
 
   const validatePassword = (password: string) => {
     const minLength = password.length >= 8;
@@ -87,10 +90,6 @@ export default function ChangePasswordModal({
   const validateForm = () => {
     const newErrors: Partial<PasswordForm> = {};
 
-    if (!formData.currentPassword) {
-      newErrors.currentPassword = "Current password is required";
-    }
-
     if (!formData.newPassword) {
       newErrors.newPassword = "New password is required";
     } else if (!validatePassword(formData.newPassword)) {
@@ -109,9 +108,16 @@ export default function ChangePasswordModal({
 
   const handleSave = () => {
     if (validateForm()) {
-      // Here you would typically make an API call to update the password
-      toast.success("Password updated successfully");
-      onClose();
+      supabaseClient.auth.updateUser({
+        password: formData.newPassword,
+      }).then(({ error }) => {
+        if (error) {
+          toast.error(`Error updating password: ${error.message}`);
+        } else {
+          toast.success("Password updated successfully");
+          onClose();
+        }
+      })
     }
   };
 
@@ -139,34 +145,6 @@ export default function ChangePasswordModal({
           Change Password
         </Typography>
         <Stack spacing={2}>
-          <FormControl error={Boolean(errors.currentPassword)}>
-            <FormLabel>Enter password</FormLabel>
-            <Input
-              type={showCurrentPassword ? "text" : "password"}
-              value={formData.currentPassword}
-              onChange={(e) =>
-                handleInputChange("currentPassword", e.target.value)
-              }
-              endDecorator={
-                <IconButton
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? (
-                    <EyeSlashIcon
-                      fontSize="var(--Icon-fontSize)"
-                      weight="bold"
-                    />
-                  ) : (
-                    <EyeIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-                  )}
-                </IconButton>
-              }
-            />
-            {errors.currentPassword && (
-              <FormHelperText>{errors.currentPassword}</FormHelperText>
-            )}
-          </FormControl>
-
           <FormControl error={Boolean(errors.newPassword)}>
             <FormLabel>Enter new password</FormLabel>
             <Input

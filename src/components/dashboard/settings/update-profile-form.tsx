@@ -363,27 +363,9 @@ export function UpdateProfileForm(): React.JSX.Element {
                       <Input
                         {...field}
                         autoFocus={false}
+                        disabled
                         sx={{ width: "100%", maxWidth: "360px" }}
                         type={showPassword ? "text" : "password"}
-                        endDecorator={
-                          <IconButton
-                            onClick={(): void => {
-                              setShowPassword(!showPassword);
-                            }}
-                          >
-                            {showPassword ? (
-                              <EyeSlashIcon
-                                fontSize="var(--Icon-fontSize)"
-                                weight="bold"
-                              />
-                            ) : (
-                              <EyeIcon
-                                fontSize="var(--Icon-fontSize)"
-                                weight="bold"
-                              />
-                            )}
-                          </IconButton>
-                        }
                       />
                       <Box
                         sx={{
