@@ -181,10 +181,10 @@ const CategoriesListComponent: React.FC<CategoriesListProps> = ({ categories, fe
       gridTemplateColumns: {
         xs: "1fr",
         sm: "1fr 1fr",
-        md: "1fr 1fr",
+        md: "1fr 1fr 1fr",
       },
       gap: 2,
-      maxWidth: 700,
+      maxWidth: 1000,
     }}
     >
       {categories.map((category) => (

@@ -554,7 +554,7 @@ export default function Page(): React.JSX.Element {
               open={isFilterOpen}
               onOpen={handleOpenFilter}
             />
-            {userInfo?.isSuperadmin && userInfo?.isCustomerSuccess ? (
+            {(userInfo?.isSuperadmin || userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser")) ? (
               <Box sx={{ position: 'relative' }}>
                 <Button
                   variant="solid"
