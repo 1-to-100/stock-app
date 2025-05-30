@@ -31,7 +31,7 @@ import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUsers, getUserById } from "../../../lib/api/users";
+import {getUsers, getUserById, inviteUser, resendInviteUser} from "../../../lib/api/users";
 import { getRoles } from "../../../lib/api/roles";
 import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
@@ -39,6 +39,10 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import { useUserInfo } from "@/hooks/use-user-info";
 import InviteUserModal from "@/components/dashboard/modals/InviteUserModal";
+import {PaperPlaneRight} from "@phosphor-icons/react";
+import {toast} from "@/components/core/toaster";
+import type {SupabaseClient} from "@supabase/supabase-js";
+import {createClient as createSupabaseClient} from "@/lib/supabase/client";
 
 interface HttpError extends Error {
   response?: {
@@ -85,6 +89,7 @@ export default function Page(): React.JSX.Element {
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
   const queryClient = useQueryClient();
+  const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
 
   const rowsPerPage = 10;
 
@@ -1004,6 +1009,25 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
+                              {user.status != 'active' && (userInfo?.isSuperadmin || userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser")) &&
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    resendInviteUser(user.email).then(() => {
+                                      toast.success("Invite sent successfully");
+                                    }).catch((error) => {
+                                      toast.error(`Failed to send invite: ${error.message}`);
+                                    });
+                                  }}
+                                  sx={{
+                                    ...menuItemStyle,
+                                    gap: { xs: "10px", sm: "14px" },
+                                  }}
+                                >
+                                  <PaperPlaneRight size={20} />
+                                  Resend invite
+                                </Box>
+                              }
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();

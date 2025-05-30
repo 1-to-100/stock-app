@@ -181,6 +181,13 @@ export async function inviteUser(payload: InviteUserPayload): Promise<void> {
   });
 }
 
+export async function resendInviteUser(email: string): Promise<void> {
+  return apiFetch<void>(`${config.site.apiUrl}/users/resend-invite`, {
+    method: 'POST',
+    body: JSON.stringify({email}),
+  });
+}
+
 export async function inviteMultipleUsers(payload: InviteMultipleUsersPayload): Promise<void> {
   return apiFetch<void>(`${config.site.apiUrl}/users/invite-multiple`, {
     method: 'POST',

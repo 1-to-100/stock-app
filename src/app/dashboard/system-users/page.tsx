@@ -25,7 +25,6 @@ import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemM
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import { useState, useCallback, useEffect } from "react";
 import Pagination from "@/components/dashboard/layout/pagination";
-import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
@@ -36,7 +35,9 @@ import { ApiUser, SystemUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
-import {SystemRoles} from "@/lib/constants/system-roles";
+import {resendInviteUser} from "@/lib/api/users";
+import {toast} from "@/components/core/toaster";
+import {PaperPlaneRight} from "@phosphor-icons/react";
 
 interface HttpError extends Error {
   response?: {
@@ -908,6 +909,25 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
+                              {user.status != 'active' &&
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    resendInviteUser(user.email).then(() => {
+                                      toast.success("Invite sent successfully");
+                                    }).catch((error) => {
+                                      toast.error(`Failed to send invite: ${error.message}`);
+                                    });
+                                  }}
+                                  sx={{
+                                    ...menuItemStyle,
+                                    gap: { xs: "10px", sm: "14px" },
+                                  }}
+                                >
+                                  <PaperPlaneRight size={20} />
+                                  Resend invite
+                                </Box>
+                              }
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
