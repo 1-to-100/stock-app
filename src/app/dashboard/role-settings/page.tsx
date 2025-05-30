@@ -14,6 +14,9 @@ import Button from "@mui/joy/Button";
 import AddRoleModal from "../../../components/dashboard/modals/AddRoleModal";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useUserInfo } from "@/hooks/use-user-info";
+import { useQuery } from "@tanstack/react-query";
+import { getUsers } from "@/lib/api/users";
+import { Role } from "@/contexts/auth/types";
 
 interface HttpError extends Error {
   response?: {
@@ -21,57 +24,31 @@ interface HttpError extends Error {
   };
 }
 
-export interface Role {
-  id: number;
-  name: string;
-  description: string | null;
-  _count: {
-    users: number;
-  };
-}
-
-export interface RoleSettingsRole {
-  id: string;
-  name: string;
-  description: string;
-  _count: {
-    users: number;
-  };
-}
 
 export default function Page(): React.JSX.Element {
-  const [roles, setRoles] = useState<RoleSettingsRole[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<HttpError | null>(null);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { userInfo } = useUserInfo();
 
-  const fetchRoles = async () => {
-    try {
-      const fetchedRoles: Role[] = await getRolesList();
-      const transformedRoles: RoleSettingsRole[] = fetchedRoles.map((role) => ({
-        id: role.id.toString(),
-        name: role.name,
-        description: role.description || "No description provided",
-        _count: {
-          users: role._count.users,
-        },
-      }));
-      setRoles(transformedRoles);
-      setError(null);
-    } catch (error) {
-      console.error("Failed to fetch roles:", error);
-      setRoles([]);
-      setError(error as HttpError);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
+  const { data, isLoading, error: rolesError, refetch } = useQuery({
+    queryKey: [
+      "roles",
+      searchTerm,
+    ],
+    queryFn: async () => {
+      const response = await getRolesList({
+        search: searchTerm || undefined,
+      });
+      return response;
+    },
+    enabled: true,
+  });
+
+  const roles = data || [];
+
 
   const handleAddRoleModal = () => {
     setOpenAddRoleModal(true);
@@ -81,7 +58,9 @@ export default function Page(): React.JSX.Element {
     setOpenAddRoleModal(false);
   };
 
-  const handleSearch = (searchTerm: string) => {};
+  const handleSearch = (searchTerm: string) => {
+    setSearchTerm(searchTerm);
+  };
 
   if (error && error.response?.status === 403) {
     return (
@@ -190,7 +169,7 @@ export default function Page(): React.JSX.Element {
           </Stack>
         </Stack>
 
-        {loading ? (
+        {isLoading ? (
           <Box
             sx={{
               display: "flex",
@@ -202,7 +181,7 @@ export default function Page(): React.JSX.Element {
             <CircularProgress />
           </Box>
         ) : roles.length > 0 ? (
-          <RoleSettings roles={roles} fetchRoles={fetchRoles} />
+          <RoleSettings roles={roles} fetchRoles={refetch} />
         ) : (
           <UserPersonas />
         )}
@@ -210,7 +189,6 @@ export default function Page(): React.JSX.Element {
       <AddRoleModal
         open={openAddRoleModal}
         onClose={handleCloseAddRoleModal}
-        onRoleCreated={fetchRoles}
       />
     </Box>
   );

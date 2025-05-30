@@ -15,15 +15,8 @@ import { useState, useEffect } from "react";
 import { Popper } from "@mui/base/Popper";
 import AddRoleModal from "../modals/AddRoleModal";
 import type { ColorPaletteProp, VariantProp } from "@mui/joy";
+import  { Role  } from "@/contexts/auth/types";
 
-export interface Role {
-  id: string;
-  name: string;
-  description: string;
-  _count: {
-    users: number;
-  };
-}
 
 interface RoleSettingsProps {
   roles: Role[];
@@ -50,7 +43,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
     };
   }, [anchorEl]);
 
-  const handleCardClick = async (roleId: string) => {
+  const handleCardClick = async (roleId: string | number) => {
     try {
       router.push(paths.dashboard.roleSettings.details(roleId.toString()));
     } catch (error) {
@@ -60,19 +53,19 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
-    roleId: string
+    roleId: string | number
   ) => {
     event.stopPropagation();
-    if (activeRoleId === roleId) {
+    if (activeRoleId === roleId.toString()) {
       handleMenuClose();
     } else {
       setAnchorEl(event.currentTarget);
-      setActiveRoleId(roleId);
+      setActiveRoleId(roleId.toString());
     }
   };
 
-  const handleEditRole = (roleId: string) => {
-    setSelectedRoleId(roleId);
+  const handleEditRole = (roleId: string | number) => {
+    setSelectedRoleId(roleId.toString());
     setOpenEditRoleModal(true);
     handleMenuClose();
   };
@@ -216,7 +209,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
               />
             </IconButton>
             <Popper
-              open={activeRoleId === role.id && Boolean(anchorEl)}
+              open={activeRoleId === role.id.toString() && Boolean(anchorEl)}
               anchorEl={anchorEl}
               placement="bottom-start"
               style={{
@@ -267,7 +260,7 @@ const RoleSettings: React.FC<RoleSettingsProps> = ({ roles, fetchRoles }) => {
                 whiteSpace: "normal",
               }}
             >
-              {role.description.slice(0, 89)}
+              {role.description?.slice(0, 89) || ''}
             </Typography>
           </Box>
           <Typography

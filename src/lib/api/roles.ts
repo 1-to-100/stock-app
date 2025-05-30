@@ -21,6 +21,10 @@ interface PermissionsByModule {
     id: number;
     permissionNames: string[];
   }
+
+  export interface GetRolesParams {
+    search?: string;
+  }
   
   export async function getRoles(): Promise<Role[]> {
     return apiFetch<Role[]>(`${config.site.apiUrl}/taxonomies/roles`, {
@@ -31,12 +35,21 @@ interface PermissionsByModule {
     });
   }
 
-  export async function getRolesList(): Promise<Role[]> {
-    return apiFetch<Role[]>(`${config.site.apiUrl}/roles`, {
-      method: "GET",
-      headers: {
-        accept: "*/*",
-      },
+  // export async function getRolesList(): Promise<Role[]> {
+  //   return apiFetch<Role[]>(`${config.site.apiUrl}/roles`, {
+  //     method: "GET",
+  //     headers: {
+  //       accept: "*/*",
+  //     },
+  //   });
+  // }
+
+  export async function getRolesList(params: GetRolesParams = {}): Promise<Role[]> {
+    const query = new URLSearchParams();
+    if (params.search) query.set('search', params.search);
+  
+    return apiFetch<Role[]>(`${config.site.apiUrl}/roles?${query.toString()}`, {
+      method: 'GET',
     });
   }
   
