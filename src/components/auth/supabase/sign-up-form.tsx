@@ -213,7 +213,11 @@ export function SignUpForm(): React.JSX.Element {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.firstName)}>
                   <FormLabel>First Name</FormLabel>
-                  <Input {...field} slotProps={{ input: { maxLength: 255 } }} />
+                  <Input 
+                    {...field} 
+                    slotProps={{ input: { maxLength: 255 } }} 
+                    onChange={(e) => field.onChange(e.target.value.trimStart())}
+                  />
                   {errors.firstName ? <FormHelperText>{errors.firstName.message}</FormHelperText> : null}
                 </FormControl>
               )}
@@ -224,7 +228,11 @@ export function SignUpForm(): React.JSX.Element {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.lastName)}>
                   <FormLabel>Last Name</FormLabel>
-                  <Input {...field} slotProps={{ input: { maxLength: 255 } }} />
+                  <Input 
+                    {...field} 
+                    slotProps={{ input: { maxLength: 255 } }} 
+                    onChange={(e) => field.onChange(e.target.value.trimStart())}
+                  />
                   {errors.lastName ? <FormHelperText>{errors.lastName.message}</FormHelperText> : null}
                 </FormControl>
               )}
@@ -294,7 +302,7 @@ export function SignUpForm(): React.JSX.Element {
                 </FormControl>
               )}
             />
-            {errors.root ? <Alert color="danger">{errors.root.message}</Alert> : null}
+            {errors.root ? <Alert color="warning">{errors.root.message}</Alert> : null}
             <Button disabled={isPending} type="submit">
               Create Account
             </Button>

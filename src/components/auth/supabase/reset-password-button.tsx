@@ -6,6 +6,7 @@ import Button from '@mui/joy/Button';
 import Stack from '@mui/joy/Stack';
 import Typography from '@mui/joy/Typography';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import RouterLink from 'next/link';
 
 import { paths } from '@/paths';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
@@ -51,6 +52,15 @@ export function ResetPasswordButton({ children, email }: ResetPasswordButtonProp
         <Typography level="body-sm" textAlign="center">
           Wait a few minutes then try again
         </Typography>
+        <Button
+          component={RouterLink}
+          href={paths.auth.supabase.signIn}
+          sx={{
+            mt: 4,
+          }}
+        >
+          Back to Login
+        </Button>
       </Stack>
     </Stack>
   );

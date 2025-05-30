@@ -835,13 +835,17 @@ export default function Page(): React.JSX.Element {
                                   fontWeight: "bold",
                                   fontSize: { xs: "12px", sm: "13px" },
                                 }}
-                                {...getAvatarProps(user.name)}
+                                {...getAvatarProps(user.firstName && user.lastName ? user.name : (user.email || ''))}
                               >
-                                {user.name
-                                  .split(" ")
-                                  .slice(0, 2)
-                                  .map((n) => n[0]?.toUpperCase() || "")
-                                  .join("")}
+                                {user.firstName && user.lastName
+                                  ? user.name
+                                      .split(" ")
+                                      .slice(0, 2)
+                                      .map((n) => n[0]?.toUpperCase() || "")
+                                      .join("")
+                                  : typeof user.email === 'string'
+                                    ? (user.email.split("@")[0] || '').slice(0, 2).toUpperCase()
+                                    : '??'}
                               </Avatar>
                               <Typography
                                 sx={{
@@ -849,7 +853,7 @@ export default function Page(): React.JSX.Element {
                                   fontSize: { xs: "12px", sm: "14px" },
                                 }}
                               >
-                                {user.name.slice(0, 85)}
+                                {user.firstName && user.lastName ? user.name.slice(0, 85) : ''}
                               </Typography>
                               <Tooltip
                                 title={user.status}
