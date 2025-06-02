@@ -134,7 +134,9 @@ export default function AddEditUser({
     },
     onError: (error: HttpError) => {
       const errorMessage = error.response?.data?.message;
-      if (errorMessage) {
+      if (errorMessage === "User with this email already exists") {
+        setErrors((prev) => ({ ...prev, email: "User with this email already exists" }));
+      } else if (errorMessage) {
         toast.error(errorMessage);
       } else {
         toast.error("An error occurred while creating the user.");
@@ -152,7 +154,9 @@ export default function AddEditUser({
     },
     onError: (error: HttpError) => {
       const errorMessage = error.response?.data?.message;
-      if (errorMessage) {
+      if (errorMessage === "User with this email already exists") {
+        setErrors((prev) => ({ ...prev, email: "User with this email already exists" }));
+      } else if (errorMessage) {
         toast.error(errorMessage);
       } else {
         toast.error("An error occurred while updating the user.");
@@ -745,7 +749,7 @@ export default function AddEditUser({
                   Manager
                 </Typography>
                 <Tooltip
-                  title="You can’t select a manager if your role is set as Manager"
+                  title="You can't select a manager if your role is set as Manager"
                   placement="top"
                   sx={{
                     background: "#DAD8FD",
