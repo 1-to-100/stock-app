@@ -231,10 +231,6 @@ export default function AddEditCustomer({
       newErrors.subscriptionId = "Subscription is required";
     }
 
-    if (!formData.ownerId) {
-      newErrors.ownerId = "Customer admin is required";
-    }
-
     return newErrors;
   };
 
