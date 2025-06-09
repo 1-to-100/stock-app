@@ -1,7 +1,7 @@
-name: deploy-hetzner
+name: '[dev] Deploy Backend to Hetzner Run'
 on: 
   push:
-    branches: [ main ]
+    branches: [ dev ]
 env: 
   CI: false
 
@@ -11,39 +11,34 @@ jobs:
     steps:   
       
       - uses: actions/checkout@v2
-
-
       - name: Build Docker Image
         run: |
-          echo "${{ secrets.ENV_PROD }}" | base64 --decode > .env
-          docker build -t stock-app-web:latest .
-
+          echo "${{ secrets.ENV_DEV }}" | base64 --decode > .env
+          docker build -t stock-app:latest .
       - name: Save Docker Image
         run: |
-          docker save stock-app-web:latest | gzip > stock-app-web.tar.gz
-
+          docker save stock-app:latest | gzip > stock-app.tar.gz
       - name: Save Docker Image
         run: |
           ls -lah
-
       - name: rsync deployments
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete
-          path: stock-app-web.tar.gz
-          remote_path: /opt/stock-app-web
-          remote_host: ${{ secrets.DEPLOY_HOST_PROD }}
+          path: stock-app.tar.gz
+          remote_path: /opt/stock-app
+          remote_host: ${{ secrets.DEPLOY_HOST_DEV }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.SSH_KEY }}          
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DEPLOY_HOST_PROD }}
+          host: ${{ secrets.DEPLOY_HOST_DEV }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /opt/stock-app-web
-            docker load < stock-app-web.tar.gz
+            cd /opt/stock-app
+            docker load < stock-app.tar.gz
             docker-compose up -d 
             docker system prune -af
