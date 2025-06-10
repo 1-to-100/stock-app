@@ -22,6 +22,7 @@ import { UsersThree as UsersThree } from '@phosphor-icons/react/dist/ssr/UsersTh
 import { Money as Money } from '@phosphor-icons/react/dist/ssr/Money';
 import { Files as Files } from '@phosphor-icons/react/dist/ssr/Files';
 import { Headphones as Headphones } from '@phosphor-icons/react/dist/ssr/Headphones';
+import { Bell as BellIcon } from '@phosphor-icons/react/dist/ssr/Bell';
 
 export const icons = {
   'chart-pie': ChartPieIcon,
@@ -37,6 +38,7 @@ export const icons = {
   'accounting': Money,
   'documentation': Files,
   'help': Headphones,
+  'bell': BellIcon,
   buildings: BuildingsIcon,
   file: FileIcon,
   house: HouseIcon,

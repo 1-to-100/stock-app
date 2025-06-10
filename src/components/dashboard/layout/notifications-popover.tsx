@@ -4,6 +4,7 @@ import * as React from "react";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
+import Box from "@mui/joy/Box";
 import {
   useInfiniteQuery,
   useMutation,
@@ -20,6 +21,7 @@ import { ApiNotification } from "@/contexts/auth/types";
 import { Info, Article } from "@phosphor-icons/react/dist/ssr";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useInAppNotificationsChannel } from "@/hooks/use-notifications";
+import { useColorScheme } from '@mui/joy/styles';
 
 export interface NotificationsPopoverProps {
   anchorEl?: HTMLElement | null;
@@ -143,10 +145,10 @@ export function NotificationsPopover({
                 ref={containerRef}
                 onScroll={handleScroll}
                 sx={{
-                  maxHeight: "500px",
+                  maxHeight: "400px",
                   overflowY: "auto",
                   "&::-webkit-scrollbar": {
-                    width: "8px",
+                    width: "4px",
                   },
                   "&::-webkit-scrollbar-track": {
                     background: "transparent",
@@ -196,6 +198,8 @@ function NotificationContent({
   notification,
 }: NotificationContentProps): React.JSX.Element {
   const queryClient = useQueryClient();
+  const { colorScheme } = useColorScheme();
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: () => markNotificationAsRead(notification.id),
@@ -232,20 +236,51 @@ function NotificationContent({
     },
   });
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getFirstLine = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const nodes = Array.from(tempDiv.childNodes);
+    
+    if (nodes.length === 0) return "";
+    
+    const firstNode = nodes[0];
+    
+    switch (firstNode?.nodeType) {
+      case Node.TEXT_NODE:
+        return firstNode.textContent?.split("\n")[0] || "";
+      case Node.ELEMENT_NODE:
+        return (firstNode as Element).outerHTML;
+      default:
+        return "";
+    }
+  };
+
   return (
-    <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
+    <Stack direction="row" spacing={2} alignItems="flex-start" flexGrow={1}>
       <Stack
         sx={{
           backgroundColor:
             notification?.channel === "info"
-              ? "#EEEFF0"
+              ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
               : notification?.channel === "article"
-              ? "#EEEFF0"
+              ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
               : notification?.channel === "warning"
-              ? "#FFF8C5"
+              ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
               : notification?.channel === "alert"
-              ? "#FFE9E8"
-              : "#4F46E5",
+              ? colorScheme === 'dark' ? 'rgba(211, 35, 47, 0.2)' : "#FFE9E8"
+              : colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#4F46E5",
           borderRadius: "50%",
           p: 0.7,
         }}
@@ -257,14 +292,14 @@ function NotificationContent({
           }}
           color={
             notification?.channel === "info"
-              ? "#6B7280"
+              ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
               : notification?.channel === "article"
-              ? "#6B7280"
+              ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
               : notification?.channel === "warning"
-              ? "#b74c06"
+              ? colorScheme === 'dark' ? '#FDBA74' : "#b74c06"
               : notification?.channel === "alert"
-              ? "#D3232F"
-              : "#4F46E5"
+              ? colorScheme === 'dark' ? '#FCA5A5' : "#D3232F"
+              : colorScheme === 'dark' ? '#818CF8' : "#4F46E5"
           }
         />
         <Article
@@ -272,10 +307,10 @@ function NotificationContent({
           style={{
             display: notification?.channel === "article" ? "block" : "none",
           }}
-          color="#6B7280"
+          color={colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"}
         />
       </Stack>
-      <Stack direction="column">
+      <Stack direction="column" flexGrow={1}>
         <Typography
           fontSize="15px"
           fontWeight="lg"
@@ -283,12 +318,87 @@ function NotificationContent({
         >
           {notification.title}
         </Typography>
-        <Typography
-          fontSize="12px"
-          sx={{ fontWeight: "400", color: "var(--joy-palette-text-secondary)" }}
-        >
-          {notification.message}
-        </Typography>
+        {isExpanded ? (
+          <>
+            <Box 
+              dangerouslySetInnerHTML={{ __html: notification.message }}
+              sx={{
+                '& a': {
+                  textDecoration: 'none',
+                },
+                '& ol, & ul': {
+                  marginLeft: '20px',
+                  marginTop: '8px',
+                  marginBottom: '8px',
+                },
+                '& li': {
+                  marginBottom: '4px',
+                },
+                '& img': {
+                  width: '400px',
+                  height: 'auto'
+                }
+              }}
+            />
+            <Typography
+              level="body-sm"
+              sx={{
+                color: "var(--joy-palette-text-secondary)",
+                mb: 0.5,
+                fontSize: "12px",
+              }}
+            >
+              {formatDate(notification.createdAt)}
+            </Typography>
+            <Stack>
+              <Button
+                size="sm"
+                variant="outlined"
+                onClick={() => setIsExpanded(!isExpanded)}
+                sx={{ flexShrink: 0, fontSize: "10px", p: 1, mt: 1, width: "fit-content" }}
+              >
+                {isExpanded ? "Show less" : "Show details"}
+              </Button>
+            </Stack>
+          </>
+        ) : (
+          <>
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: getFirstLine(notification.message),
+              }}
+              sx={{
+                '& a': {
+                  textDecoration: 'none',
+                },
+                '& img': {
+                  width: '400px',
+                  height: 'auto'
+                }
+              }}
+            />
+            <Typography
+              level="body-sm"
+              sx={{
+                color: "var(--joy-palette-text-secondary)",
+                mb: 0.5,
+                fontSize: "12px",
+              }}
+            >
+              {formatDate(notification.createdAt)}
+            </Typography>
+            <Stack>
+              <Button
+                size="sm"
+                variant="outlined"
+                onClick={() => setIsExpanded(!isExpanded)}
+                sx={{ flexShrink: 0, fontSize: "10px", p: 1, mt: 1, width: "fit-content" }}
+              >
+                {isExpanded ? "Show less" : "Show details"}
+              </Button>
+            </Stack>
+          </>
+        )}
       </Stack>
 
       {!notification.isRead ? (

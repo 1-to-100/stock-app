@@ -31,6 +31,7 @@ import { paths } from "@/paths";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { useUserInfo } from "@/hooks/use-user-info";
+import { useColorScheme } from '@mui/joy/styles';
 
 interface HttpError extends Error {
   response?: {
@@ -67,6 +68,7 @@ export default function Page(): React.JSX.Element {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const { userInfo } = useUserInfo();
+  const { colorScheme } = useColorScheme();
 
   const router = useRouter();
   const rowsPerPage = 10;
@@ -712,16 +714,16 @@ export default function Page(): React.JSX.Element {
                               width: "fit-content",
                               color:
                                 customer.subscriptionName === "Premium"
-                                  ? "#3D37DD"
+                                  ? colorScheme === 'dark' ? '#818CF8' : "#3D37DD"
                                   : customer.subscriptionName === "Enterprise"
-                                  ? "#4D2D00"
-                                  : "#272930",
+                                  ? colorScheme === 'dark' ? '#FDBA74' : "#4D2D00"
+                                  : colorScheme === 'dark' ? '#D1D5DB' : "#272930",
                               bgcolor:
                                 customer.subscriptionName === "Premium"
-                                  ? "#DAD8FD"
+                                  ? colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#DAD8FD"
                                   : customer.subscriptionName === "Enterprise"
-                                  ? "#FFF8C5"
-                                  : "#EEEFF0",
+                                  ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
+                                  : colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0",
                             }}
                           >
                             {customer?.subscriptionName || "N/A"}

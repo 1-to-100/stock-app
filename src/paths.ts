@@ -64,6 +64,10 @@ export const paths = {
       user: '/dashboard/role-settings/user',
     },
     userManagement: '/dashboard/user-management',
+    notificationManagement: {
+      list: '/dashboard/notification-management',
+      history:  `/dashboard/notification-management/history`,
+    },
     systemUsers: {
       list: '/dashboard/system-users',
       details: (userId: string) => `/dashboard/system-users/${userId}`,

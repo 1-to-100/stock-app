@@ -8,36 +8,30 @@ import Typography from "@mui/joy/Typography";
 import IconButton from "@mui/joy/IconButton";
 import Table from "@mui/joy/Table";
 import Checkbox from "@mui/joy/Checkbox";
-import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
-import Tooltip from "@mui/joy/Tooltip";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
-import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
-import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
+import { PaperPlaneRight as SendIcon } from "@phosphor-icons/react/dist/ssr/PaperPlaneRight";
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
 import { config } from "@/config";
-import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
-import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
+import DeleteItemModal from "@/components/dashboard/modals/DeleteItemModal";
 import { useState, useCallback, useEffect } from "react";
+import AddEditNotification from "@/components/dashboard/modals/AddEditNotification";
 import Pagination from "@/components/dashboard/layout/pagination";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
-import { useQuery } from "@tanstack/react-query";
-import { getSystemUsers, getSystemUserById } from "../../../lib/api/system-users";
-import { getRoles } from "../../../lib/api/roles";
-import { getCustomers } from "../../../lib/api/customers";
-import { ApiUser, SystemUser } from "@/contexts/auth/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {getNotificationTemplates, deleteNotification} from "../../../lib/api/notifications";
+import { ApiNotification } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
-import { ColorPaletteProp, VariantProp } from "@mui/joy";
-import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
-import {resendInviteUser} from "@/lib/api/users";
-import {toast} from "@/components/core/toaster";
-import {PaperPlaneRight} from "@phosphor-icons/react";
+import SendNotifications from "@/components/dashboard/modals/SendNotifications";
+import { useRouter } from "next/navigation";
+import { paths } from "@/paths";
+import NotificationDetailsPopover from "@/components/dashboard/notification-management/notification-details-popover";
+import { useColorScheme } from '@mui/joy/styles';
 
 interface HttpError extends Error {
   response?: {
@@ -46,114 +40,70 @@ interface HttpError extends Error {
 }
 
 const metadata = {
-  title: `User Management | Dashboard | ${config.site.name}`,
+  title: `Notification Management | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
+  const { colorScheme } = useColorScheme();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [anchorEl, setAnchorPopper] = useState<null | HTMLElement>(null);
   const [menuRowIndex, setMenuRowIndex] = useState<number | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openDeactivateModal, setOpenDeactivateModal] = useState(false);
   const [rowsToDelete, setRowsToDelete] = useState<number[]>([]);
-  const [isDeactivating, setIsDeactivating] = useState(false);
-  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(
-    null
-  );
-  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
-  const [openEditModal, setOpenEditModal] = useState(false);
-  const [openAddUserModal, setOpenAddUserModal] = useState(false);
-  const [userToEditId, setUserToEditId] = useState<number | null>(null);
-  const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedNotification, setSelectedNotification] = useState<ApiNotification | null>(null);
+  const [openAddNotificationModal, setOpenAddNotificationModal] = useState(false);
+  const [notificationToEditId, setNotificationToEditId] = useState<number | null>(null);
+  const [sortColumn, setSortColumn] = useState<keyof ApiNotification | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filters, setFilters] = useState<{
-    statusId: string[];
-    customerId: number[];
-    isSuperadmin: boolean;
-    isCustomerSuccess: boolean;
-  }>({
-    statusId: [],
-    customerId: [],
-    isSuperadmin: false,
-    isCustomerSuccess: false,
-  });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [openSentNotificationsModal, setOpenSentNotificationsModal] = useState(false);
+  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   const rowsPerPage = 10;
-
-  const { data: roles, isLoading: isRolesLoading } = useQuery({
-    queryKey: ["roles"],
-    queryFn: getRoles,
-  });
-
-  const { data: customers, isLoading: isCustomersLoading } = useQuery({
-    queryKey: ["customers"],
-    queryFn: getCustomers,
-  });
-
-  const transformUser = (apiUser: SystemUser): SystemUser => {
-    const customer = customers?.find((c) => c.id === apiUser.customerId);
-    const role = roles?.find((r) => r.id === apiUser.roleId);
-    return {
-      managerId: apiUser.managerId,
-      id: apiUser.id,
-      firstName: apiUser.firstName,
-      lastName: apiUser.lastName,
-      name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
-      email: apiUser.email,
-      customerId: apiUser.customerId,
-      customer: customer || apiUser.customer,
-      roleId: apiUser.roleId,
-      role: role || apiUser.role,
-      persona: apiUser.persona || "",
-      status: apiUser.status,
-      avatar: apiUser.avatar || undefined,
-      activity: apiUser.activity,
-      isSuperadmin: apiUser.isSuperadmin,
-      isCustomerSuccess: apiUser.isCustomerSuccess,
-    };
-  };
+ 
 
   const { data, isLoading, error } = useQuery({
     queryKey: [
-      "users",
+      "notificationTemplates",
       currentPage,
       searchTerm,
       sortColumn,
       sortDirection,
-      filters.statusId,
-      filters.customerId,
-      filters.isSuperadmin,
-      filters.isCustomerSuccess,
     ],
     queryFn: async () => {
-      const response = await getSystemUsers({
+      const response = await getNotificationTemplates({
         page: currentPage,
         perPage: rowsPerPage,
         search: searchTerm || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
-        statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
-        customerId:
-          filters.customerId.length > 0 ? filters.customerId : undefined,
-        isSuperadmin: filters.isSuperadmin,
-        isCustomerSuccess: filters.isCustomerSuccess,
       });
       return {
         ...response,
-        data: response.data.map(transformUser),
+        data: (response.data as ApiNotification[]).map((notification) => ({
+          ...notification,
+          recipients: {
+            customers: notification.Customer?.name || "",
+            users: notification.User
+              ? `${notification.User.firstName} ${notification.User.lastName} (${notification.User.email})`
+              : "",
+          },
+        })) as ApiNotification[],
       };
     },
-    enabled: !isRolesLoading && !isCustomersLoading,
+    enabled: true,
   });
 
-  const users = data?.data || [];
+  const notifications = data?.data || [];
   const totalPages = data?.meta?.lastPage || 1;
-  const hasResults = users.length > 0;
+  const hasResults = notifications.length > 0;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -168,7 +118,7 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
-  useEffect(() => {}, [popoverAnchorEl, selectedUser]);
+  useEffect(() => {}, [popoverAnchorEl, selectedNotification]);
 
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
@@ -197,20 +147,12 @@ export default function Page(): React.JSX.Element {
   ) => {
     if (!hasResults) return;
     if (event.target.checked) {
-      setSelectedRows(users.map((user) => user.id));
+      setSelectedRows(notifications.map((notification) => notification.id));
     } else {
       setSelectedRows([]);
     }
   };
 
-  const handleCloseFilter = () => {
-    setIsFilterOpen(false);
-  };
-
-  const handleOpenFilter = () => {
-    setIsFilterOpen(true);
-    handleClosePopover();
-  };
 
   const handleDelete = () => {
     if (selectedRows.length > 0) {
@@ -228,40 +170,23 @@ export default function Page(): React.JSX.Element {
     setRowsToDelete([userId]);
     setOpenDeleteModal(true);
   }, []);
+ 
 
-  const handleDeactivate = (userId: number) => {
-    setRowsToDelete([userId]);
-    setIsDeactivating(true);
-    setOpenDeactivateModal(true);
-    handleMenuClose();
-  };
-
-  const handleBulkDeactivate = () => {
-    if (selectedRows.length > 0) {
-      setRowsToDelete(selectedRows);
-      setIsDeactivating(true);
-      setOpenDeactivateModal(true);
+  const confirmDelete = async () => {
+    try {
+      setOpenDeleteModal(false);
+      await Promise.all(rowsToDelete.map(id => deleteNotification(id)));
+      
+      await queryClient.invalidateQueries({ queryKey: ["notificationTemplates"] });
+    
+      setRowsToDelete([]);
+      setSelectedRows([]);
+    } catch (error) {
+      console.error('Error deleting notifications:', error);
     }
   };
 
-  const confirmDelete = () => {
-    setOpenDeleteModal(false);
-    setRowsToDelete([]);
-    setSelectedRows([]);
-  };
-
-  const confirmDeactivate = () => {
-    setOpenDeactivateModal(false);
-    setRowsToDelete([]);
-    setSelectedRows([]);
-  };
-
-  const handleCopyEmail = (email: string) => {
-    navigator.clipboard.writeText(email).then(() => {
-      setCopiedEmail(email);
-      setTimeout(() => setCopiedEmail(null), 2000);
-    });
-  };
+ 
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -278,33 +203,31 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleClosePopover = () => {
-    setSelectedUser(null);
+    setSelectedNotification(null);
     setPopoverAnchorEl(null);
+  };
+
+  const handleCloseFilter = () => {
+    setIsFilterOpen(false);
   };
 
   const handleOpenDetail = async (
     event: React.MouseEvent<HTMLElement>,
-    userId: number
+    notificationId: number
   ) => {
     event.preventDefault();
     event.persist();
     const targetElement = event.currentTarget;
-    try {
-      const userData = await getSystemUserById(userId);
-      const transformedUser = transformUser(userData);
-      setSelectedUser(transformedUser);
-      setPopoverAnchorEl(targetElement);
-      handleCloseFilter();
-    } catch (err) {
-      // Handle error
-    }
+    setSelectedNotificationId(notificationId);
+    setPopoverAnchorEl(targetElement);
+    handleCloseFilter();
     handleMenuClose();
   };
 
   const handleEdit = async (userId: number) => {
     try {
-      setUserToEditId(userId);
-      setOpenEditModal(true);
+      setNotificationToEditId(userId);
+      setOpenAddNotificationModal(true);
     } catch (err) {
       // Handle error
     }
@@ -312,35 +235,23 @@ export default function Page(): React.JSX.Element {
   };
 
   const handleAddUser = () => {
-    setOpenAddUserModal(true);
+    setOpenAddNotificationModal(true);
     handleMenuClose();
   };
 
-  const handleCloseEditModal = () => {
-    setOpenEditModal(false);
-    setUserToEditId(null);
-  };
-
-  const handleCloseAddUserModal = () => {
-    setOpenAddUserModal(false);
+  const handleCloseAddNotificationModal = () => {
+    setOpenAddNotificationModal(false);
+    setNotificationToEditId(null);
+    queryClient.invalidateQueries({ queryKey: ["notificationTemplates"] });
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     setSelectedRows([]);
   };
+ 
 
-  const handleFilter = (filters: {
-    statusId: string[];
-    customerId: number[];
-    isSuperadmin: boolean;
-    isCustomerSuccess: boolean;
-  }) => {
-    setFilters(filters);
-    setCurrentPage(1);
-  };
-
-  const handleSort = (column: keyof ApiUser) => {
+  const handleSort = (column: keyof ApiNotification) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     const newDirection = isAsc ? "desc" : "asc";
     setSortColumn(column);
@@ -352,10 +263,10 @@ export default function Page(): React.JSX.Element {
     setCurrentPage(1);
   };
 
-  const usersToDelete = rowsToDelete
+  const notificationsToDelete = rowsToDelete
     .map((userId) => {
-      const user = users.find((u) => u.id === userId);
-      return user ? user.name : undefined;
+      const notification = notifications.find((n) => n.id === userId);
+      return notification ? notification.title : undefined;
     })
     .filter((name): name is string => name !== undefined);
 
@@ -369,26 +280,38 @@ export default function Page(): React.JSX.Element {
     color: "var(--joy-palette-text-primary)",
     "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
   };
+ 
 
-  const avatarColors: ColorPaletteProp[] = [
-    "primary",
-    "neutral",
-    "danger",
-    "warning",
-    "success",
-  ];
-
-  const getAvatarProps = (name: string) => {
-    const hash = Array.from(name).reduce(
-      (acc: number, char: string) => acc + char.charCodeAt(0),
-      0
-    );
-    const colorIndex = hash % avatarColors.length;
-    return {
-      color: avatarColors[colorIndex],
-      variant: "soft" as VariantProp,
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (addUserAnchorEl && !addUserAnchorEl.contains(event.target as Node)) {
+        handleAddUserClose();
+      }
     };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [addUserAnchorEl]);
+
+  const handleAddUserClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (addUserAnchorEl) {
+      handleAddUserClose();
+    } else {
+      setAddUserAnchorEl(event.currentTarget);
+    }
   };
+
+  const handleAddUserClose = () => {
+    setAddUserAnchorEl(null);
+  };
+
+  const handleOpenSentNotificationsModal = (notification: ApiNotification) => {
+    setOpenSentNotificationsModal(true);
+    setSelectedNotification(notification);
+  };
+  const handleCloseSentNotificationsModal = () => setOpenSentNotificationsModal(false);
 
   if (error) {
     const httpError = error as HttpError;
@@ -452,7 +375,7 @@ export default function Page(): React.JSX.Element {
               level="h1"
               sx={{ wordBreak: "break-word" }}
             >
-              System Users Management
+              Notification Management
             </Typography>
           </Stack>
 
@@ -495,44 +418,38 @@ export default function Page(): React.JSX.Element {
                   >
                     <TrashIcon fontSize="var(--Icon-fontSize)" />
                   </IconButton>
-                  <IconButton
-                    onClick={handleBulkDeactivate}
-                    sx={{
-                      bgcolor: "var(--joy-palette-background-mainBg)",
-                      color: "#636B74",
-                      borderRadius: "50%",
-                      width: { xs: 28, sm: 32 },
-                      height: { xs: 28, sm: 32 },
-                    }}
-                  >
-                    <ToggleLeft fontSize="var(--Icon-fontSize)" />
-                  </IconButton>
                 </Stack>
               </Box>
             ) : null}
-            {/* <Filter
-              users={users}
-              onFilter={handleFilter}
-              onClose={handleCloseFilter}
-              open={isFilterOpen}
-              onOpen={handleOpenFilter}
-            /> */}
             <Button
-              variant="solid"
+              variant="outlined"
               color="primary"
-              onClick={handleAddUser}
-              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              onClick={() => router.push(paths.dashboard.notificationManagement.history)}
               sx={{
                 width: { xs: "100%", sm: "auto" },
                 py: { xs: 1, sm: 0.75 },
               }}
             >
-              Add system user
+              Notification history
             </Button>
+            
+              <Button
+                variant="solid"
+                color="primary"
+                onClick={handleAddUser}
+                startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  py: { xs: 1, sm: 0.75 },
+                }}
+              >
+                Add notifications
+              </Button>
+         
           </Stack>
         </Stack>
 
-        {isLoading || isRolesLoading || isCustomersLoading ? (
+        {isLoading ? (
           <Box
             sx={{
               display: "flex",
@@ -577,12 +494,12 @@ export default function Page(): React.JSX.Element {
                       <th style={{ width: "60px" }}>
                         <Checkbox
                           checked={
-                            hasResults && selectedRows.length === users.length
+                            hasResults && selectedRows.length === notifications.length
                           }
                           indeterminate={
                             hasResults &&
                             selectedRows.length > 0 &&
-                            selectedRows.length < users.length
+                              selectedRows.length < notifications.length
                           }
                           onChange={handleSelectAllChange}
                           disabled={!hasResults}
@@ -590,7 +507,7 @@ export default function Page(): React.JSX.Element {
                       </th>
                       <th
                         style={{ width: "30%" }}
-                        onClick={() => handleSort("name")}
+                        onClick={() => handleSort("title")}
                       >
                         <Box
                           sx={{
@@ -604,7 +521,7 @@ export default function Page(): React.JSX.Element {
                             "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
-                          User name
+                          Title
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -614,7 +531,7 @@ export default function Page(): React.JSX.Element {
                       </th>
                       <th
                         style={{ width: "25%" }}
-                        onClick={() => handleSort("email")}
+                        onClick={() => handleSort("message")}
                       >
                         <Box
                           sx={{
@@ -628,7 +545,7 @@ export default function Page(): React.JSX.Element {
                             "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
-                          Email
+                          Message
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -638,7 +555,6 @@ export default function Page(): React.JSX.Element {
                       </th>
                       <th
                         style={{ width: "20%" }}
-                        onClick={() => handleSort("customer")}
                       >
                         <Box
                           sx={{
@@ -652,7 +568,7 @@ export default function Page(): React.JSX.Element {
                             "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
-                          Customer
+                          Type
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -662,7 +578,7 @@ export default function Page(): React.JSX.Element {
                       </th>
                       <th
                         style={{ width: "15%" }}
-                        onClick={() => handleSort("role")}
+                        onClick={() => handleSort("createdAt")}
                       >
                         <Box
                           sx={{
@@ -676,7 +592,7 @@ export default function Page(): React.JSX.Element {
                             "&:hover .sort-icon": { opacity: 1 },
                           }}
                         >
-                          System role
+                          Channel
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -688,7 +604,7 @@ export default function Page(): React.JSX.Element {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.length === 0 ? (
+                    {notifications.length === 0 ? (
                       <tr>
                         <td
                           colSpan={6}
@@ -700,22 +616,22 @@ export default function Page(): React.JSX.Element {
                         </td>
                       </tr>
                     ) : (
-                      users.map((user, index) => (
+                      notifications.map((notification, index) => (
                         <tr
-                          key={user.id}
+                          key={notification.id}
                           onMouseEnter={() => setHoveredRow(index)}
                           onMouseLeave={() => setHoveredRow(null)}
                           onClick={(event) => {
                             event.stopPropagation();
-                            handleOpenDetail(event, user.id);
+                            handleOpenDetail(event, notification.id);
                           }}
                         >
                           <td>
                             <Checkbox
-                              checked={selectedRows.includes(user.id)}
+                              checked={selectedRows.includes(notification.id)}
                               onChange={(event) => {
                                 event.stopPropagation();
-                                handleRowCheckboxChange(user.id)
+                                handleRowCheckboxChange(notification.id)
                               }}
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -728,54 +644,14 @@ export default function Page(): React.JSX.Element {
                               spacing={1}
                               sx={{ alignItems: "center" }}
                             >
-                              <Avatar
-                                sx={{
-                                  width: { xs: 24, sm: 28 },
-                                  height: { xs: 24, sm: 28 },
-                                  fontWeight: "bold",
-                                  fontSize: { xs: "12px", sm: "13px" },
-                                }}
-                                {...getAvatarProps(user.name)}
-                              >
-                                {user.name
-                                  .split(" ")
-                                  .slice(0, 2)
-                                  .map((n) => n[0]?.toUpperCase() || "")
-                                  .join("")}
-                              </Avatar>
                               <Typography
                                 sx={{
                                   wordBreak: "break-all",
                                   fontSize: { xs: "12px", sm: "14px" },
                                 }}
                               >
-                                {user.name.slice(0, 85)}
+                                {notification.title.slice(0, 85)}
                               </Typography>
-                              <Tooltip
-                                title={user.status}
-                                placement="top"
-                                sx={{
-                                  background: "#DAD8FD",
-                                  color: "#3D37DD",
-                                  textTransform: "capitalize",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    bgcolor:
-                                      user.status === "active"
-                                        ? "#1A7D36"
-                                        : user.status === "inactive"
-                                        ? "#D3232F"
-                                        : "#FAE17D",
-                                    borderRadius: "50%",
-                                    width: "10px",
-                                    minWidth: "10px",
-                                    height: "10px",
-                                    display: "inline-block",
-                                  }}
-                                />
-                              </Tooltip>
                             </Stack>
                           </td>
                           <td>
@@ -789,67 +665,7 @@ export default function Page(): React.JSX.Element {
                                 fontSize: { xs: "12px", sm: "14px" },
                               }}
                             >
-                              {typeof user.email === "string"
-                                ? user.email.slice(0, 75)
-                                : user.email[0]}
-                              {hoveredRow === index && (
-                                <Tooltip
-                                  title="Copy Email"
-                                  placement="top"
-                                  sx={{
-                                    background: "#DAD8FD",
-                                    color: "#3D37DD",
-                                    textTransform: "capitalize",
-                                  }}
-                                >
-                                  <IconButton
-                                    size="sm"
-                                    onClick={() => {
-                                      if (typeof user.email === "string") {
-                                        handleCopyEmail(user.email);
-                                      }
-                                    }}
-                                    sx={{
-                                      position: "absolute",
-                                      right: { xs: "-24px", sm: "-30px" },
-                                      top: "50%",
-                                      transform: "translateY(-50%)",
-                                      bgcolor: "transparent",
-                                      "&:hover": { bgcolor: "transparent" },
-                                    }}
-                                  >
-                                    <CopyIcon fontSize="var(--Icon-fontSize)" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-                              {copiedEmail === user.email && (
-                                <Box
-                                  sx={{
-                                    position: "fixed",
-                                    bottom: "20px",
-                                    left: "50%",
-                                    transform: "translateX(-50%)",
-                                    bgcolor: "#DCFCE7",
-                                    color: "#16A34A",
-                                    padding: "4px 6px",
-                                    borderRadius: "10px",
-                                    fontSize: { xs: "10px", sm: "12px" },
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                    zIndex: 1000,
-                                  }}
-                                >
-                                  Copied to clipboard
-                                  <IconButton
-                                    size="sm"
-                                    onClick={() => setCopiedEmail(null)}
-                                    sx={{ color: "#16A34A" }}
-                                  >
-                                    <X fontSize="var(--Icon-fontSize)" />
-                                  </IconButton>
-                                </Box>
-                              )}
+                              <div dangerouslySetInnerHTML={{ __html: notification.message.slice(0, 75) }} />
                             </Box>
                           </td>
                           <td
@@ -858,8 +674,29 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.customer?.name.slice(0, 45)}
+                            <Box 
+                              sx={{ 
+                                fontSize: { xs: "12px", sm: "14px" }, 
+                                wordBreak: "break-all",
+                                fontWeight: 500,
+                                backgroundColor:
+                                  notification?.type?.includes("IN_APP")
+                                    ? colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#E0E7FF"
+                                    : notification?.type?.includes("EMAIL")
+                                    ? colorScheme === 'dark' ? 'rgba(22, 163, 74, 0.2)' : "#DCFCE7"
+                                    : colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#F3F4F6",
+                                color:
+                                  notification?.type?.includes("IN_APP")
+                                    ? colorScheme === 'dark' ? '#818CF8' : "#4F46E5"
+                                    : notification?.type?.includes("EMAIL")
+                                    ? colorScheme === 'dark' ? '#4ADE80' : "#16A34A"
+                                    : colorScheme === 'dark' ? '#9CA3AF' : "#6B7280",
+                                borderRadius: "10px",
+                                padding: "2px 8px",
+                                display: "inline-block"
+                              }}
+                            >
+                              {notification.type?.includes("IN_APP") ? "In-App" : notification.type?.includes("EMAIL") ? "Email" : notification.type?.[0] || ""}
                             </Box>
                           </td>
                           <td
@@ -867,8 +704,37 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.isSuperadmin ? "System Administrator" : "Customer Success"}
+                            <Box 
+                              sx={{ 
+                                fontSize: { xs: "12px", sm: "14px" }, 
+                                wordBreak: "break-all",
+                                fontWeight: 500,
+                                backgroundColor:
+                                  notification?.channel === "info"
+                                    ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                                    : notification?.channel === "article"
+                                    ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                                    : notification?.channel === "warning"
+                                    ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
+                                    : notification?.channel === "alert"
+                                    ? colorScheme === 'dark' ? 'rgba(211, 35, 47, 0.2)' : "#FFE9E8"
+                                    : colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#4F46E5",
+                                color:
+                                  notification?.channel === "info"
+                                    ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                                    : notification?.channel === "article"
+                                    ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                                    : notification?.channel === "warning"
+                                    ? colorScheme === 'dark' ? '#FDBA74' : "#b74c06"
+                                    : notification?.channel === "alert"
+                                    ? colorScheme === 'dark' ? '#FCA5A5' : "#D3232F"
+                                    : colorScheme === 'dark' ? '#818CF8' : "#4F46E5",
+                                borderRadius: "10px",
+                                padding: "2px 8px",
+                                display: "inline-block"
+                              }}
+                            >
+                              {notification.channel}
                             </Box>
                           </td>
                           <td>
@@ -899,7 +765,7 @@ export default function Page(): React.JSX.Element {
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
-                                  handleOpenDetail(event, user.id);
+                                  handleOpenDetail(event, notification.id);
                                 }}
                                 sx={{
                                   ...menuItemStyle,
@@ -909,29 +775,10 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
-                              {/* {user.status != 'active' &&
-                                <Box
-                                  onMouseDown={(event) => {
-                                    event.preventDefault();
-                                    resendInviteUser(user.email).then(() => {
-                                      toast.success("Invite sent successfully");
-                                    }).catch((error) => {
-                                      toast.error(`Failed to send invite: ${error.message}`);
-                                    });
-                                  }}
-                                  sx={{
-                                    ...menuItemStyle,
-                                    gap: { xs: "10px", sm: "14px" },
-                                  }}
-                                >
-                                  <PaperPlaneRight size={20} />
-                                  Resend invite
-                                </Box>
-                              } */}
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
-                                  handleEdit(user.id);
+                                  handleEdit(notification.id);
                                 }}
                                 sx={{
                                   ...menuItemStyle,
@@ -941,10 +788,23 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
-                              {/* <Box
+                              <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
-                                  handleDeleteUser(user.id);
+                                  handleOpenSentNotificationsModal(notification);
+                                }}
+                                sx={{
+                                  ...menuItemStyle,
+                                  gap: { xs: "10px", sm: "14px" },
+                                }}
+                              >
+                                <SendIcon fontSize="18px" />
+                                Send
+                              </Box>
+                              <Box
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleDeleteUser(notification.id);
                                 }}
                                 sx={{
                                   ...menuItemStyle,
@@ -953,20 +813,7 @@ export default function Page(): React.JSX.Element {
                               >
                                 <TrashIcon fontSize="20px" />
                                 Delete
-                              </Box> */}
-                              {/* <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleDeactivate(user.id);
-                                }}
-                                sx={{
-                                  ...menuItemStyle,
-                                  gap: { xs: "10px", sm: "14px" },
-                                }}
-                              >
-                                <ToggleLeft fontSize="20px" />
-                                Deactivate
-                              </Box> */}
+                              </Box>
                             </Popper>
                           </td>
                         </tr>
@@ -987,39 +834,33 @@ export default function Page(): React.JSX.Element {
         )}
       </Stack>
 
-      <DeleteDeactivateUserModal
+      <DeleteItemModal
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={confirmDelete}
-        usersToDelete={usersToDelete}
-        title="Delete user"
-        description="Are you sure you want to delete this user?"
+        usersToDelete={notificationsToDelete}
+        title="Delete notification"
+        description="Are you sure you want to delete this notification?"
       />
 
-      <DeleteDeactivateUserModal
-        open={openDeactivateModal}
-        onClose={() => setOpenDeactivateModal(false)}
-        onConfirm={confirmDeactivate}
-        usersToDelete={usersToDelete}
-        isDeactivate={true}
-        title="Deactivate user"
-        description="Are you sure you want to deactivate this user?"
-      />
-
-      <UserDetailsPopover
-        open={Boolean(popoverAnchorEl)}
-        onClose={handleClosePopover}
+      <NotificationDetailsPopover
+        open={!!popoverAnchorEl}
+        onClose={() => {
+          setPopoverAnchorEl(null);
+          setSelectedNotificationId(null);
+        }}
         anchorEl={popoverAnchorEl}
-        userId={selectedUser?.id ?? 0}
+        notificationId={selectedNotificationId || 0}
       />
 
-      <AddEditSystemUser
-        open={openEditModal}
-        onClose={handleCloseEditModal}
-        userId={userToEditId}
+      <AddEditNotification
+        open={openAddNotificationModal}
+        onClose={handleCloseAddNotificationModal}
+        notificationToEditId={notificationToEditId}
       />
 
-      <AddEditSystemUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
+      <SendNotifications open={openSentNotificationsModal} onClose={handleCloseSentNotificationsModal} selectedNotificationId={selectedNotification?.id ?? 0} />
+      
     </Box>
   );
 }

@@ -153,10 +153,27 @@ export interface ApiNotification {
   id: number;
   title: string;
   message: string;
+  comment: string;
   createdAt: string;
-  isRead: boolean;
+  isRead?: boolean;
   channel: string;
+  type: string;
+  User?: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  Customer?: { 
+    id: number;
+    name: string;
+  };
 }
+
+export interface NotificationType {  
+    types: string[];
+    channels: string[];
+  }
 
 export type SystemRole =  "customer_success" | "system_admin";
 

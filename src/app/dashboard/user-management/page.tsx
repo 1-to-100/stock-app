@@ -1013,7 +1013,7 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
-                              {user.status != 'active' && (userInfo?.isSuperadmin || userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser")) &&
+                              {user.status != 'active' && (userInfo?.isSuperadmin || userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser") || userInfo?.permissions?.includes("createUser")) &&
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();

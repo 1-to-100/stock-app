@@ -1,0 +1,456 @@
+"use client";
+
+import * as React from "react";
+import type { Metadata } from "next";
+import Box from "@mui/joy/Box";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import Table from "@mui/joy/Table";
+import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
+import { config } from "@/config";
+import { useState } from "react";
+import Pagination from "@/components/dashboard/layout/pagination";
+import SearchInput from "@/components/dashboard/layout/search-input";
+import { useQuery } from "@tanstack/react-query";
+import { getNotificationsHistory } from "@/lib/api/notifications";
+import CircularProgress from "@mui/joy/CircularProgress";
+import NotificationFilter from "@/components/dashboard/notification-management/notification-filter";
+import { ApiNotification } from "@/contexts/auth/types";
+
+const metadata = {
+  title: `Notification History | Dashboard | ${config.site.name}`,
+} satisfies Metadata;
+
+export default function Page(): React.JSX.Element {
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filters, setFilters] = useState<{
+    type: string[];
+    channel: string[];
+    customer: number[];
+    user: number[];
+  }>({
+    type: [],
+    channel: [],
+    customer: [],
+    user: [],
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const rowsPerPage = 10;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      "notifications",
+      currentPage,
+      searchTerm,
+      sortColumn,
+      sortDirection,
+      filters.type,
+      filters.channel,
+      filters.customer,
+      filters.user,
+    ],
+    queryFn: async () => {
+      const response = await getNotificationsHistory ({
+        page: currentPage,
+        perPage: rowsPerPage,
+        orderBy: sortColumn || undefined,
+        orderDirection: sortDirection || undefined,
+        search: searchTerm || undefined,
+        type: filters.type.length > 0 ? filters.type[0] : undefined,
+        channel: filters.channel.length > 0 ? filters.channel : undefined,
+        customer: filters.customer.length > 0 ? filters.customer[0] : undefined,
+        user: filters.user.length > 0 ? filters.user[0] : undefined,
+      });
+      return response;
+    },
+  });
+
+  const notifications = data?.data || [];
+  const totalPages = data?.meta?.lastPage || 1;
+  const hasResults = notifications.length > 0;
+
+  const handleCloseFilter = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleOpenFilter = () => {
+    setIsFilterOpen(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleFilter = (filters: {
+    type: string[];
+    channel: string[];
+    customer: number[];
+    user: number[];
+  }) => {
+    setFilters(filters);
+    setCurrentPage(1);
+  };
+
+  const handleSort = (column: string) => {
+    const isAsc = sortColumn === column && sortDirection === "asc";
+    const newDirection = isAsc ? "desc" : "asc";
+    setSortColumn(column);
+    setSortDirection(newDirection);
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    setSearchTerm(searchTerm);
+    setCurrentPage(1);
+  };
+ 
+
+  return (
+    <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
+      <Box
+        sx={{
+          position: { xs: "static", sm: "fixed" },
+          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
+          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+          zIndex: 1000,
+        }}
+      >
+        <SearchInput onSearch={handleSearch} />
+      </Box>
+
+      <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{ alignItems: { xs: "stretch", sm: "flex-start" } }}
+        >
+          <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+            <Typography
+              fontSize={{ xs: "xl2", sm: "xl3" }}
+              level="h1"
+              sx={{ wordBreak: "break-word" }}
+            >
+              Notification History
+            </Typography>
+          </Stack>
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{
+              alignItems: { xs: "stretch", sm: "center" },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <NotificationFilter
+              onFilter={handleFilter}
+              onClose={handleCloseFilter}
+              open={isFilterOpen}
+              onOpen={handleOpenFilter}
+            />
+          </Stack>
+        </Stack>
+
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: { xs: "40vh", sm: "50vh" },
+            }}
+          >
+            <CircularProgress size="lg" />
+          </Box>
+        ) : (
+          <>
+            <Box>
+              <Box
+                sx={{
+                  overflowX: "auto",
+                  width: "100%",
+                  WebkitOverflowScrolling: "touch",
+                  scrollbarWidth: { xs: "thin", sm: "auto" },
+                  "&::-webkit-scrollbar": {
+                    height: { xs: "8px", sm: "12px" },
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "var(--joy-palette-divider)",
+                    borderRadius: "4px",
+                  },
+                }}
+              >
+                <Table
+                  aria-label="notification history table"
+                  sx={{
+                    minWidth: "800px",
+                    tableLayout: "fixed",
+                    "& th, & td": {
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 1, sm: 1.5 },
+                    },
+                  }}
+                >
+                  <thead>
+                    <tr>
+                      <th
+                        style={{ width: "9%" }}
+                        onClick={() => handleSort("createdAt")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Date
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "15%" }}
+                        onClick={() => handleSort("user")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          User
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "15%" }}
+                        onClick={() => handleSort("customer")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Customer
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "9%" }}
+                        onClick={() => handleSort("channel")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Channel
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "9%" }}
+                        onClick={() => handleSort("type")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Type
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        
+                        onClick={() => handleSort("message")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Message
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notifications.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          style={{ textAlign: "center", padding: "20px" }}
+                        >
+                          <Typography level="body-md" color="neutral">
+                            No items found
+                          </Typography>
+                        </td>
+                      </tr>
+                    ) : (
+                      notifications.map((notification) => (
+                        <tr key={notification.id}>
+                          <td>
+                            <Typography
+                              sx={{
+                                wordBreak: "break-all",
+                                fontSize: { xs: "12px", sm: "14px" },
+                              }}
+                            >
+                              {new Date(notification.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontSize: { xs: "12px", sm: "14px" },
+                                whiteSpace: "normal",
+                                wordBreak: "break-word",
+                                maxWidth: "100%"
+                              }}
+                            >
+                              {notification.User?.firstName?.slice(0, 40) || ''} {notification.User?.lastName?.slice(0, 40) || ''}
+                              <br />
+                              {notification.User?.email?.slice(0, 40) || ''}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontSize: { xs: "12px", sm: "14px" },
+                                whiteSpace: "normal",
+                                wordBreak: "break-word",
+                                maxWidth: "100%"
+                              }}
+                            >
+                              {notification.Customer?.name?.slice(0, 40) || ''}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontSize: { xs: "12px", sm: "14px" },
+                              }}
+                            >
+                              {notification.channel}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontSize: { xs: "12px", sm: "14px" },
+                              }}
+                            >
+                              {notification.type}
+                            </Typography>
+                          </td>
+                          <td>
+                            <Typography
+                              sx={{
+                                color: "var(--joy-palette-text-secondary)",
+                                fontSize: { xs: "12px", sm: "14px" },
+                                '& img': {
+                                  width: '100%',
+                                  maxWidth: '600px',
+                                  height: 'auto'
+                                }
+                              }}
+                            >
+                              <div dangerouslySetInnerHTML={{ __html: notification.message }} />
+                            </Typography>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </Box>
+
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                disabled={!hasResults}
+              />
+            </Box>
+          </>
+        )}
+      </Stack>
+    </Box>
+  );
+} 

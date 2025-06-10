@@ -35,6 +35,7 @@ import {
   Video,
   TextH,
   CaretDown,
+  Article as ButtonIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
 declare module "@tiptap/core" {
@@ -46,8 +47,144 @@ declare module "@tiptap/core" {
       setFontSize: (fontSize: string) => ReturnType;
       unsetFontSize: () => ReturnType;
     };
+    customButton: {
+      setCustomButton: (options: {
+        text: string;
+        url: string;
+        backgroundColor: string;
+        textColor: string;
+        padding: string;
+        borderWidth: string;
+        borderColor: string;
+        borderStyle: string;
+        borderRadius: string;
+        fontSize: string;
+        fontFamily: string;
+      }) => ReturnType;
+    };
   }
 }
+
+const CustomButton = Node.create({
+  name: "customButton",
+  group: "inline",
+  inline: true,
+  selectable: true,
+  draggable: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      text: {
+        default: "Button",
+      },
+      url: {
+        default: "#",
+      },
+      backgroundColor: {
+        default: "#3d37dd",
+      },
+      textColor: {
+        default: "#ffffff",
+      },
+      padding: {
+        default: "2px 6px",
+      },
+      borderWidth: {
+        default: "1px",
+      },
+      borderColor: {
+        default: "#3d37dd",
+      },
+      borderStyle: {
+        default: "solid",
+      },
+      borderRadius: {
+        default: "4px",
+      },
+      fontSize: {
+        default: "16px",
+      },
+      fontFamily: {
+        default: "inherit",
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "a.custom-button",
+        getAttrs: (element: HTMLElement) => ({
+          text: element.textContent,
+          url: element.getAttribute("href"),
+          backgroundColor: element.style.backgroundColor,
+          textColor: element.style.color,
+          padding: element.style.padding,
+          borderWidth: element.style.borderWidth,
+          borderColor: element.style.borderColor,
+          borderStyle: element.style.borderStyle,
+          borderRadius: element.style.borderRadius,
+          fontSize: element.style.fontSize,
+          fontFamily: element.style.fontFamily,
+        }),
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "a",
+      mergeAttributes(
+        {
+          class: "custom-button",
+          href: HTMLAttributes.url,
+          style: `
+            display: inline-block;
+            background-color: ${HTMLAttributes.backgroundColor};
+            color: ${HTMLAttributes.textColor};
+            padding: ${HTMLAttributes.padding};
+            border: ${HTMLAttributes.borderWidth} ${HTMLAttributes.borderStyle} ${HTMLAttributes.borderColor};
+            border-radius: ${HTMLAttributes.borderRadius};
+            font-size: ${HTMLAttributes.fontSize};
+            font-family: ${HTMLAttributes.fontFamily};
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin: 0;
+          `,
+        },
+        HTMLAttributes
+      ),
+      HTMLAttributes.text,
+    ];
+  },
+
+  addCommands() {
+    return {
+      setCustomButton:
+        (options: {
+          text: string;
+          url: string;
+          backgroundColor: string;
+          textColor: string;
+          padding: string;
+          borderWidth: string;
+          borderColor: string;
+          borderStyle: string;
+          borderRadius: string;
+          fontSize: string;
+          fontFamily: string;
+        }) =>
+        ({ commands }: CommandProps): boolean => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: options,
+          });
+        },
+    } as Partial<RawCommands>;
+  },
+});
 
 const VideoNode = Node.create({
   name: "video",
@@ -215,14 +352,28 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   const videoInputRef = useRef<HTMLInputElement>(null);
   const colorButtonRef = useRef<HTMLButtonElement>(null);
   const linkButtonRef = useRef<HTMLButtonElement>(null);
+  const customButtonRef = useRef<HTMLButtonElement>(null);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [isLinkInputOpen, setIsLinkInputOpen] = useState(false);
+  const [isCustomButtonOpen, setIsCustomButtonOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isHeadingDropdownOpen, setIsHeadingDropdownOpen] = useState(false);
   const [isFontSizeDropdownOpen, setIsFontSizeDropdownOpen] = useState(false);
-  const [isFontFamilyDropdownOpen, setIsFontFamilyDropdownOpen] =
-    useState(false);
+  const [isFontFamilyDropdownOpen, setIsFontFamilyDropdownOpen] = useState(false);
+  
+  // Custom button state
+  const [buttonText, setButtonText] = useState("Button");
+  const [buttonUrl, setButtonUrl] = useState("#");
+  const [buttonBgColor, setButtonBgColor] = useState("#3d37dd");
+  const [buttonTextColor, setButtonTextColor] = useState("#ffffff");
+  const [buttonPadding, setButtonPadding] = useState("2px 6px");
+  const [buttonBorderWidth, setButtonBorderWidth] = useState("1px");
+  const [buttonBorderColor, setButtonBorderColor] = useState("#3d37dd");
+  const [buttonBorderStyle, setButtonBorderStyle] = useState("solid");
+  const [buttonBorderRadius, setButtonBorderRadius] = useState("4px");
+  const [buttonFontSize, setButtonFontSize] = useState("14px");
+  const [buttonFontFamily, setButtonFontFamily] = useState("inherit");
 
   const editor = useEditor({
     extensions: [
@@ -262,6 +413,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       Superscript,
       FontSize,
       VideoNode,
+      CustomButton,
     ],
     content,
     onUpdate({ editor }) {
@@ -804,15 +956,159 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             </button>
             <span className="tooltip">Insert Image</span>
           </div>
-          {/* <div className="tooltip-wrapper">
+          <div className="tooltip-wrapper">
             <button
-              onClick={() => videoInputRef.current?.click()}
+              ref={customButtonRef}
+              onClick={() => setIsCustomButtonOpen(!isCustomButtonOpen)}
               disabled={isPreview || !editor}
             >
-              <Video size={22} />
+              <ButtonIcon size={22} />
             </button>
-            <span className="tooltip">Insert Video</span>
-          </div> */}
+            <span className="tooltip">Insert Custom Button</span>
+          </div>
+          {isCustomButtonOpen && !isPreview && (
+            <div className="custom-button-popup">
+              <div className="custom-button-form">
+                <div className="form-group">
+                  <label>Button Text:</label>
+                  <input
+                    type="text"
+                    value={buttonText}
+                    onChange={(e) => setButtonText(e.target.value)}
+                    placeholder="Enter button text"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>URL:</label>
+                  <input
+                    type="text"
+                    value={buttonUrl}
+                    onChange={(e) => setButtonUrl(e.target.value)}
+                    placeholder="Enter URL"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Background Color:</label>
+                  <input
+                    type="color"
+                    value={buttonBgColor}
+                    onChange={(e) => setButtonBgColor(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Text Color:</label>
+                  <input
+                    type="color"
+                    value={buttonTextColor}
+                    onChange={(e) => setButtonTextColor(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Padding:</label>
+                  <input
+                    type="text"
+                    value={buttonPadding}
+                    onChange={(e) => setButtonPadding(e.target.value)}
+                    placeholder="e.g., 8px 16px"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Border Width:</label>
+                  <input
+                    type="text"
+                    value={buttonBorderWidth}
+                    onChange={(e) => setButtonBorderWidth(e.target.value)}
+                    placeholder="e.g., 1px"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Border Color:</label>
+                  <input
+                    type="color"
+                    value={buttonBorderColor}
+                    onChange={(e) => setButtonBorderColor(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Border Style:</label>
+                  <select
+                    value={buttonBorderStyle}
+                    onChange={(e) => setButtonBorderStyle(e.target.value)}
+                  >
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                    <option value="double">Double</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Border Radius:</label>
+                  <input
+                    type="text"
+                    value={buttonBorderRadius}
+                    onChange={(e) => setButtonBorderRadius(e.target.value)}
+                    placeholder="e.g., 4px"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Font Size:</label>
+                  <select
+                    value={buttonFontSize}
+                    onChange={(e) => setButtonFontSize(e.target.value)}
+                  >
+                    {fontSizes.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Font Family:</label>
+                  <select
+                    value={buttonFontFamily}
+                    onChange={(e) => setButtonFontFamily(e.target.value)}
+                  >
+                    {fontFamilies.map((font) => (
+                      <option
+                        key={font.value}
+                        value={font.value}
+                        style={{ fontFamily: font.value }}
+                      >
+                        {font.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="button-actions">
+                  <button
+                    onClick={() => {
+                      editor?.chain().focus().setCustomButton({
+                        text: buttonText,
+                        url: buttonUrl,
+                        backgroundColor: buttonBgColor,
+                        textColor: buttonTextColor,
+                        padding: buttonPadding,
+                        borderWidth: buttonBorderWidth,
+                        borderColor: buttonBorderColor,
+                        borderStyle: buttonBorderStyle,
+                        borderRadius: buttonBorderRadius,
+                        fontSize: buttonFontSize,
+                        fontFamily: buttonFontFamily,
+                      }).run();
+                      setIsCustomButtonOpen(false);
+                    }}
+                  >
+                    <Check size={18} />
+                  </button>
+                  <button onClick={() => setIsCustomButtonOpen(false)}>
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <input
             type="file"
             accept="image/*"
@@ -1022,6 +1318,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         :global(.pre) {
           white-space: pre-wrap;
         }
+        :global(p) {
+          margin-block-start: 0.5em !important;
+          margin-block-end: 0.5em !important;
+        }
         :global(.custom-code-block) {
           border: 1px solid var(--joy-palette-divider);
           background: var(--Layout-bg);
@@ -1191,6 +1491,100 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         .select-option.heading-4 {
           font-size: 16px;
           font-weight: bold;
+        }
+        .custom-button-popup {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          margin-top: 4px;
+          background: var(--joy-palette-background-body);
+          border: 1px solid var(--joy-palette-divider);
+          border-radius: 4px;
+          padding: 16px;
+          z-index: 10000;
+          min-width: 300px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          max-height: 300px;
+          overflow-y: auto;
+        }
+        .custom-button-form {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .form-group label {
+          font-size: 14px;
+          color: var(--joy-palette-text-secondary);
+        }
+        .form-group input[type="text"] {
+          padding: 8px;
+          border: 1px solid var(--joy-palette-divider);
+          border-radius: 4px;
+          font-size: 14px;
+          background: var(--joy-palette-background-body);
+          color: var(--joy-palette-text-primary);
+        }
+        .form-group input[type="color"] {
+          width: 100%;
+          height: 36px;
+          padding: 2px;
+          border: 1px solid var(--joy-palette-divider);
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .button-actions {
+          display: flex;
+          gap: 8px;
+          justify-content: flex-end;
+          margin-top: 8px;
+        }
+        .button-actions button {
+          padding: 8px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--joy-palette-background-body);
+          color: var(--joy-palette-text-primary);
+          transition: background-color 0.2s;
+        }
+        .button-actions button:hover {
+          background: var(--joy-palette-neutral-100);
+        }
+        :global(.custom-button) {
+          display: inline-block;
+          text-decoration: none;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        :global(.custom-button:hover) {
+          opacity: 0.8;
+        }
+        .form-group select {
+          padding: 8px;
+          border: 1px solid var(--joy-palette-divider);
+          border-radius: 4px;
+          font-size: 14px;
+          background: var(--joy-palette-background-body);
+          color: var(--joy-palette-text-primary);
+          width: 100%;
+          cursor: pointer;
+        }
+        .form-group select:focus {
+          outline: none;
+          border-color: var(--joy-palette-primary-500);
+        }
+        .form-group select option {
+          padding: 8px;
+          background: var(--joy-palette-background-body);
+          color: var(--joy-palette-text-primary);
         }
       `}</style>
     </div>

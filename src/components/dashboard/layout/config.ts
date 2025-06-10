@@ -23,6 +23,7 @@ export const layoutConfig: LayoutConfig = {
         { key: 'role', title: 'Role Settings', href: paths.dashboard.roleSettings.list, icon: 'role' },
         { key: 'customer', title: 'Customer Management', href: paths.dashboard.customerManagement.list, icon: 'customer' },
         { key: 'system-users', title: 'System Users', href: paths.dashboard.systemUsers.list, icon: 'user' },
+        { key: 'notification-management', title: 'Notification Management', href: paths.dashboard.notificationManagement.list, icon: 'bell' },
         // { key: 'test', title: 'User Test', href: paths.dashboard.test.list, icon: 'help' },
         // { key: 'accounting', title: 'Accounting', href: paths.dashboard.crypto, icon: 'accounting' },
         // { key: 'help', title: 'Help Centre', href: paths.dashboard.crypto, icon: 'help' },
