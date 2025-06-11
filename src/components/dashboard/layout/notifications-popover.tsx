@@ -22,6 +22,7 @@ import { Info, Article } from "@phosphor-icons/react/dist/ssr";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useInAppNotificationsChannel } from "@/hooks/use-notifications";
 import { useColorScheme } from '@mui/joy/styles';
+import { toast } from "@/components/core/toaster";
 
 export interface NotificationsPopoverProps {
   anchorEl?: HTMLElement | null;
@@ -36,8 +37,106 @@ export function NotificationsPopover({
 }: NotificationsPopoverProps): React.JSX.Element {
   const queryClient = useQueryClient();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const { colorScheme } = useColorScheme();
+
+  const getFirstLine = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const nodes = Array.from(tempDiv.childNodes);
+    if (nodes.length === 0) return "";
+    const firstNode = nodes[0];
+    switch (firstNode?.nodeType) {
+      case Node.TEXT_NODE:
+        return firstNode.textContent?.split("\n")[0] || "";
+      case Node.ELEMENT_NODE:
+        return (firstNode as Element).outerHTML;
+      default:
+        return "";
+    }
+  };
+
   useInAppNotificationsChannel((payload) => {
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    toast(
+      <Stack direction="row" spacing={2} alignItems="flex-start">
+        <Stack direction="column" sx={{ marginLeft: "20px" }}>
+          <Typography
+            fontSize="15px"
+            fontWeight="lg"
+            sx={{ fontWeight: "500", color: "var(--joy-palette-text-primary)" }}
+          >
+            {payload.title}
+          </Typography>
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: getFirstLine(payload.message || ""),
+            }}
+            sx={{
+              '& a': {
+                textDecoration: 'none',
+              },
+              '& img': {
+                width: '400px',
+                height: 'auto'
+              }
+            }}
+          />
+        </Stack>
+      </Stack>,
+      {
+        duration: 5000,
+        className: 'notification-toast',
+        style: {
+          backgroundColor: colorScheme === 'dark' ? 'var(--joy-palette-background-level1)' : 'white',
+          color: 'var(--joy-palette-text-primary)',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        },
+        icon: (
+          <Stack
+            sx={{
+              backgroundColor:
+                payload?.channel === "info"
+                  ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                  : payload?.channel === "article"
+                  ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                  : payload?.channel === "warning"
+                  ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
+                  : payload?.channel === "alert"
+                  ? colorScheme === 'dark' ? 'rgba(211, 35, 47, 0.2)' : "#FFE9E8"
+                  : colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#4F46E5",
+              borderRadius: "50%",
+              p: 0.7,
+            }}
+          >
+            <Info
+              size={24}
+              style={{
+                display: payload?.channel === "article" ? "none" : "block",
+              }}
+              color={
+                payload?.channel === "info"
+                  ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                  : payload?.channel === "article"
+                  ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                  : payload?.channel === "warning"
+                  ? colorScheme === 'dark' ? '#FDBA74' : "#b74c06"
+                  : payload?.channel === "alert"
+                  ? colorScheme === 'dark' ? '#FCA5A5' : "#D3232F"
+                  : colorScheme === 'dark' ? '#818CF8' : "#4F46E5"
+              }
+            />
+            <Article
+              size={24}
+              style={{
+                display: payload?.channel === "article" ? "block" : "none",
+              }}
+              color={colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"}
+            />
+          </Stack>
+        ),
+      }
+    );
   });
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -109,7 +208,7 @@ export function NotificationsPopover({
       open={open}
       placement="bottom-end"
       sx={{
-        maxWidth: "500px",
+        maxWidth: { xs: "95%", sm: "500px" },
         width: "100%",
       }}
     >
@@ -268,7 +367,15 @@ function NotificationContent({
   };
 
   return (
-    <Stack direction="row" spacing={2} alignItems="flex-start" flexGrow={1}>
+    <Stack direction="row" spacing={2} alignItems="flex-start" flexGrow={1} sx={{
+      p: 1,
+      borderRadius: '8px',
+      transition: 'background-color 0.2s ease',
+      '&:hover': { 
+        backgroundColor: 'var(--joy-palette-background-mainBg)',
+        cursor: 'pointer'
+      }
+    }}>
       <Stack
         sx={{
           backgroundColor:

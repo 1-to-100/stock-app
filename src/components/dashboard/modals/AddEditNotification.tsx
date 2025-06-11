@@ -77,7 +77,7 @@ export default function AddEditUser({
         message: notification?.message || "",
         comment: "",
         channel: notification?.channel || "",
-        type: notification?.type ? [notification.type] : [],
+        type: notification?.type ? (Array.isArray(notification.type) ? notification.type : [notification.type]) : [],
       });
       setErrors(null);
     } else if (!notificationToEditId && open) {
@@ -319,12 +319,22 @@ export default function AddEditUser({
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 error={!!errors?.title}
-                slotProps={{ input: { maxLength: 255 } }}
+                slotProps={{ input: { maxLength: 100 } }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
                 }}
               />
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "12px",
+                  color: formData.title.length > 100 ? "red" : "var(--joy-palette-text-secondary)",
+                  ml: "auto"
+                }}
+              >
+                {formData.title.length}/100 characters
+              </Typography>
               {errors?.title && (
                 <FormHelperText
                   sx={{

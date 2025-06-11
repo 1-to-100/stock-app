@@ -12,11 +12,21 @@ import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
 import FormHelperText from "@mui/joy/FormHelperText";
+import IconButton from "@mui/joy/IconButton";
+import { X as CloseIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { getCustomers } from "@/lib/api/customers";
 import { getUsers } from "@/lib/api/users";
 import { sendNotification } from "@/lib/api/notifications";
 import { toast } from "@/components/core/toaster";
 import { queryClient } from "@/lib/react-query";
+
+interface HttpError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 interface SendNotificationsProps {
   open: boolean;
@@ -29,6 +39,13 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState<"users" | "customers">("users");
   const [error, setError] = useState<{ customer?: string; user?: string; type?: string }>({});
+
+  const resetForm = () => {
+    setSelectedCustomer([]);
+    setSelectedUser([]);
+    setSelectedType("users");
+    setError({});
+  };
 
   const { data: customers, isLoading: isCustomersLoading } = useQuery({
     queryKey: ["customers"],
@@ -54,18 +71,38 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
     }
     setError(newError);
     if (!hasError) {
-      await sendNotification({
-        customerId: selectedCustomer.length > 0 ? parseInt(selectedCustomer[0] ?? "0", 10) : 0,
-        userIds: selectedUser.map(id => parseInt(id, 10)),
-      }, selectedNotificationId);
-      toast.success("Notifications has been sent successfully.");
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      onClose();
+      try {
+        onClose();
+        await sendNotification({
+          customerId: selectedCustomer.length > 0 ? parseInt(selectedCustomer[0] ?? "0", 10) : 0,
+          userIds: selectedUser.map(id => parseInt(id, 10)),
+        }, selectedNotificationId);
+        toast.success("Notifications have been sent successfully.");
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        resetForm();
+      } catch (error) {
+        const httpError = error as HttpError;
+        const errorMessage = httpError.response?.data?.message || "Failed to send notifications. Please try again.";
+        toast.error(errorMessage);
+      }
     }
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleRemoveUser = (userId: string) => {
+    setSelectedUser(selectedUser.filter(id => id !== userId));
+  };
+
+  const handleRemoveCustomer = (customerId: string) => {
+    setSelectedCustomer(selectedCustomer.filter(id => id !== customerId));
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <ModalDialog
         sx={{
           width: { xs: "90%", sm: 400 },
@@ -137,6 +174,14 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                 value={selectedUser}
                 multiple
                 onChange={(_, newValue) => setSelectedUser(newValue as string[])}
+                slotProps={{
+                  listbox: {
+                    sx: {
+                      maxHeight: "300px",
+                    },
+                    placement: "top",
+                  }
+                }}
                 renderValue={(selected) => {
                   if (selected.length === 0) {
                     return (
@@ -174,7 +219,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
               >
                 {users && users.map((user) => (
                   <Option key={user.id} value={user.id.toString()}>
-                    {user.firstName?.slice(0, 10)} {user.lastName?.slice(0, 10)}
+                    {user.firstName?.slice(0, 10)} {user.lastName?.slice(0, 10) || user.email?.slice(0, 40)}
                   </Option>
                 ))}
               </Select>
@@ -197,9 +242,11 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                   {selectedUser.map((userId) => {
                     const user = users.find((u) => u.id.toString() === userId);
                     return (
-                      <Typography
+                      <Stack
                         key={userId}
-                        level="body-sm"
+                        direction="row"
+                        alignItems="center"
+                        spacing={0.5}
                         sx={{
                           fontSize: "12px",
                           color: "#4F46E5",
@@ -209,8 +256,22 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                           padding: "3px 5px",
                         }}
                       >
-                        {user ? `${user.firstName} ${user.lastName}` : userId}
-                      </Typography>
+                        <Typography level="body-sm" sx={{ fontSize: "12px", color: "#4F46E5" }}>
+                          {user ? `${user.firstName?.slice(0, 10)} ${user.lastName?.slice(0, 10)}` : userId}
+                        </Typography>
+                        <IconButton
+                          size="sm"
+                          variant="plain"
+                          onClick={() => handleRemoveUser(userId)}
+                          sx={{
+                            '--IconButton-size': '16px',
+                            '&:hover': { backgroundColor: 'transparent' },
+                            color: "#4F46E5",
+                          }}
+                        >
+                          <CloseIcon  />
+                        </IconButton>
+                      </Stack>
                     );
                   })}
                 </Stack>
@@ -234,12 +295,19 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                 value={selectedCustomer}
                 multiple
                 onChange={(_, newValue) => setSelectedCustomer(newValue as string[])}
+                slotProps={{
+                  listbox: {
+                    sx: {
+                      maxHeight: "300px",
+                    },
+                    placement: "top",
+                  }
+                }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
                   border: error.customer ? "1px solid var(--joy-palette-danger-500)" : undefined,
                 }}
-                disabled={isCustomersLoading}
                 renderValue={(selected) => {
                   if (selected.length === 0) {
                     return (
@@ -274,9 +342,11 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                   {selectedCustomer.map((customerId) => {
                     const customer = customers?.find((c) => c.id.toString() === customerId);
                     return (
-                      <Typography
+                      <Stack
                         key={customerId}
-                        level="body-sm"
+                        direction="row"
+                        alignItems="center"
+                        spacing={0.5}
                         sx={{
                           fontSize: "12px",
                           color: "#4F46E5",
@@ -286,8 +356,22 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                           padding: "3px 5px",
                         }}
                       >
-                        {customer ? customer.name : customerId}
-                      </Typography>
+                        <Typography level="body-sm" sx={{ fontSize: "12px", color: "#4F46E5" }}>
+                          {customer ? customer.name.slice(0, 10) : customerId}
+                        </Typography>
+                        <IconButton
+                          size="sm"
+                          variant="plain"
+                          onClick={() => handleRemoveCustomer(customerId)}
+                          sx={{
+                            '--IconButton-size': '16px',
+                            '&:hover': { backgroundColor: 'transparent' },
+                            color: "#4F46E5",
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Stack>
                     );
                   })}
                 </Stack>
@@ -297,7 +381,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button
               variant="outlined"
-              onClick={onClose}
+              onClick={handleClose}
               sx={{ fontSize: { xs: "12px", sm: "14px" }, px: { xs: 2, sm: 3 }, width: { xs: "100%", sm: "auto" } }}
             >
               Cancel

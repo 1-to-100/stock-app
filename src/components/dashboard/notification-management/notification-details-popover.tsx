@@ -10,7 +10,7 @@ import { X as XIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { DotsThreeVertical as DotsIcon } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
 import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import DeleteItemModal from "../modals/DeleteItemModal";
 import { Popper } from "@mui/base/Popper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,12 +26,12 @@ interface NotificationDetailsPopoverProps {
   notificationId: number;
 }
 
-const NotificationDetailsPopover: React.FC<NotificationDetailsPopoverProps> = ({
+const NotificationDetailsPopover = forwardRef<HTMLDivElement, NotificationDetailsPopoverProps>(({
   open,
   onClose,
   anchorEl,
   notificationId,
-}) => {
+}, ref) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -110,6 +110,7 @@ const NotificationDetailsPopover: React.FC<NotificationDetailsPopoverProps> = ({
   return (
     <>
       <Sheet
+        ref={ref}
         sx={{
           position: { xs: "fixed", sm: "absolute" },
           top: { xs: "10%", sm: "20.3%" },
@@ -306,6 +307,8 @@ const NotificationDetailsPopover: React.FC<NotificationDetailsPopoverProps> = ({
       />
     </>
   );
-};
+});
+
+NotificationDetailsPopover.displayName = 'NotificationDetailsPopover';
 
 export default NotificationDetailsPopover; 

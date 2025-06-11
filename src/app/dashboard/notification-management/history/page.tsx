@@ -77,6 +77,26 @@ export default function Page(): React.JSX.Element {
     setIsFilterOpen(false);
   };
 
+  const getFirstLine = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const nodes = Array.from(tempDiv.childNodes);
+
+    if (nodes.length === 0) return "";
+
+    const firstNode = nodes[0];
+
+    switch (firstNode?.nodeType) {
+      case Node.TEXT_NODE:
+        return firstNode.textContent?.split("\n")[0] || "";
+      case Node.ELEMENT_NODE:
+        return (firstNode as Element).outerHTML;
+      default:
+        return "";
+    }
+  };
+
   const handleOpenFilter = () => {
     setIsFilterOpen(true);
   };
@@ -197,7 +217,7 @@ export default function Page(): React.JSX.Element {
                   <thead>
                     <tr>
                       <th
-                        style={{ width: "9%" }}
+                        style={{ width: "130px" }}
                         onClick={() => handleSort("createdAt")}
                       >
                         <Box
@@ -431,7 +451,11 @@ export default function Page(): React.JSX.Element {
                                 }
                               }}
                             >
-                              <div dangerouslySetInnerHTML={{ __html: notification.message }} />
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: getFirstLine(notification.message),
+                                }}
+                              />
                             </Typography>
                           </td>
                         </tr>

@@ -103,7 +103,7 @@ const CustomButton = Node.create({
         default: "4px",
       },
       fontSize: {
-        default: "16px",
+        default: "14px",
       },
       fontFamily: {
         default: "inherit",
@@ -420,6 +420,11 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       onChange?.(editor.getHTML());
     },
     editable: !isPreview,
+    editorProps: {
+      attributes: {
+        style: 'font-size: 14px;',
+      },
+    },
   });
 
   useEffect(() => {
@@ -653,7 +658,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
                 disabled={isPreview}
                 className="select-button"
               >
-                {editor?.getAttributes("textStyle").fontSize || "16px"}
+                {editor?.getAttributes("textStyle").fontSize || "14px"}
                 <CaretDown size={16} />
               </button>
               {isFontSizeDropdownOpen && !isPreview && (

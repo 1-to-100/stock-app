@@ -18,20 +18,24 @@ import { PaperPlaneRight as SendIcon } from "@phosphor-icons/react/dist/ssr/Pape
 import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
 import { config } from "@/config";
 import DeleteItemModal from "@/components/dashboard/modals/DeleteItemModal";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import AddEditNotification from "@/components/dashboard/modals/AddEditNotification";
 import Pagination from "@/components/dashboard/layout/pagination";
 import { Popper } from "@mui/base/Popper";
 import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {getNotificationTemplates, deleteNotification} from "../../../lib/api/notifications";
+import {
+  getNotificationTemplates,
+  deleteNotification,
+} from "../../../lib/api/notifications";
 import { ApiNotification } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import SendNotifications from "@/components/dashboard/modals/SendNotifications";
 import { useRouter } from "next/navigation";
 import { paths } from "@/paths";
 import NotificationDetailsPopover from "@/components/dashboard/notification-management/notification-details-popover";
-import { useColorScheme } from '@mui/joy/styles';
+import { useColorScheme } from "@mui/joy/styles";
+import { toast } from "@/components/core/toaster";
 
 interface HttpError extends Error {
   response?: {
@@ -63,11 +67,11 @@ export default function Page(): React.JSX.Element {
   const [openSentNotificationsModal, setOpenSentNotificationsModal] = useState(false);
   const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const rowsPerPage = 10;
- 
 
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -130,7 +134,10 @@ export default function Page(): React.JSX.Element {
 
   useEffect(() => {
     const handleClickOutsidePopover = (event: MouseEvent) => {
-      if (popoverAnchorEl && !popoverAnchorEl.contains(event.target as Node)) {
+      if (popoverAnchorEl && 
+          !popoverAnchorEl.contains(event.target as Node) && 
+          popoverRef.current && 
+          !popoverRef.current.contains(event.target as Node)) {
         handleClosePopover();
       }
     };
@@ -153,7 +160,6 @@ export default function Page(): React.JSX.Element {
     }
   };
 
-
   const handleDelete = () => {
     if (selectedRows.length > 0) {
       setRowsToDelete(selectedRows);
@@ -170,23 +176,23 @@ export default function Page(): React.JSX.Element {
     setRowsToDelete([userId]);
     setOpenDeleteModal(true);
   }, []);
- 
 
   const confirmDelete = async () => {
     try {
       setOpenDeleteModal(false);
-      await Promise.all(rowsToDelete.map(id => deleteNotification(id)));
-      
-      await queryClient.invalidateQueries({ queryKey: ["notificationTemplates"] });
-    
+      await Promise.all(rowsToDelete.map((id) => deleteNotification(id)));
+
+      await queryClient.invalidateQueries({
+        queryKey: ["notificationTemplates"],
+      });
+      toast.success("Notifications has been deleted successfully");
+
       setRowsToDelete([]);
       setSelectedRows([]);
     } catch (error) {
-      console.error('Error deleting notifications:', error);
+      console.error("Error deleting notifications:", error);
     }
   };
-
- 
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -249,7 +255,6 @@ export default function Page(): React.JSX.Element {
     setCurrentPage(page);
     setSelectedRows([]);
   };
- 
 
   const handleSort = (column: keyof ApiNotification) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
@@ -280,7 +285,6 @@ export default function Page(): React.JSX.Element {
     color: "var(--joy-palette-text-primary)",
     "&:hover": { backgroundColor: "var(--joy-palette-background-mainBg)" },
   };
- 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -311,7 +315,8 @@ export default function Page(): React.JSX.Element {
     setOpenSentNotificationsModal(true);
     setSelectedNotification(notification);
   };
-  const handleCloseSentNotificationsModal = () => setOpenSentNotificationsModal(false);
+  const handleCloseSentNotificationsModal = () =>
+    setOpenSentNotificationsModal(false);
 
   if (error) {
     const httpError = error as HttpError;
@@ -349,6 +354,26 @@ export default function Page(): React.JSX.Element {
       );
     }
   }
+
+  const getFirstLine = (html: string) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const nodes = Array.from(tempDiv.childNodes);
+
+    if (nodes.length === 0) return "";
+
+    const firstNode = nodes[0];
+
+    switch (firstNode?.nodeType) {
+      case Node.TEXT_NODE:
+        return firstNode.textContent?.split("\n")[0] || "";
+      case Node.ELEMENT_NODE:
+        return (firstNode as Element).outerHTML;
+      default:
+        return "";
+    }
+  };
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
@@ -424,7 +449,9 @@ export default function Page(): React.JSX.Element {
             <Button
               variant="outlined"
               color="primary"
-              onClick={() => router.push(paths.dashboard.notificationManagement.history)}
+              onClick={() =>
+                router.push(paths.dashboard.notificationManagement.history)
+              }
               sx={{
                 width: { xs: "100%", sm: "auto" },
                 py: { xs: 1, sm: 0.75 },
@@ -432,20 +459,19 @@ export default function Page(): React.JSX.Element {
             >
               Notification history
             </Button>
-            
-              <Button
-                variant="solid"
-                color="primary"
-                onClick={handleAddUser}
-                startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
-                sx={{
-                  width: { xs: "100%", sm: "auto" },
-                  py: { xs: 1, sm: 0.75 },
-                }}
-              >
-                Add notifications
-              </Button>
-         
+
+            <Button
+              variant="solid"
+              color="primary"
+              onClick={handleAddUser}
+              startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                py: { xs: 1, sm: 0.75 },
+              }}
+            >
+              Add notifications
+            </Button>
           </Stack>
         </Stack>
 
@@ -494,12 +520,13 @@ export default function Page(): React.JSX.Element {
                       <th style={{ width: "60px" }}>
                         <Checkbox
                           checked={
-                            hasResults && selectedRows.length === notifications.length
+                            hasResults &&
+                            selectedRows.length === notifications.length
                           }
                           indeterminate={
                             hasResults &&
                             selectedRows.length > 0 &&
-                              selectedRows.length < notifications.length
+                            selectedRows.length < notifications.length
                           }
                           onChange={handleSelectAllChange}
                           disabled={!hasResults}
@@ -553,9 +580,7 @@ export default function Page(): React.JSX.Element {
                           />
                         </Box>
                       </th>
-                      <th
-                        style={{ width: "20%" }}
-                      >
+                      <th style={{ width: "20%" }}>
                         <Box
                           sx={{
                             display: "flex",
@@ -631,7 +656,7 @@ export default function Page(): React.JSX.Element {
                               checked={selectedRows.includes(notification.id)}
                               onChange={(event) => {
                                 event.stopPropagation();
-                                handleRowCheckboxChange(notification.id)
+                                handleRowCheckboxChange(notification.id);
                               }}
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -663,9 +688,17 @@ export default function Page(): React.JSX.Element {
                                 color: "var(--joy-palette-text-secondary)",
                                 wordBreak: "break-all",
                                 fontSize: { xs: "12px", sm: "14px" },
+                                img: {
+                                  maxWidth: "300px",
+                                  height: "auto",
+                                },
                               }}
                             >
-                              <div dangerouslySetInnerHTML={{ __html: notification.message.slice(0, 75) }} />
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: getFirstLine(notification.message),
+                                }}
+                              />
                             </Box>
                           </td>
                           <td
@@ -674,29 +707,45 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box 
-                              sx={{ 
-                                fontSize: { xs: "12px", sm: "14px" }, 
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
                                 wordBreak: "break-all",
                                 fontWeight: 500,
-                                backgroundColor:
-                                  notification?.type?.includes("IN_APP")
-                                    ? colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#E0E7FF"
-                                    : notification?.type?.includes("EMAIL")
-                                    ? colorScheme === 'dark' ? 'rgba(22, 163, 74, 0.2)' : "#DCFCE7"
-                                    : colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#F3F4F6",
-                                color:
-                                  notification?.type?.includes("IN_APP")
-                                    ? colorScheme === 'dark' ? '#818CF8' : "#4F46E5"
-                                    : notification?.type?.includes("EMAIL")
-                                    ? colorScheme === 'dark' ? '#4ADE80' : "#16A34A"
-                                    : colorScheme === 'dark' ? '#9CA3AF' : "#6B7280",
+                                backgroundColor: notification?.type?.includes(
+                                  "IN_APP"
+                                )
+                                  ? colorScheme === "dark"
+                                    ? "rgba(79, 70, 229, 0.2)"
+                                    : "#E0E7FF"
+                                  : notification?.type?.includes("EMAIL")
+                                  ? colorScheme === "dark"
+                                    ? "rgba(22, 163, 74, 0.2)"
+                                    : "#DCFCE7"
+                                  : colorScheme === "dark"
+                                  ? "rgba(107, 114, 128, 0.2)"
+                                  : "#F3F4F6",
+                                color: notification?.type?.includes("IN_APP")
+                                  ? colorScheme === "dark"
+                                    ? "#818CF8"
+                                    : "#4F46E5"
+                                  : notification?.type?.includes("EMAIL")
+                                  ? colorScheme === "dark"
+                                    ? "#4ADE80"
+                                    : "#16A34A"
+                                  : colorScheme === "dark"
+                                  ? "#9CA3AF"
+                                  : "#6B7280",
                                 borderRadius: "10px",
                                 padding: "2px 8px",
-                                display: "inline-block"
+                                display: "inline-block",
                               }}
                             >
-                              {notification.type?.includes("IN_APP") ? "In-App" : notification.type?.includes("EMAIL") ? "Email" : notification.type?.[0] || ""}
+                              {notification.type?.includes("IN_APP")
+                                ? "In-App"
+                                : notification.type?.includes("EMAIL")
+                                ? "Email"
+                                : notification.type?.[0] || ""}
                             </Box>
                           </td>
                           <td
@@ -704,34 +753,54 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box 
-                              sx={{ 
-                                fontSize: { xs: "12px", sm: "14px" }, 
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
                                 wordBreak: "break-all",
                                 fontWeight: 500,
                                 backgroundColor:
                                   notification?.channel === "info"
-                                    ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(107, 114, 128, 0.2)"
+                                      : "#EEEFF0"
                                     : notification?.channel === "article"
-                                    ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(107, 114, 128, 0.2)"
+                                      : "#EEEFF0"
                                     : notification?.channel === "warning"
-                                    ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(183, 76, 6, 0.2)"
+                                      : "#FFF8C5"
                                     : notification?.channel === "alert"
-                                    ? colorScheme === 'dark' ? 'rgba(211, 35, 47, 0.2)' : "#FFE9E8"
-                                    : colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#4F46E5",
+                                    ? colorScheme === "dark"
+                                      ? "rgba(211, 35, 47, 0.2)"
+                                      : "#FFE9E8"
+                                    : colorScheme === "dark"
+                                    ? "rgba(79, 70, 229, 0.2)"
+                                    : "#4F46E5",
                                 color:
                                   notification?.channel === "info"
-                                    ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                                    ? colorScheme === "dark"
+                                      ? "#D1D5DB"
+                                      : "#6B7280"
                                     : notification?.channel === "article"
-                                    ? colorScheme === 'dark' ? '#D1D5DB' : "#6B7280"
+                                    ? colorScheme === "dark"
+                                      ? "#D1D5DB"
+                                      : "#6B7280"
                                     : notification?.channel === "warning"
-                                    ? colorScheme === 'dark' ? '#FDBA74' : "#b74c06"
+                                    ? colorScheme === "dark"
+                                      ? "#FDBA74"
+                                      : "#b74c06"
                                     : notification?.channel === "alert"
-                                    ? colorScheme === 'dark' ? '#FCA5A5' : "#D3232F"
-                                    : colorScheme === 'dark' ? '#818CF8' : "#4F46E5",
+                                    ? colorScheme === "dark"
+                                      ? "#FCA5A5"
+                                      : "#D3232F"
+                                    : colorScheme === "dark"
+                                    ? "#818CF8"
+                                    : "#4F46E5",
                                 borderRadius: "10px",
                                 padding: "2px 8px",
-                                display: "inline-block"
+                                display: "inline-block",
                               }}
                             >
                               {notification.channel}
@@ -791,7 +860,9 @@ export default function Page(): React.JSX.Element {
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
-                                  handleOpenSentNotificationsModal(notification);
+                                  handleOpenSentNotificationsModal(
+                                    notification
+                                  );
                                 }}
                                 sx={{
                                   ...menuItemStyle,
@@ -851,6 +922,7 @@ export default function Page(): React.JSX.Element {
         }}
         anchorEl={popoverAnchorEl}
         notificationId={selectedNotificationId || 0}
+        ref={popoverRef}
       />
 
       <AddEditNotification
@@ -859,8 +931,11 @@ export default function Page(): React.JSX.Element {
         notificationToEditId={notificationToEditId}
       />
 
-      <SendNotifications open={openSentNotificationsModal} onClose={handleCloseSentNotificationsModal} selectedNotificationId={selectedNotification?.id ?? 0} />
-      
+      <SendNotifications
+        open={openSentNotificationsModal}
+        onClose={handleCloseSentNotificationsModal}
+        selectedNotificationId={selectedNotification?.id ?? 0}
+      />
     </Box>
   );
 }
