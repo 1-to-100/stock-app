@@ -219,7 +219,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
               >
                 {users && users.map((user) => (
                   <Option key={user.id} value={user.id.toString()}>
-                    {user.firstName?.slice(0, 10)} {user.lastName?.slice(0, 10) || user.email?.slice(0, 40)}
+                    {user.firstName?.slice(0, 10)} {user.lastName?.slice(0, 10) || user.email?.slice(0, 40)}  - {user?.customer?.name?.slice(0, 10)}
                   </Option>
                 ))}
               </Select>
