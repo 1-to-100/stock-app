@@ -15,6 +15,9 @@ import Stack from '@mui/joy/Stack';
 import Typography from '@mui/joy/Typography';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
+import { Eye as EyeIcon } from '@phosphor-icons/react/dist/ssr/Eye';
+import { EyeSlash as EyeSlashIcon } from '@phosphor-icons/react/dist/ssr/EyeSlash';
+import IconButton from '@mui/joy/IconButton';
 
 import { paths } from '@/paths';
 import { DynamicLogo } from '@/components/core/logo';
@@ -23,7 +26,13 @@ import {config} from "@/config";
 
 const schema = zod
   .object({
-    password: zod.string().min(6, { message: 'Password should be at least 6 characters' }),
+    password: zod.string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .max(100, { message: 'Password must be less than 100 characters' })
+      .regex(/^(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
+      .regex(/^(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
+      .regex(/^(?=.*\d)/, { message: 'Password must contain at least one number' })
+      .regex(/^[^\s]*$/, { message: 'Password cannot contain spaces' }),
     confirmPassword: zod.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -39,6 +48,8 @@ export function UpdatePasswordForm({title}: {title?: string}) {
   const {message, supabaseClient} = useCheckSessionInvite();
   const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const titleForm = title || 'Update Password';
 
   const {
@@ -93,7 +104,19 @@ export function UpdatePasswordForm({title}: {title?: string}) {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.password)}>
                   <FormLabel>Password</FormLabel>
-                  <Input {...field} type="password" />
+                  <Input
+                    {...field}
+                    type={showPassword ? 'text' : 'password'}
+                    endDecorator={
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        variant="plain"
+                        color="neutral"
+                      >
+                        {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                      </IconButton>
+                    }
+                  />
                   {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
                 </FormControl>
               )}
@@ -104,7 +127,19 @@ export function UpdatePasswordForm({title}: {title?: string}) {
               render={({ field }) => (
                 <FormControl error={Boolean(errors.confirmPassword)}>
                   <FormLabel>Confirm Password</FormLabel>
-                  <Input {...field} type="password" />
+                  <Input
+                    {...field}
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    endDecorator={
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        variant="plain"
+                        color="neutral"
+                      >
+                        {showConfirmPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                      </IconButton>
+                    }
+                  />
                   {errors.confirmPassword ? <FormHelperText>{errors.confirmPassword.message}</FormHelperText> : null}
                 </FormControl>
               )}
