@@ -112,9 +112,9 @@ const NotificationDetailsPopover = forwardRef<HTMLDivElement, NotificationDetail
       <Sheet
         ref={ref}
         sx={{
-          position: { xs: "fixed", sm: "absolute" },
+          position: { xs: "fixed", sm: "fixed" },
           top: { xs: "10%", sm: "20.3%" },
-          right: { xs: "5%", sm: "1.5%" },
+          right: { xs: "5%", sm: "2.5%" },
           width: { xs: "90%", sm: 400, md: 500 },
           maxWidth: "100%",
           borderRadius: "8px",

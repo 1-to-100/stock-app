@@ -13,12 +13,14 @@ import Option from "@mui/joy/Option";
 import Button from "@mui/joy/Button";
 import FormHelperText from "@mui/joy/FormHelperText";
 import IconButton from "@mui/joy/IconButton";
+import Autocomplete from "@mui/joy/Autocomplete";
 import { X as CloseIcon } from "@phosphor-icons/react/dist/ssr/X";
 import { getCustomers } from "@/lib/api/customers";
 import { getUsers } from "@/lib/api/users";
 import { sendNotification } from "@/lib/api/notifications";
 import { toast } from "@/components/core/toaster";
 import { queryClient } from "@/lib/react-query";
+import { ApiUser } from "@/contexts/auth/types";
 
 interface HttpError {
   response?: {
@@ -54,7 +56,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
 
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users", 1],
-    queryFn: () => getUsers({ page: 1, perPage: 100 }),
+    queryFn: () => getUsers({ page: 1, perPage: 10000 }),
   });
   const users = usersData?.data || [];
 
@@ -169,11 +171,41 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
               >
                 Select recipients
               </Typography>
-              <Select
-                placeholder="Select users"
-                value={selectedUser}
+              <Autocomplete
                 multiple
-                onChange={(_, newValue) => setSelectedUser(newValue as string[])}
+                disableCloseOnSelect
+                value={users.filter(user => selectedUser.includes(user.id.toString()))}
+                onChange={(_, newValue) => {
+                  setSelectedUser(newValue.map(user => user.id.toString()));
+                }}
+                options={users}
+                getOptionKey={(option) => option.id.toString()}
+                getOptionLabel={(option) => {
+                  let displayName = '';
+                  if (option.firstName && option.lastName) {
+                    displayName = `${option.firstName.slice(0, 10)} ${option.lastName.slice(0, 10)}`;
+                  } else if (option.email) {
+                    displayName = option.email;
+                  }
+                  return `${displayName} - ${option.customer?.name || ''}`;
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                placeholder={selectedUser.length > 0 ? `Selected users: ${selectedUser.length}` : "Select users"}
+                renderTags={() => null}
+                filterOptions={(options, { inputValue }) => {
+                  const searchTerm = inputValue.toLowerCase();
+                  return options.filter(option => 
+                    (option.firstName?.toLowerCase().includes(searchTerm) || '') ||
+                    (option.lastName?.toLowerCase().includes(searchTerm) || '') ||
+                    (option.email?.toLowerCase().includes(searchTerm) || '')
+                  );
+                }}
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: { xs: "12px", sm: "14px" },
+                  border: error.user ? "1px solid var(--joy-palette-danger-500)" : undefined,
+                }}
+                disabled={isUsersLoading}
                 slotProps={{
                   listbox: {
                     sx: {
@@ -182,47 +214,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                     placement: "top",
                   }
                 }}
-                renderValue={(selected) => {
-                  if (selected.length === 0) {
-                    return (
-                      <Typography
-                        sx={{
-                          color: "var(--joy-palette-text-primary)",
-                          fontSize: "14px",
-                        }}
-                      >
-                        Select users
-                      </Typography>
-                    );
-                  }
-                  return (
-                    <Typography
-                      sx={{
-                        color: "var(--joy-palette-text-primary)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Selected users: {selected.length}
-                    </Typography>
-                  );
-                }}
-                sx={{
-                  borderRadius: "6px",
-                  fontSize: { xs: "12px", sm: "14px" },
-                  border: error.user ? "1px solid var(--joy-palette-danger-500)" : undefined,
-                  "& .MuiSelect-placeholder": {
-                    fontSize: { xs: "12px", sm: "14px" },
-                    color: "var(--joy-palette-text-primary)",
-                  },
-                }}
-                disabled={isUsersLoading}
-              >
-                {users && users.map((user) => (
-                  <Option key={user.id} value={user.id.toString()}>
-                    {user.firstName?.slice(0, 10)} {user.lastName?.slice(0, 10) || user.email?.slice(0, 40)}  - {user?.customer?.name?.slice(0, 10)}
-                  </Option>
-                ))}
-              </Select>
+              />
               {error.user && (
                 <FormHelperText sx={{ color: "var(--joy-palette-danger-500)", fontSize: { xs: "10px", sm: "12px" } }}>{error.user}</FormHelperText>
               )}
@@ -269,7 +261,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                             color: "#4F46E5",
                           }}
                         >
-                          <CloseIcon  />
+                          <CloseIcon />
                         </IconButton>
                       </Stack>
                     );

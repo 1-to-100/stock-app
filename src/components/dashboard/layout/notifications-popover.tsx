@@ -299,10 +299,12 @@ function NotificationContent({
   const queryClient = useQueryClient();
   const { colorScheme } = useColorScheme();
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: () => markNotificationAsRead(notification.id),
     onMutate: async () => {
+      setIsVisible(false);
       await queryClient.cancelQueries({ queryKey: ["notifications"] });
 
       const previousNotifications = queryClient.getQueryData(["notifications"]);
@@ -419,9 +421,12 @@ function NotificationContent({
       </Stack>
       <Stack direction="column" flexGrow={1}>
         <Typography
-          fontSize="15px"
+          fontSize="16px"
           fontWeight="lg"
-          sx={{ fontWeight: "500", color: "var(--joy-palette-text-primary)" }}
+          sx={{ fontWeight: "500", color: "var(--joy-palette-text-primary)", wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word',
+            wordWrap: 'break-word' }}
         >
           {notification.title}
         </Typography>
@@ -442,9 +447,26 @@ function NotificationContent({
                   marginBottom: '4px',
                 },
                 '& img': {
-                  width: '400px',
+                  width: '370px',
                   height: 'auto'
-                }
+                },
+                '& p': {
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%',
+                },
+                '& h1, & h2, & h3, & h4, & h5, & h6': {
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  overflow: 'hidden',
+                },
+                
               }}
             />
             <Typography
@@ -479,9 +501,26 @@ function NotificationContent({
                   textDecoration: 'none',
                 },
                 '& img': {
-                  width: '400px',
+                  width: '370px',
                   height: 'auto'
-                }
+                },
+                '& p': {
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%',
+                },
+                '& h1, & h2, & h3, & h4, & h5, & h6': {
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  wordWrap: 'break-word',
+                  overflow: 'hidden',
+                },
+                fontSize: '14px',
               }}
             />
             <Typography
@@ -522,6 +561,16 @@ function NotificationContent({
             p: "5px",
             minHeight: "5px",
             marginLeft: "auto",
+            transition: 'all 0.3s ease',
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'scale(1)' : 'scale(0.8)',
+            '&:active': {
+              transform: 'scale(0.8)',
+              opacity: 0.5,
+            },
+            '&:hover': {
+              transform: 'scale(1.1)',
+            },
           }}
         />
       ) : null}

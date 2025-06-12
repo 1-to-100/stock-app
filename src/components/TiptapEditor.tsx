@@ -649,7 +649,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             </button>
             <span className="tooltip">Subscript</span>
           </div>
-          <div className="tooltip-wrapper">
+          {/* <div className="tooltip-wrapper">
             <div className="custom-select">
               <button
                 onClick={() =>
@@ -679,7 +679,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
               )}
             </div>
             <span className="tooltip">Font Size</span>
-          </div>
+          </div> */}
           <div className="tooltip-wrapper">
             <div className="custom-select">
               <button

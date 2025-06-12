@@ -16,12 +16,14 @@ import { getNotificationsHistory } from "@/lib/api/notifications";
 import CircularProgress from "@mui/joy/CircularProgress";
 import NotificationFilter from "@/components/dashboard/notification-management/notification-filter";
 import { ApiNotification } from "@/contexts/auth/types";
+import { useColorScheme } from "@mui/joy/styles";
 
 const metadata = {
   title: `Notification History | Dashboard | ${config.site.name}`,
 } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
+  const { colorScheme } = useColorScheme();
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -290,30 +292,6 @@ export default function Page(): React.JSX.Element {
                       </th>
                       <th
                         style={{ width: "9%" }}
-                        onClick={() => handleSort("channel")}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            "& .sort-icon": {
-                              opacity: 0,
-                              transition: "opacity 0.2s ease-in-out",
-                            },
-                            "&:hover .sort-icon": { opacity: 1 },
-                          }}
-                        >
-                          Channel
-                          <SortIcon
-                            className="sort-icon"
-                            fontSize="16"
-                            color="var(--joy-palette-text-secondary)"
-                          />
-                        </Box>
-                      </th>
-                      <th
-                        style={{ width: "9%" }}
                         onClick={() => handleSort("type")}
                       >
                         <Box
@@ -329,6 +307,30 @@ export default function Page(): React.JSX.Element {
                           }}
                         >
                           Type
+                          <SortIcon
+                            className="sort-icon"
+                            fontSize="16"
+                            color="var(--joy-palette-text-secondary)"
+                          />
+                        </Box>
+                      </th>
+                      <th
+                        style={{ width: "9%" }}
+                        onClick={() => handleSort("channel")}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            "& .sort-icon": {
+                              opacity: 0,
+                              transition: "opacity 0.2s ease-in-out",
+                            },
+                            "&:hover .sort-icon": { opacity: 1 },
+                          }}
+                        >
+                          Channel
                           <SortIcon
                             className="sort-icon"
                             fontSize="16"
@@ -419,25 +421,110 @@ export default function Page(): React.JSX.Element {
                               {notification.Customer?.name?.slice(0, 40) || ''}
                             </Typography>
                           </td>
-                          <td>
-                            <Typography
+                          <td
+                            style={{
+                              fontWeight: 400,
+                              color: "var(--joy-palette-text-secondary)",
+                            }}
+                          >
+                            <Box
                               sx={{
-                                color: "var(--joy-palette-text-secondary)",
                                 fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                                fontWeight: 500,
+                                backgroundColor: notification?.type?.includes(
+                                  "IN_APP"
+                                )
+                                  ? colorScheme === "dark"
+                                    ? "rgba(79, 70, 229, 0.2)"
+                                    : "#E0E7FF"
+                                  : notification?.type?.includes("EMAIL")
+                                  ? colorScheme === "dark"
+                                    ? "rgba(22, 163, 74, 0.2)"
+                                    : "#DCFCE7"
+                                  : colorScheme === "dark"
+                                  ? "rgba(107, 114, 128, 0.2)"
+                                  : "#F3F4F6",
+                                color: notification?.type?.includes("IN_APP")
+                                  ? colorScheme === "dark"
+                                    ? "#818CF8"
+                                    : "#4F46E5"
+                                  : notification?.type?.includes("EMAIL")
+                                  ? colorScheme === "dark"
+                                    ? "#4ADE80"
+                                    : "#16A34A"
+                                  : colorScheme === "dark"
+                                  ? "#9CA3AF"
+                                  : "#6B7280",
+                                borderRadius: "10px",
+                                padding: "2px 8px",
+                                display: "inline-block",
+                              }}
+                            >
+                              {notification.type?.includes("IN_APP")
+                                ? "In-App"
+                                : notification.type?.includes("EMAIL")
+                                ? "Email"
+                                : notification.type?.[0] || ""}
+                            </Box>
+                          </td>
+                          <td
+                            style={{
+                              color: "var(--joy-palette-text-secondary)",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                                fontWeight: 500,
+                                backgroundColor:
+                                  notification?.channel === "info"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(107, 114, 128, 0.2)"
+                                      : "#EEEFF0"
+                                    : notification?.channel === "article"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(107, 114, 128, 0.2)"
+                                      : "#EEEFF0"
+                                    : notification?.channel === "warning"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(183, 76, 6, 0.2)"
+                                      : "#FFF8C5"
+                                    : notification?.channel === "alert"
+                                    ? colorScheme === "dark"
+                                      ? "rgba(211, 35, 47, 0.2)"
+                                      : "#FFE9E8"
+                                    : colorScheme === "dark"
+                                    ? "rgba(79, 70, 229, 0.2)"
+                                    : "#4F46E5",
+                                color:
+                                  notification?.channel === "info"
+                                    ? colorScheme === "dark"
+                                      ? "#D1D5DB"
+                                      : "#6B7280"
+                                    : notification?.channel === "article"
+                                    ? colorScheme === "dark"
+                                      ? "#D1D5DB"
+                                      : "#6B7280"
+                                    : notification?.channel === "warning"
+                                    ? colorScheme === "dark"
+                                      ? "#FDBA74"
+                                      : "#b74c06"
+                                    : notification?.channel === "alert"
+                                    ? colorScheme === "dark"
+                                      ? "#FCA5A5"
+                                      : "#D3232F"
+                                    : colorScheme === "dark"
+                                    ? "#818CF8"
+                                    : "#4F46E5",
+                                borderRadius: "10px",
+                                padding: "2px 8px",
+                                display: "inline-block",
                               }}
                             >
                               {notification.channel}
-                            </Typography>
-                          </td>
-                          <td>
-                            <Typography
-                              sx={{
-                                color: "var(--joy-palette-text-secondary)",
-                                fontSize: { xs: "12px", sm: "14px" },
-                              }}
-                            >
-                              {notification.type}
-                            </Typography>
+                            </Box>
                           </td>
                           <td>
                             <Typography
