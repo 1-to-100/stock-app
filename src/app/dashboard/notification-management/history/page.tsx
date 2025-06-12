@@ -291,7 +291,7 @@ export default function Page(): React.JSX.Element {
                         </Box>
                       </th>
                       <th
-                        style={{ width: "9%" }}
+                        style={{ width: "100px" }}
                         onClick={() => handleSort("type")}
                       >
                         <Box
@@ -315,7 +315,7 @@ export default function Page(): React.JSX.Element {
                         </Box>
                       </th>
                       <th
-                        style={{ width: "9%" }}
+                        style={{ width: "110px" }}
                         onClick={() => handleSort("channel")}
                       >
                         <Box
@@ -403,9 +403,13 @@ export default function Page(): React.JSX.Element {
                                 maxWidth: "100%"
                               }}
                             >
-                              {notification.User?.firstName?.slice(0, 40) || ''} {notification.User?.lastName?.slice(0, 40) || ''}
-                              <br />
-                              {notification.User?.email?.slice(0, 40) || ''}
+                              {notification.User?.firstName?.slice(0, 40) || notification.User?.lastName?.slice(0, 40) ? (
+                                <>
+                                  {notification.User?.firstName?.slice(0, 40) || ''} {notification.User?.lastName?.slice(0, 40) || ''}
+                                </>
+                              ) : (
+                                notification.User?.email?.slice(0, 40) || ''
+                              )}
                             </Typography>
                           </td>
                           <td>

@@ -611,7 +611,7 @@ export default function Page(): React.JSX.Element {
                     }}
                   >
                     <PlusIcon fontSize="18px" />
-                    Invite User
+                    Add Users
                   </Box>
                 </Popper>
               </Box>
