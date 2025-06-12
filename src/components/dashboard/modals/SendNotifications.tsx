@@ -21,6 +21,7 @@ import { sendNotification } from "@/lib/api/notifications";
 import { toast } from "@/components/core/toaster";
 import { queryClient } from "@/lib/react-query";
 import { ApiUser } from "@/contexts/auth/types";
+import Box from "@mui/joy/Box";
 
 interface HttpError {
   response?: {
@@ -185,9 +186,54 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                   if (option.firstName && option.lastName) {
                     displayName = `${option.firstName.slice(0, 10)} ${option.lastName.slice(0, 10)}`;
                   } else if (option.email) {
-                    displayName = option.email;
+                    displayName = option.email.slice(0, 10);
                   }
-                  return `${displayName} - ${option.customer?.name || ''}`;
+                  return option.customer?.name ? `${displayName} (${option.customer.name})` : displayName;
+                }}
+                renderOption={(props, option) => {
+                  let displayName = '';
+                  if (option.firstName && option.lastName) {
+                    displayName = `${option.firstName.slice(0, 10)} ${option.lastName.slice(0, 10)}`;
+                  } else if (option.email) {
+                    displayName = option.email.slice(0, 15);
+                  }
+                  return (
+                    <Box
+                      component="li"
+                      {...props}
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'var(--joy-palette-background-mainBg)'
+                        }
+                      }}
+                    >
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        width: '100%',
+                        alignItems: 'center',
+                        padding: '5px 10px',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'var(--joy-palette-background-mainBg)'
+                        }
+                      }}>
+                        <Typography sx={{
+                          color: 'var(--joy-palette-text-primary)',
+                          fontSize: '14px',
+                          fontWeight: 300
+                        }}>{displayName}</Typography>
+                        <Typography sx={{ 
+                          color: 'var(--joy-palette-text-secondary)', 
+                          fontSize: '12px',
+                          marginLeft: '8px'
+                        }}>
+                          {option.customer?.name ? `(${option.customer.name})` : ''}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  );
                 }}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 placeholder={selectedUser.length > 0 ? `Selected users: ${selectedUser.length}` : "Select users"}
