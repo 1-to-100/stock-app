@@ -532,6 +532,7 @@ export default function Page(): React.JSX.Element {
                           </td>
                           <td>
                             <Typography
+                              component="div"
                               sx={{
                                 color: "var(--joy-palette-text-secondary)",
                                 fontSize: { xs: "12px", sm: "14px" },

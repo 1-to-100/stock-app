@@ -133,7 +133,6 @@ export default function NotificationFilter({
       user: [],
       customer: [],
     });
-    handleClose();
   };
 
   const filterCount = selectedTypes.length + selectedChannels.length + selectedUserIds.length + selectedCustomerIds.length;
@@ -177,383 +176,385 @@ export default function NotificationFilter({
       </Button>
 
       {open && anchorEl && (
-        <Sheet
-          ref={sheetRef}
-          sx={{
-            position: "absolute",
-            top: {
-              xs: anchorEl.getBoundingClientRect().bottom + 5,
-              sm: anchorEl.getBoundingClientRect().bottom + 10,
-            },
-            left: { xs: "10px", sm: "auto" },
-            right: { xs: "10px", sm: "9.5vw" },
-            width: { xs: "calc(100% - 20px)", sm: "550px", md: "600px" },
-            maxHeight: { xs: "70vh", sm: "80vh" },
-            overflowY: "auto",
-            borderRadius: "8px",
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-            border: "1px solid var(--joy-palette-divider)",
-            zIndex: 1300,
-            p: { xs: 1.5, sm: 2 },
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={{ xs: 2, sm: 1 }}
-          >
-            <Box sx={{ width: { xs: "100%", sm: "58%" }, pr: { sm: 1 } }}>
-              <Typography
-                level="body-sm"
-                sx={{
-                  color: "var(--joy-palette-text-secondary)",
-                  fontSize: { xs: "10px", sm: "12px" },
-                  mb: { xs: 1, sm: 1.5 },
-                }}
-              >
-                {filterCount} filter
-                {filterCount !== 1 ? "s" : ""} apply
-              </Typography>
-              <Stack
-                spacing={1}
-                sx={{
-                  borderRight: { sm: "1px solid var(--joy-palette-divider)" },
-                  paddingRight: { sm: "20px" },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    p: { xs: "4px 8px", sm: "6px 12px" },
-                    bgcolor:
-                      activeCategory === "Type"
-                        ? "var(--joy-palette-background-mainBg)"
-                        : "transparent",
-                    borderRadius: "4px",
-                    border:
-                      activeCategory === "Type"
-                        ? "1px solid var(--joy-palette-divider)"
-                        : "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleCategoryClick("Type")}
-                >
-                  <Typography
-                    level="body-md"
-                    fontWeight="400"
-                    sx={{
-                      color:
-                        activeCategory === "Type"
-                          ? "var(--joy-palette-text-primary)"
-                          : "#32383E",
-                      fontSize: { xs: "14px", sm: "16px" },
-                    }}
-                  >
-                    Type
-                  </Typography>
-                  <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    p: { xs: "4px 8px", sm: "6px 12px" },
-                    bgcolor:
-                      activeCategory === "Channel"
-                        ? "var(--joy-palette-background-mainBg)"
-                        : "transparent",
-                    borderRadius: "4px",
-                    border:
-                      activeCategory === "Channel"
-                        ? "1px solid var(--joy-palette-divider)"
-                        : "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleCategoryClick("Channel")}
-                >
-                  <Typography
-                    level="body-md"
-                    fontWeight="400"
-                    sx={{
-                      color:
-                        activeCategory === "Channel"
-                          ? "var(--joy-palette-text-primary)"
-                          : "#32383E",
-                      fontSize: { xs: "14px", sm: "16px" },
-                    }}
-                  >
-                    Channel
-                  </Typography>
-                  <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    p: { xs: "4px 8px", sm: "6px 12px" },
-                    bgcolor:
-                      activeCategory === "User"
-                        ? "var(--joy-palette-background-mainBg)"
-                        : "transparent",
-                    borderRadius: "4px",
-                    border:
-                      activeCategory === "User"
-                        ? "1px solid var(--joy-palette-divider)"
-                        : "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleCategoryClick("User")}
-                >
-                  <Typography
-                    level="body-md"
-                    fontWeight="400"
-                    sx={{
-                      color:
-                        activeCategory === "User"
-                          ? "var(--joy-palette-text-primary)"
-                          : "#32383E",
-                      fontSize: { xs: "14px", sm: "16px" },
-                    }}
-                  >
-                    User
-                  </Typography>
-                  <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    p: { xs: "4px 8px", sm: "6px 12px" },
-                    bgcolor:
-                      activeCategory === "Customer"
-                        ? "var(--joy-palette-background-mainBg)"
-                        : "transparent",
-                    borderRadius: "4px",
-                    border:
-                      activeCategory === "Customer"
-                        ? "1px solid var(--joy-palette-divider)"
-                        : "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleCategoryClick("Customer")}
-                >
-                  <Typography
-                    level="body-md"
-                    fontWeight="400"
-                    sx={{
-                      color:
-                        activeCategory === "Customer"
-                          ? "var(--joy-palette-text-primary)"
-                          : "#32383E",
-                      fontSize: { xs: "14px", sm: "16px" },
-                    }}
-                  >
-                    Customer
-                  </Typography>
-                  <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
-                </Box>
-              </Stack>
-            </Box>
-
-            <Box sx={{ width: { xs: "100%", sm: "42%" }, pl: { sm: 1 } }}>
-              {activeCategory && (
-                <>
-                  <Typography
-                    level="body-md"
-                    fontWeight="600"
-                    sx={{
-                      fontSize: { xs: "10px", sm: "12px" },
-                      mb: { xs: 1, sm: 1.5 },
-                      color: "var(--joy-palette-text-primary)",
-                    }}
-                  >
-                    Select {activeCategory.toLowerCase()}
-                  </Typography>
-                  <Stack spacing={1}>
-                    {activeCategory === "Type" &&
-                      uniqueTypes.map((type) => (
-                        <Box
-                          key={type}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedTypes.includes(type)}
-                            onChange={() => handleTypeToggle(type)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "Channel" &&
-                      uniqueChannels.map((channel) => (
-                        <Box
-                          key={channel}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedChannels.includes(channel)}
-                            onChange={() => handleChannelToggle(channel)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {channel.charAt(0).toUpperCase() + channel.slice(1)}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "User" &&
-                      users?.data.map((user) => (
-                        <Box
-                          key={user.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedUserIds.includes(user.id)}
-                            onChange={() => handleUserToggle(user.id)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {user.firstName} {user.lastName}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "Customer" &&
-                      customers?.map((customer) => (
-                        <Box
-                          key={customer.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedCustomerIds.includes(customer.id)}
-                            onChange={() => handleCustomerToggle(customer.id)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {customer.name}
-                          </Typography>
-                        </Box>
-                      ))}
-                  </Stack>
-                </>
-              )}
-            </Box>
-          </Stack>
-
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={{ xs: 1, sm: 1 }}
+        <ClickAwayListener onClickAway={handleClose}>
+          <Sheet
+            ref={sheetRef}
             sx={{
-              justifyContent: { xs: "center", sm: "space-between" },
-              alignItems: { xs: "center", sm: "center" },
-              mt: { xs: 2, sm: 3 },
+              position: "absolute",
+              top: {
+                xs: anchorEl.getBoundingClientRect().bottom + 5,
+                sm: anchorEl.getBoundingClientRect().bottom + 10,
+              },
+              left: { xs: "10px", sm: "auto" },
+              right: { xs: "10px", sm: "9.5vw" },
+              width: { xs: "calc(100% - 20px)", sm: "550px", md: "600px" },
+              maxHeight: { xs: "70vh", sm: "80vh" },
+              overflowY: "auto",
+              borderRadius: "8px",
+              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              border: "1px solid var(--joy-palette-divider)",
+              zIndex: 1300,
+              p: { xs: 1.5, sm: 2 },
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <Button
-              variant="plain"
-              onClick={handleClear}
-              sx={{
-                fontSize: { xs: "12px", sm: "14px" },
-                width: { xs: "100%", sm: "auto" },
-              }}
-            >
-              Reset filters
-            </Button>
             <Stack
-              direction="row"
-              spacing={1}
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 2, sm: 1 }}
+            >
+              <Box sx={{ width: { xs: "100%", sm: "58%" }, pr: { sm: 1 } }}>
+                <Typography
+                  level="body-sm"
+                  sx={{
+                    color: "var(--joy-palette-text-secondary)",
+                    fontSize: { xs: "10px", sm: "12px" },
+                    mb: { xs: 1, sm: 1.5 },
+                  }}
+                >
+                  {filterCount} filter
+                  {filterCount !== 1 ? "s" : ""} apply
+                </Typography>
+                <Stack
+                  spacing={1}
+                  sx={{
+                    borderRight: { sm: "1px solid var(--joy-palette-divider)" },
+                    paddingRight: { sm: "20px" },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
+                      bgcolor:
+                        activeCategory === "Type"
+                          ? "var(--joy-palette-background-mainBg)"
+                          : "transparent",
+                      borderRadius: "4px",
+                      border:
+                        activeCategory === "Type"
+                          ? "1px solid var(--joy-palette-divider)"
+                          : "none",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleCategoryClick("Type")}
+                  >
+                    <Typography
+                      level="body-md"
+                      fontWeight="400"
+                      sx={{
+                        color:
+                          activeCategory === "Type"
+                            ? "var(--joy-palette-text-primary)"
+                            : "#32383E",
+                        fontSize: { xs: "14px", sm: "16px" },
+                      }}
+                    >
+                      Type
+                    </Typography>
+                    <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
+                      bgcolor:
+                        activeCategory === "Channel"
+                          ? "var(--joy-palette-background-mainBg)"
+                          : "transparent",
+                      borderRadius: "4px",
+                      border:
+                        activeCategory === "Channel"
+                          ? "1px solid var(--joy-palette-divider)"
+                          : "none",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleCategoryClick("Channel")}
+                  >
+                    <Typography
+                      level="body-md"
+                      fontWeight="400"
+                      sx={{
+                        color:
+                          activeCategory === "Channel"
+                            ? "var(--joy-palette-text-primary)"
+                            : "#32383E",
+                        fontSize: { xs: "14px", sm: "16px" },
+                      }}
+                    >
+                      Channel
+                    </Typography>
+                    <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
+                      bgcolor:
+                        activeCategory === "User"
+                          ? "var(--joy-palette-background-mainBg)"
+                          : "transparent",
+                      borderRadius: "4px",
+                      border:
+                        activeCategory === "User"
+                          ? "1px solid var(--joy-palette-divider)"
+                          : "none",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleCategoryClick("User")}
+                  >
+                    <Typography
+                      level="body-md"
+                      fontWeight="400"
+                      sx={{
+                        color:
+                          activeCategory === "User"
+                            ? "var(--joy-palette-text-primary)"
+                            : "#32383E",
+                        fontSize: { xs: "14px", sm: "16px" },
+                      }}
+                    >
+                      User
+                    </Typography>
+                    <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      p: { xs: "4px 8px", sm: "6px 12px" },
+                      bgcolor:
+                        activeCategory === "Customer"
+                          ? "var(--joy-palette-background-mainBg)"
+                          : "transparent",
+                      borderRadius: "4px",
+                      border:
+                        activeCategory === "Customer"
+                          ? "1px solid var(--joy-palette-divider)"
+                          : "none",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleCategoryClick("Customer")}
+                  >
+                    <Typography
+                      level="body-md"
+                      fontWeight="400"
+                      sx={{
+                        color:
+                          activeCategory === "Customer"
+                            ? "var(--joy-palette-text-primary)"
+                            : "#32383E",
+                        fontSize: { xs: "14px", sm: "16px" },
+                      }}
+                    >
+                      Customer
+                    </Typography>
+                    <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
+                  </Box>
+                </Stack>
+              </Box>
+
+              <Box sx={{ width: { xs: "100%", sm: "42%" }, pl: { sm: 1 } }}>
+                {activeCategory && (
+                  <>
+                    <Typography
+                      level="body-md"
+                      fontWeight="600"
+                      sx={{
+                        fontSize: { xs: "10px", sm: "12px" },
+                        mb: { xs: 1, sm: 1.5 },
+                        color: "var(--joy-palette-text-primary)",
+                      }}
+                    >
+                      Select {activeCategory.toLowerCase()}
+                    </Typography>
+                    <Stack spacing={1}>
+                      {activeCategory === "Type" &&
+                        uniqueTypes.map((type) => (
+                          <Box
+                            key={type}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectedTypes.includes(type)}
+                              onChange={() => handleTypeToggle(type)}
+                              sx={{
+                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                              }}
+                            />
+                            <Typography
+                              level="body-sm"
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                color: "var(--joy-palette-text-primary)",
+                              }}
+                            >
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </Typography>
+                          </Box>
+                        ))}
+                      {activeCategory === "Channel" &&
+                        uniqueChannels.map((channel) => (
+                          <Box
+                            key={channel}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectedChannels.includes(channel)}
+                              onChange={() => handleChannelToggle(channel)}
+                              sx={{
+                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                              }}
+                            />
+                            <Typography
+                              level="body-sm"
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                color: "var(--joy-palette-text-primary)",
+                              }}
+                            >
+                              {channel.charAt(0).toUpperCase() + channel.slice(1)}
+                            </Typography>
+                          </Box>
+                        ))}
+                      {activeCategory === "User" &&
+                        users?.data.map((user) => (
+                          <Box
+                            key={user.id}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectedUserIds.includes(user.id)}
+                              onChange={() => handleUserToggle(user.id)}
+                              sx={{
+                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                              }}
+                            />
+                            <Typography
+                              level="body-sm"
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                color: "var(--joy-palette-text-primary)",
+                              }}
+                            >
+                              {user.firstName} {user.lastName}
+                            </Typography>
+                          </Box>
+                        ))}
+                      {activeCategory === "Customer" &&
+                        customers?.map((customer) => (
+                          <Box
+                            key={customer.id}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectedCustomerIds.includes(customer.id)}
+                              onChange={() => handleCustomerToggle(customer.id)}
+                              sx={{
+                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                              }}
+                            />
+                            <Typography
+                              level="body-sm"
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                color: "var(--joy-palette-text-primary)",
+                              }}
+                            >
+                              {customer.name}
+                            </Typography>
+                          </Box>
+                        ))}
+                    </Stack>
+                  </>
+                )}
+              </Box>
+            </Stack>
+
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 1, sm: 1 }}
               sx={{
-                width: { xs: "100%", sm: "auto" },
-                justifyContent: { xs: "space-between", sm: "flex-end" },
+                justifyContent: { xs: "center", sm: "space-between" },
+                alignItems: { xs: "center", sm: "center" },
+                mt: { xs: 2, sm: 3 },
               }}
             >
               <Button
-                variant="outlined"
-                onClick={handleClose}
+                variant="plain"
+                onClick={handleClear}
                 sx={{
                   fontSize: { xs: "12px", sm: "14px" },
-                  width: { xs: "48%", sm: "auto" },
+                  width: { xs: "100%", sm: "auto" },
                 }}
               >
-                Cancel
+                Reset filters
               </Button>
-              <Button
-                variant="solid"
-                onClick={handleApply}
+              <Stack
+                direction="row"
+                spacing={1}
                 sx={{
-                  borderRadius: "20px",
-                  bgcolor: "#4F46E5",
-                  color: "#FFFFFF",
-                  fontSize: { xs: "12px", sm: "14px" },
-                  fontWeight: 500,
-                  px: { xs: 2, sm: 3 },
-                  py: 1,
-                  "&:hover": { bgcolor: "#4338CA" },
-                  width: { xs: "48%", sm: "auto" },
+                  width: { xs: "100%", sm: "auto" },
+                  justifyContent: { xs: "space-between", sm: "flex-end" },
                 }}
               >
-                Apply
-              </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleClose}
+                  sx={{
+                    fontSize: { xs: "12px", sm: "14px" },
+                    width: { xs: "48%", sm: "auto" },
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="solid"
+                  onClick={handleApply}
+                  sx={{
+                    borderRadius: "20px",
+                    bgcolor: "#4F46E5",
+                    color: "#FFFFFF",
+                    fontSize: { xs: "12px", sm: "14px" },
+                    fontWeight: 500,
+                    px: { xs: 2, sm: 3 },
+                    py: 1,
+                    "&:hover": { bgcolor: "#4338CA" },
+                    width: { xs: "48%", sm: "auto" },
+                  }}
+                >
+                  Apply
+                </Button>
+              </Stack>
             </Stack>
-          </Stack>
-        </Sheet>
+          </Sheet>
+        </ClickAwayListener>
       )}
     </>
   );

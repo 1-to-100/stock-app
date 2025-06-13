@@ -612,6 +612,7 @@ export default function AddEditUser({
               <Input
                 placeholder="Enter email"
                 type="email"
+                disabled 
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 error={!!errors?.email}

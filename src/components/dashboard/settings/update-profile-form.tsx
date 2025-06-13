@@ -311,7 +311,7 @@ export function UpdateProfileForm(): React.JSX.Element {
                       </FormControl>
                     )}
                   />
-                  <Controller
+                  {/* <Controller
                     control={control}
                     name="phoneNumber"
                     render={({ field }) => (
@@ -339,7 +339,7 @@ export function UpdateProfileForm(): React.JSX.Element {
                         ) : null}
                       </FormControl>
                     )}
-                  />
+                  /> */}
                 </Stack>
               </Box>
             </Stack>
