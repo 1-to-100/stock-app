@@ -321,7 +321,7 @@ export default function AddEditCustomer({
     <Modal open={open} onClose={onClose}>
       <ModalDialog
         sx={{
-          width: 520,
+          width: { xs: "90%", sm: 520 },
           p: 3,
           borderRadius: "8px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -425,6 +425,7 @@ export default function AddEditCustomer({
             </Typography>
             <Input
               placeholder="Enter email"
+              disabled
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
@@ -474,6 +475,11 @@ export default function AddEditCustomer({
               onChange={(e, newValue) =>
                 handleInputChange("subscriptionId", newValue)
               }
+              slotProps={{
+                listbox: {
+                  placement: 'top'
+                }
+              }}
               sx={{
                 borderRadius: "6px",
                 fontSize: "14px",

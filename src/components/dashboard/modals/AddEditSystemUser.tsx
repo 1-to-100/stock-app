@@ -586,6 +586,7 @@ export default function AddEditSystemUser({
               </Typography>
               <Input
                 placeholder="Enter email"
+                disabled
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}

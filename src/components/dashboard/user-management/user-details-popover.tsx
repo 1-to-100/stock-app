@@ -254,10 +254,15 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     sx={{
                       fontSize: { xs: "16px", sm: "18px" },
                       color: "var(--joy-palette-text-primary)",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                      maxWidth: "100%",
+                      overflowWrap: "break-word",
+                      textOverflow: "ellipsis",
                     }}
                     fontWeight="600"
                   >
-                    {userData?.firstName} {userData?.lastName}
+                    {userData?.firstName.slice(0, 20)} {userData?.lastName.slice(0, 20)}
                   </Typography>
                   <Typography
                     level="body-sm"
@@ -429,9 +434,14 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 sx={{
                   color: "var(--joy-palette-text-primary)",
                   fontSize: { xs: "12px", sm: "14px" },
+                  wordBreak: "break-word",
+                  whiteSpace: "normal",
+                  maxWidth: "100%",
+                  overflowWrap: "break-word",
+                  textOverflow: "ellipsis",
                 }}
               >
-                {userData?.firstName} {userData?.lastName}
+                {userData?.firstName.slice(0, 30)} {userData?.lastName.slice(0, 30)}
               </Typography>
             </Stack>
 

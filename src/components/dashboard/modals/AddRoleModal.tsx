@@ -244,8 +244,12 @@ export default function AddRoleModal({
       let role: Role;
       if (roleData && roleId) {
         role = await editRole(roleId, rolePayload);
+        onClose();
+        toast.success("Role has been successfully updated");
       } else {
         role = await createRole(rolePayload);
+        onClose();
+        toast.success("Role has been successfully created");
       }
 
       const permissionNames: string[] = [];
@@ -286,7 +290,6 @@ export default function AddRoleModal({
       if (onRoleCreated) {
         onRoleCreated();
       }
-      onClose();
     } catch (error) {
       console.error(
         "Error creating or editing role or adding permissions:",

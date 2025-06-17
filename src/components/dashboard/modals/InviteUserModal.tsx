@@ -88,6 +88,10 @@ export default function InviteUser({
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (event.key === "Enter" && emailInput.trim() !== "") {
+      if (emails.length >= 5) {
+        setError("Maximum 5 email addresses allowed");
+        return;
+      }
       const emailError = validateEmail(emailInput.trim());
       if (emailError) {
         setError(emailError);
@@ -131,6 +135,10 @@ export default function InviteUser({
     setError("");
 
     if (emailInput.trim() !== "") {
+      if (emails.length >= 5) {
+        setError("Maximum 5 email addresses allowed");
+        return;
+      }
       const emailError = validateEmail(emailInput.trim());
       if (emailError) {
         setError(emailError);
@@ -206,7 +214,7 @@ export default function InviteUser({
     <Modal open={open} onClose={onClose}>
       <ModalDialog
         sx={{
-          maxWidth: 520,
+          maxWidth: { xs: "90%", sm: 520 },
           width: "100%",
           borderRadius: "8px",
           p: 3,

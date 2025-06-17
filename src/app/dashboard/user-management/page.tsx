@@ -908,7 +908,8 @@ export default function Page(): React.JSX.Element {
                                 >
                                   <IconButton
                                     size="sm"
-                                    onClick={() => {
+                                    onClick={(event) => {
+                                      event.stopPropagation();
                                       if (typeof user.email === "string") {
                                         handleCopyEmail(user.email);
                                       }

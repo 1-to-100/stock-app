@@ -444,8 +444,8 @@ const Filter = ({
                       sx={{
                         color:
                           activeCategory === "Manager"
-                            ? "var(--joy-palette-text-primary)"
-                            : "#32383E ReferralCode",
+                          ? "var(--joy-palette-text-primary)"
+                          : "#32383E",
                         fontSize: { xs: "14px", sm: "16px" },
                       }}
                     >
