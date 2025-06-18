@@ -43,6 +43,7 @@ import {PaperPlaneRight} from "@phosphor-icons/react";
 import {toast} from "@/components/core/toaster";
 import type {SupabaseClient} from "@supabase/supabase-js";
 import {createClient as createSupabaseClient} from "@/lib/supabase/client";
+import {isUserOwner} from "@/lib/user-utils";
 
 interface HttpError extends Error {
   response?: {
@@ -1014,7 +1015,7 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
-                              {user.status != 'active' && (userInfo?.isSuperadmin || userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser") || userInfo?.permissions?.includes("createUser")) &&
+                              {user.status != 'active' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("inviteUser") || userInfo?.permissions?.includes("createUser")) &&
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();
