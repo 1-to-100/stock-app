@@ -435,62 +435,89 @@ export default function NotificationFilter({
                             </Typography>
                           </Box>
                         ))}
-                      {activeCategory === "User" &&
-                        users?.data.map((user) => (
-                          <Box
-                            key={user.id}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1.5,
-                            }}
-                          >
-                            <Checkbox
-                              checked={selectedUserIds.includes(user.id)}
-                              onChange={() => handleUserToggle(user.id)}
-                              sx={{
-                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                              }}
-                            />
-                            <Typography
-                              level="body-sm"
-                              sx={{
-                                fontSize: { xs: "12px", sm: "14px" },
-                                color: "var(--joy-palette-text-primary)",
-                              }}
-                            >
-                              {user.firstName} {user.lastName}
-                            </Typography>
-                          </Box>
-                        ))}
-                      {activeCategory === "Customer" &&
-                        customers?.map((customer) => (
-                          <Box
-                            key={customer.id}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1.5,
-                            }}
-                          >
-                            <Checkbox
-                              checked={selectedCustomerIds.includes(customer.id)}
-                              onChange={() => handleCustomerToggle(customer.id)}
-                              sx={{
-                                transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                              }}
-                            />
-                            <Typography
-                              level="body-sm"
-                              sx={{
-                                fontSize: { xs: "12px", sm: "14px" },
-                                color: "var(--joy-palette-text-primary)",
-                              }}
-                            >
-                              {customer.name}
-                            </Typography>
-                          </Box>
-                        ))}
+                      {activeCategory === "User" && (
+                        <Box
+                          sx={{
+                            maxHeight: { xs: "200px", sm: "250px" },
+                            overflowY: "auto",
+                            borderRadius: "4px",
+                            p: 1,
+                          }}
+                        >
+                          <Stack spacing={1}>
+                            {users?.data.map((user) => (
+                              <Box
+                                key={user.id}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1.5,
+                                }}
+                              >
+                                <Checkbox
+                                  checked={selectedUserIds.includes(user.id)}
+                                  onChange={() => handleUserToggle(user.id)}
+                                  sx={{
+                                    transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                                  }}
+                                />
+                                <Typography
+                                  level="body-sm"
+                                  sx={{
+                                    fontSize: { xs: "12px", sm: "14px" },
+                                    color: "var(--joy-palette-text-primary)",
+                                  }}
+                                >
+                                  {user.firstName && user.lastName 
+                                    ? `${user.firstName} ${user.lastName}`
+                                    : user.email || 'Unknown User'
+                                  }
+                                </Typography>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+                      {activeCategory === "Customer" && (
+                        <Box
+                          sx={{
+                            maxHeight: { xs: "200px", sm: "250px" },
+                            overflowY: "auto",
+                            borderRadius: "4px",
+                            p: 1,
+                          }}
+                        >
+                          <Stack spacing={1}>
+                            {customers?.map((customer) => (
+                              <Box
+                                key={customer.id}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1.5,
+                                }}
+                              >
+                                <Checkbox
+                                  checked={selectedCustomerIds.includes(customer.id)}
+                                  onChange={() => handleCustomerToggle(customer.id)}
+                                  sx={{
+                                    transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                                  }}
+                                />
+                                <Typography
+                                  level="body-sm"
+                                  sx={{
+                                    fontSize: { xs: "12px", sm: "14px" },
+                                    color: "var(--joy-palette-text-primary)",
+                                  }}
+                                >
+                                  {customer.name}
+                                </Typography>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
                     </Stack>
                   </>
                 )}

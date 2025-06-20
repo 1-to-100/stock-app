@@ -57,7 +57,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
 
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users", 1],
-    queryFn: () => getUsers({ page: 1, perPage: 10000 }),
+    queryFn: () => getUsers({ page: 1, perPage: 10000, statusId: ["active"] }),
   });
   const users = usersData?.data || [];
 
@@ -197,10 +197,14 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
                   } else if (option.email) {
                     displayName = option.email.slice(0, 15);
                   }
+                  
+                  const { key, ownerState, ...otherProps } = props as React.HTMLAttributes<HTMLLIElement> & { key?: string; ownerState?: unknown };
+                  
                   return (
                     <Box
                       component="li"
-                      {...props}
+                      key={option.id}
+                      {...otherProps}
                       sx={{
                         cursor: 'pointer',
                         '&:hover': {

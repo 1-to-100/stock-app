@@ -37,6 +37,7 @@ export interface GetUsersParams {
   roleId?: number[];
   customerId?: number[];
   statusId?: string[];
+  hasCustomer?: boolean;
 }
 
 interface GetUsersResponse {
@@ -139,6 +140,9 @@ export async function getUsers(params: GetUsersParams = {}): Promise<GetUsersRes
   }
   if (params.statusId && params.statusId.length > 0) {
     params.statusId.forEach(status => query.append('status', status));
+  }
+  if (params.hasCustomer !== undefined) {
+    query.set('hasCustomer', params.hasCustomer.toString());
   }
 
   return apiFetch<GetUsersResponse>(`${config.site.apiUrl}/users?${query.toString()}`, {

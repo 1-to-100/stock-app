@@ -110,6 +110,7 @@ export default function AddEditCustomer({
     queryFn: async () => {
       const params: GetUsersParams = {
         perPage: 1000,
+        hasCustomer: false,
       };
       return getUsers(params);
     },
@@ -231,6 +232,10 @@ export default function AddEditCustomer({
       newErrors.subscriptionId = "Subscription is required";
     }
 
+    if (!formData.ownerId) {
+      newErrors.ownerId = "Customer admin is required";
+    }
+
     return newErrors;
   };
 
@@ -275,47 +280,7 @@ export default function AddEditCustomer({
     }
   };
 
-  const selectUsers = React.useMemo<SelectUser[]>(() => {
-    const usersData = (users?.data || []) as ApiUser[];
-
-    const filteredUsers = usersData.filter((user) => user.customerId === null);
-
-    const idCounts = filteredUsers.reduce((acc, user) => {
-      acc[user.id] = (acc[user.id] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
-    const duplicates = Object.entries(idCounts)
-      .filter(([id, count]) => count > 1)
-      .map(([id]) => Number(id));
-    if (duplicates.length > 0) {
-      console.warn(`Duplicate user IDs found: ${duplicates.join(", ")}`);
-    }
-
-    const userMap = new Map<number, SelectUser>();
-    filteredUsers.forEach((user) => {
-      if (user.id != null) {
-        userMap.set(user.id, {
-          id: user.id,
-          firstName: user.firstName || "",
-          lastName: user.lastName || "",
-        });
-      }
-    });
-
-    if (customerData?.owner?.id != null) {
-      const ownerId = customerData.owner.id;
-      const ownerUser = usersData.find((user) => user.id === ownerId);
-      if (ownerUser && ownerUser.customerId === null && !userMap.has(ownerId)) {
-        userMap.set(ownerId, {
-          id: ownerId,
-          firstName: customerData.owner.firstName || "",
-          lastName: customerData.owner.lastName || "",
-        });
-      }
-    }
-
-    return Array.from(userMap.values());
-  }, [users, customerData]);
+ 
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -409,6 +374,62 @@ export default function AddEditCustomer({
                 {errors.name}
               </FormHelperText>
             )}
+          </Stack>
+
+          <Stack direction="row" spacing={2}>
+            <Stack sx={{ flex: 1 }}>
+              <Typography
+                level="body-sm"
+                sx={{
+                  fontSize: "14px",
+                  color: "var(--joy-palette-text-primary)",
+                  mb: 0.5,
+                  fontWeight: 500,
+                }}
+              >
+                Customer admin
+              </Typography>
+              <Autocomplete
+                placeholder="Search users"
+                options={users?.data || []}
+                getOptionLabel={(user: ApiUser) =>
+                  `${user.firstName.slice(0, 25)} ${user.lastName.slice(0, 25)}`
+                }
+                getOptionKey={(user: ApiUser) => user.id}
+                value={
+                  users?.data?.find((user: ApiUser) => user.id === formData.ownerId) ||
+                  null
+                }
+                onChange={(event, newValue) => {
+                  handleInputChange("ownerId", newValue ? newValue.id : null);
+                  if (!customerId) {
+                    if (newValue && newValue.email) {
+                      handleInputChange("email", newValue.email);
+                    } else if (!newValue) {
+                      handleInputChange("email", "");
+                    }
+                  }
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                sx={{
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  border: errors?.ownerId
+                    ? "1px solid var(--joy-palette-danger-500)"
+                    : undefined,
+                }}
+              />
+              {errors?.ownerId && (
+                <FormHelperText
+                  sx={{
+                    color: "var(--joy-palette-danger-500)",
+                    fontSize: "12px",
+                  }}
+                >
+                  {errors.ownerId}
+                </FormHelperText>
+              )}
+            </Stack>
           </Stack>
 
           <Stack sx={{ flex: 1 }}>
@@ -549,55 +570,6 @@ export default function AddEditCustomer({
                   }}
                 >
                   {errors.customerSuccessId}
-                </FormHelperText>
-              )}
-            </Stack>
-          </Stack>
-
-          <Stack direction="row" spacing={2}>
-            <Stack sx={{ flex: 1 }}>
-              <Typography
-                level="body-sm"
-                sx={{
-                  fontSize: "14px",
-                  color: "var(--joy-palette-text-primary)",
-                  mb: 0.5,
-                  fontWeight: 500,
-                }}
-              >
-                Customer admin
-              </Typography>
-              <Autocomplete
-                placeholder="Search users"
-                options={selectUsers}
-                getOptionLabel={(user) =>
-                  `${user.firstName.slice(0, 25)} ${user.lastName.slice(0, 25)}`
-                }
-                getOptionKey={(user) => user.id}
-                value={
-                  selectUsers.find((user) => user.id === formData.ownerId) ||
-                  null
-                }
-                onChange={(event, newValue) =>
-                  handleInputChange("ownerId", newValue ? newValue.id : null)
-                }
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                sx={{
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  border: errors?.ownerId
-                    ? "1px solid var(--joy-palette-danger-500)"
-                    : undefined,
-                }}
-              />
-              {errors?.ownerId && (
-                <FormHelperText
-                  sx={{
-                    color: "var(--joy-palette-danger-500)",
-                    fontSize: "12px",
-                  }}
-                >
-                  {errors.ownerId}
                 </FormHelperText>
               )}
             </Stack>

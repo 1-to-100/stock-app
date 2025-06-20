@@ -470,7 +470,7 @@ export default function Page(): React.JSX.Element {
                 py: { xs: 1, sm: 0.75 },
               }}
             >
-              Add notifications
+              Add notification
             </Button>
           </Stack>
         </Stack>

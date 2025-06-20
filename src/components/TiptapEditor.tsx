@@ -362,6 +362,9 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   const [isFontSizeDropdownOpen, setIsFontSizeDropdownOpen] = useState(false);
   const [isFontFamilyDropdownOpen, setIsFontFamilyDropdownOpen] = useState(false);
   
+  const headingDropdownRef = useRef<HTMLDivElement>(null);
+  const fontFamilyDropdownRef = useRef<HTMLDivElement>(null);
+  
   // Custom button state
   const [buttonText, setButtonText] = useState("Button");
   const [buttonUrl, setButtonUrl] = useState("#");
@@ -587,22 +590,104 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   ];
 
   useEffect(() => {
-    const handleClickOutside: (event: MouseEvent) => void = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target;
       if (
-        isColorPickerOpen &&
+        target instanceof globalThis.Node &&
         colorButtonRef.current &&
-        !colorButtonRef.current.contains(event.target as globalThis.Node) &&
-        !(event.target as HTMLElement).closest(".color-picker")
+        !colorButtonRef.current.contains(target) &&
+        !(target as HTMLElement).closest('.color-picker')
       ) {
         setIsColorPickerOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    if (isColorPickerOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isColorPickerOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target;
+      if (
+        target instanceof globalThis.Node &&
+        headingDropdownRef.current &&
+        !headingDropdownRef.current.contains(target)
+      ) {
+        setIsHeadingDropdownOpen(false);
+      }
+    };
+    if (isHeadingDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isHeadingDropdownOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target;
+      if (
+        target instanceof globalThis.Node &&
+        fontFamilyDropdownRef.current &&
+        !fontFamilyDropdownRef.current.contains(target)
+      ) {
+        setIsFontFamilyDropdownOpen(false);
+      }
+    };
+    if (isFontFamilyDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFontFamilyDropdownOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target;
+      if (
+        target instanceof globalThis.Node &&
+        linkButtonRef.current &&
+        !linkButtonRef.current.contains(target) &&
+        !(target as HTMLElement).closest('.link-input-container')
+      ) {
+        setIsLinkInputOpen(false);
+      }
+    };
+    if (isLinkInputOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLinkInputOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target;
+      if (
+        target instanceof globalThis.Node &&
+        customButtonRef.current &&
+        !customButtonRef.current.contains(target) &&
+        !(target as HTMLElement).closest('.custom-button-popup')
+      ) {
+        setIsCustomButtonOpen(false);
+      }
+    };
+    if (isCustomButtonOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCustomButtonOpen]);
 
   return (
     <div>
@@ -681,7 +766,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             <span className="tooltip">Font Size</span>
           </div> */}
           <div className="tooltip-wrapper">
-            <div className="custom-select">
+            <div className="custom-select" ref={fontFamilyDropdownRef}>
               <button
                 onClick={() =>
                   setIsFontFamilyDropdownOpen(!isFontFamilyDropdownOpen)
@@ -716,7 +801,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
             <span className="tooltip">Font Family</span>
           </div>
           <div className="tooltip-wrapper">
-            <div className="custom-select">
+            <div className="custom-select" ref={headingDropdownRef}>
               <button
                 onClick={() => setIsHeadingDropdownOpen(!isHeadingDropdownOpen)}
                 disabled={isPreview}

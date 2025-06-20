@@ -11,6 +11,7 @@ import Stack from "@mui/joy/Stack";
 import Input from "@mui/joy/Input";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
+import Autocomplete from "@mui/joy/Autocomplete";
 import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
@@ -262,6 +263,14 @@ export default function AddEditUser({
         setErrors((prev) => ({ ...prev, email: emailError }));
       }
     }
+  };
+
+  const handleCustomerChange = (event: React.SyntheticEvent, newValue: string | null) => {
+    handleInputChange("customer", newValue || "");
+  };
+
+  const handleRoleChange = (event: React.SyntheticEvent, newValue: string | null) => {
+    handleInputChange("role", newValue || "");
   };
 
   const handleAdditionalEmailChange = async (index: number, value: string) => {
@@ -612,7 +621,7 @@ export default function AddEditUser({
               <Input
                 placeholder="Enter email"
                 type="email"
-                disabled 
+                disabled={!!userId} 
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 error={!!errors?.email}
@@ -655,12 +664,16 @@ export default function AddEditUser({
               >
                 Customer
               </Typography>
-              <Select
+              <Autocomplete
                 placeholder="Select customer"
                 value={formData.customer}
-                onChange={(e, newValue) =>
-                  handleInputChange("customer", newValue as string)
-                }
+                onChange={handleCustomerChange}
+                options={customers?.sort((a, b) => a.name.localeCompare(b.name)).map((customer) => customer.name) || []}
+                slotProps={{
+                  listbox: {
+                    placement: 'top',
+                  },
+                }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
@@ -668,14 +681,7 @@ export default function AddEditUser({
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
                 }}
-              >
-                {customers &&
-                  customers?.map((customer) => (
-                    <Option key={customer.id} value={customer.name}>
-                      {customer?.name.slice(0, 45)}
-                    </Option>
-                  ))}
-              </Select>
+              />
               {errors?.customer && (
                 <FormHelperText
                   sx={{
@@ -705,12 +711,16 @@ export default function AddEditUser({
               >
                 Role
               </Typography>
-              <Select
+              <Autocomplete
                 placeholder="Select role"
                 value={formData.role}
-                onChange={(e, newValue) =>
-                  handleInputChange("role", newValue as string)
-                }
+                onChange={handleRoleChange}
+                options={roles?.sort((a, b) => a.name.localeCompare(b.name)).map((role) => role.name) || []}
+                slotProps={{
+                  listbox: {
+                    placement: 'top',
+                  },
+                }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
@@ -718,13 +728,7 @@ export default function AddEditUser({
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
                 }}
-              >
-                {roles?.map((role) => (
-                  <Option key={role.id} value={role.name}>
-                    {role.name}
-                  </Option>
-                ))}
-              </Select>
+              />
               {errors?.role && (
                 <FormHelperText
                   sx={{
