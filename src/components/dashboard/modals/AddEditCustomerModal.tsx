@@ -280,8 +280,6 @@ export default function AddEditCustomer({
     }
   };
 
- 
-
   return (
     <Modal open={open} onClose={onClose}>
       <ModalDialog
@@ -391,7 +389,7 @@ export default function AddEditCustomer({
               </Typography>
               <Autocomplete
                 placeholder="Search users"
-                options={users?.data || []}
+                options={users?.data.sort((a, b) => a.firstName.localeCompare(b.firstName)) || []}
                 getOptionLabel={(user: ApiUser) =>
                   `${user.firstName.slice(0, 25)} ${user.lastName.slice(0, 25)}`
                 }
@@ -541,12 +539,13 @@ export default function AddEditCustomer({
               >
                 Customer Success Manager
               </Typography>
-              <Select
+              <Autocomplete
                 placeholder="Select user"
-                value={formData.customerSuccessId}
-                onChange={(e, newValue) =>
-                  handleInputChange("customerSuccessId", newValue)
-                }
+                options={managers?.sort((a, b) => a.name.localeCompare(b.name)) || []}
+                value={managers?.find((manager) => manager.id === formData.customerSuccessId) || null}
+                onChange={(event, newValue) => handleInputChange("customerSuccessId", newValue ? newValue.id : null)}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 sx={{
                   borderRadius: "6px",
                   fontSize: "14px",
@@ -554,14 +553,12 @@ export default function AddEditCustomer({
                     ? "1px solid var(--joy-palette-danger-500)"
                     : undefined,
                 }}
-              >
-                {managers &&
-                  managers.map((manager) => (
-                    <Option key={manager.id} value={manager.id}>
-                      {manager.name}
-                    </Option>
-                  ))}
-              </Select>
+                slotProps={{
+                  listbox: {
+                    placement: 'top',
+                  },
+                }}
+              />
               {errors?.customerSuccessId && (
                 <FormHelperText
                   sx={{

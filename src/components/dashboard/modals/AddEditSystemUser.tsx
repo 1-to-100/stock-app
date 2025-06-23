@@ -11,6 +11,7 @@ import Stack from "@mui/joy/Stack";
 import Input from "@mui/joy/Input";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
+import Autocomplete from "@mui/joy/Autocomplete";
 import Button from "@mui/joy/Button";
 import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
@@ -586,7 +587,7 @@ export default function AddEditSystemUser({
               </Typography>
               <Input
                 placeholder="Enter email"
-                disabled
+                disabled={!!userId}
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
@@ -630,13 +631,19 @@ export default function AddEditSystemUser({
               >
                 Customer
               </Typography>
-              <Select
+              <Autocomplete
                 placeholder="Select customer"
                 value={formData.customer}
-                onChange={(e, newValue) =>
+                onChange={(event, newValue) =>
                   handleInputChange("customer", newValue as string)
                 }
+                options={customers?.sort((a, b) => a.name.localeCompare(b.name)).map((customer) => customer.name) || []}
                 disabled={formData.systemRole === "system_admin"}
+                slotProps={{
+                  listbox: {
+                    placement: 'top',
+                  },
+                }}
                 sx={{
                   borderRadius: "6px",
                   fontSize: { xs: "12px", sm: "14px" },
@@ -645,14 +652,7 @@ export default function AddEditSystemUser({
                     : undefined,
                   opacity: formData.systemRole === "system_admin" ? 0.5 : 1,
                 }}
-              >
-                {customers &&
-                  customers?.map((customer) => (
-                    <Option key={customer.id} value={customer.name}>
-                      {customer?.name.slice(0, 45)}
-                    </Option>
-                  ))}
-              </Select>
+              />
               {errors?.customer && (
                 <FormHelperText
                   sx={{
