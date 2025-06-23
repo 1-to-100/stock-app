@@ -29,21 +29,23 @@ import AddEditUser from "@/components/dashboard/modals/AddEditUser";
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
-import SearchInput from "@/components/dashboard/layout/search-input";
+import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {getUsers, getUserById, inviteUser, resendInviteUser} from "../../../lib/api/users";
-import { getRoles } from "../../../lib/api/roles";
-import { getCustomers } from "../../../lib/api/customers";
 import { ApiUser } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import { useUserInfo } from "@/hooks/use-user-info";
 import InviteUserModal from "@/components/dashboard/modals/InviteUserModal";
-import {PaperPlaneRight} from "@phosphor-icons/react";
-import {toast} from "@/components/core/toaster";
-import type {SupabaseClient} from "@supabase/supabase-js";
-import {createClient as createSupabaseClient} from "@/lib/supabase/client";
-import {isUserOwner} from "@/lib/user-utils";
+import { PaperPlaneRight } from "@phosphor-icons/react";
+import { toast } from "@/components/core/toaster";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
+import { isUserOwner } from "@/lib/user-utils";
+import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { useImpersonation } from "@/contexts/impersonation-context";
+import {getCustomers} from "@/lib/api/customers";
+import {getRoles} from "@/lib/api/roles";
+import {getUserById, getUsers, resendInviteUser} from "@/lib/api/users";
 
 interface HttpError extends Error {
   response?: {
@@ -88,9 +90,14 @@ export default function Page(): React.JSX.Element {
   const { userInfo } = useUserInfo();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openInviteModal, setOpenInviteModal] = useState(false);
-  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
+  const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const queryClient = useQueryClient();
-  const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
+  const [supabaseClient] = React.useState<SupabaseClient>(
+    createSupabaseClient()
+  );
+  const { setImpersonatedUserId } = useImpersonation();
 
   const rowsPerPage = 10;
 
@@ -433,6 +440,12 @@ export default function Page(): React.JSX.Element {
     queryClient.invalidateQueries({ queryKey: ["users"] });
   };
 
+  const handleImpersonateUser = (userId: number) => {
+    setImpersonatedUserId(userId);
+    handleMenuClose();
+    window.location.reload();
+  };
+
   if (error) {
     const httpError = error as HttpError;
     let status: number | undefined = httpError.response?.status;
@@ -472,16 +485,7 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <Box
-        sx={{
-          position: { xs: "static", sm: "fixed" },
-          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
-          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
-          zIndex: 1000,
-        }}
-      >
-        <SearchInput onSearch={handleSearch} />
-      </Box>
+      <WrapperSearchInput onSearch={handleSearch} />
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
@@ -560,8 +564,12 @@ export default function Page(): React.JSX.Element {
               open={isFilterOpen}
               onOpen={handleOpenFilter}
             />
-            {(userInfo?.isSuperadmin || isUserOwner(userInfo)|| userInfo?.isCustomerSuccess || userInfo?.permissions?.includes("inviteUser") || userInfo?.permissions?.includes("createUser")) ? (
-              <Box sx={{ position: 'relative' }}>
+            {userInfo?.isSuperadmin ||
+            isUserOwner(userInfo) ||
+            userInfo?.isCustomerSuccess ||
+            userInfo?.permissions?.includes("inviteUser") ||
+            userInfo?.permissions?.includes("createUser") ? (
+              <Box sx={{ position: "relative" }}>
                 <Button
                   variant="solid"
                   color="primary"
@@ -816,7 +824,7 @@ export default function Page(): React.JSX.Element {
                               checked={selectedRows.includes(user.id)}
                               onChange={(event) => {
                                 event.stopPropagation();
-                                handleRowCheckboxChange(user.id)
+                                handleRowCheckboxChange(user.id);
                               }}
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -964,7 +972,12 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                              }}
+                            >
                               {user.customer?.name.slice(0, 45)}
                             </Box>
                           </td>
@@ -973,7 +986,12 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                              }}
+                            >
                               {user.role?.name.slice(0, 75)}
                             </Box>
                           </td>
@@ -1015,25 +1033,56 @@ export default function Page(): React.JSX.Element {
                                 <EyeIcon fontSize="20px" />
                                 Open detail
                               </Box>
-                              {user.status != 'active' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("inviteUser") || userInfo?.permissions?.includes("createUser")) &&
-                                <Box
-                                  onMouseDown={(event) => {
-                                    event.preventDefault();
-                                    resendInviteUser(user.email).then(() => {
-                                      toast.success("Invite sent successfully");
-                                    }).catch((error) => {
-                                      toast.error(`Failed to send invite: ${error.message}`);
-                                    });
-                                  }}
-                                  sx={{
-                                    ...menuItemStyle,
-                                    gap: { xs: "10px", sm: "14px" },
-                                  }}
-                                >
-                                  <PaperPlaneRight size={20} />
-                                  Resend invite
-                                </Box>
-                              }
+                              {user.status != "active" &&
+                                (isUserOwner(userInfo, user) ||
+                                  userInfo?.permissions?.includes(
+                                    "inviteUser"
+                                  ) ||
+                                  userInfo?.permissions?.includes(
+                                    "createUser"
+                                  )) && (
+                                  <Box
+                                    onMouseDown={(event) => {
+                                      event.preventDefault();
+                                      resendInviteUser(user.email)
+                                        .then(() => {
+                                          toast.success(
+                                            "Invite sent successfully"
+                                          );
+                                        })
+                                        .catch((error) => {
+                                          toast.error(
+                                            `Failed to send invite: ${error.message}`
+                                          );
+                                        });
+                                    }}
+                                    sx={{
+                                      ...menuItemStyle,
+                                      gap: { xs: "10px", sm: "14px" },
+                                    }}
+                                  >
+                                    <PaperPlaneRight size={20} />
+                                    Resend invite
+                                  </Box>
+                                )}
+                              {user.status == "active" &&
+                                userInfo &&
+                                (userInfo.isSuperadmin ||
+                                  userInfo.isCustomerSuccess) && (
+                                  <Box
+                                    onMouseDown={(event) => {
+                                      event.preventDefault();
+                                      handleImpersonateUser(user.id);
+                                    }}
+                                    sx={{
+                                      ...menuItemStyle,
+                                      gap: { xs: "10px", sm: "14px" },
+                                    }}
+                                  >
+                                    <ArrowRightIcon size={20} />
+                                    Impersonate user
+                                  </Box>
+                                )}
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();

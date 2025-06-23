@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { Metadata } from "next";
+import {useCallback, useEffect, useState} from "react";
+import type {Metadata} from "next";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
@@ -11,33 +12,32 @@ import Checkbox from "@mui/joy/Checkbox";
 import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
 import Tooltip from "@mui/joy/Tooltip";
-import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
-import { Copy as CopyIcon } from "@phosphor-icons/react/dist/ssr/Copy";
-import { X as X } from "@phosphor-icons/react/dist/ssr/X";
-import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
-import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
-import { config } from "@/config";
+import {Plus as PlusIcon} from "@phosphor-icons/react/dist/ssr/Plus";
+import {Trash as TrashIcon} from "@phosphor-icons/react/dist/ssr/Trash";
+import {DotsThreeVertical} from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
+import {Copy as CopyIcon} from "@phosphor-icons/react/dist/ssr/Copy";
+import {X as X} from "@phosphor-icons/react/dist/ssr/X";
+import {Eye as EyeIcon} from "@phosphor-icons/react/dist/ssr/Eye";
+import {PencilSimple as PencilIcon} from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import {ToggleLeft} from "@phosphor-icons/react/dist/ssr/ToggleLeft";
+import {ArrowsDownUp as SortIcon} from "@phosphor-icons/react/dist/ssr/ArrowsDownUp";
+import {config} from "@/config";
 import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemModal";
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
-import { useState, useCallback, useEffect } from "react";
 import Pagination from "@/components/dashboard/layout/pagination";
-import { Popper } from "@mui/base/Popper";
-import SearchInput from "@/components/dashboard/layout/search-input";
-import { useQuery } from "@tanstack/react-query";
-import { getSystemUsers, getSystemUserById } from "../../../lib/api/system-users";
-import { getRoles } from "../../../lib/api/roles";
-import { getCustomers } from "../../../lib/api/customers";
-import { ApiUser, SystemUser } from "@/contexts/auth/types";
+import {Popper} from "@mui/base/Popper";
+import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import {useQuery} from "@tanstack/react-query";
+import {ApiUser, SystemUser} from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
-import { ColorPaletteProp, VariantProp } from "@mui/joy";
+import {ColorPaletteProp, VariantProp} from "@mui/joy";
 import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
-import {resendInviteUser} from "@/lib/api/users";
-import {toast} from "@/components/core/toaster";
-import {PaperPlaneRight} from "@phosphor-icons/react";
+import {useUserInfo} from "@/hooks/use-user-info";
+import {useImpersonation} from "@/contexts/impersonation-context";
+import {ArrowRight as ArrowRightIcon} from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import {getRoles} from "@/lib/api/roles";
+import {getCustomers} from "@/lib/api/customers";
+import {getSystemUserById, getSystemUsers} from "@/lib/api/system-users";
 
 interface HttpError extends Error {
   response?: {
@@ -82,6 +82,8 @@ export default function Page(): React.JSX.Element {
     isCustomerSuccess: false,
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { userInfo } = useUserInfo();
+  const { setImpersonatedUserId } = useImpersonation();
 
   const rowsPerPage = 10;
 
@@ -316,6 +318,12 @@ export default function Page(): React.JSX.Element {
     handleMenuClose();
   };
 
+  const handleImpersonateUser = (userId: number) => {
+    setImpersonatedUserId(userId);
+    handleMenuClose();
+    window.location.reload();
+  };
+
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
     setUserToEditId(null);
@@ -429,16 +437,7 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <Box
-        sx={{
-          position: { xs: "static", sm: "fixed" },
-          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
-          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
-          zIndex: 1000,
-        }}
-      >
-        <SearchInput onSearch={handleSearch} />
-      </Box>
+      <WrapperSearchInput onSearch={handleSearch} />
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
@@ -715,7 +714,7 @@ export default function Page(): React.JSX.Element {
                               checked={selectedRows.includes(user.id)}
                               onChange={(event) => {
                                 event.stopPropagation();
-                                handleRowCheckboxChange(user.id)
+                                handleRowCheckboxChange(user.id);
                               }}
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -858,7 +857,12 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                              }}
+                            >
                               {user.customer?.name.slice(0, 45)}
                             </Box>
                           </td>
@@ -867,8 +871,15 @@ export default function Page(): React.JSX.Element {
                               color: "var(--joy-palette-text-secondary)",
                             }}
                           >
-                            <Box sx={{ fontSize: { xs: "12px", sm: "14px" }, wordBreak: "break-all" }}>
-                              {user.isSuperadmin ? "System Administrator" : "Customer Success"}
+                            <Box
+                              sx={{
+                                fontSize: { xs: "12px", sm: "14px" },
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {user.isSuperadmin
+                                ? "System Administrator"
+                                : "Customer Success"}
                             </Box>
                           </td>
                           <td>
@@ -941,6 +952,24 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
+                              {user.status === "active" &&
+                                userInfo &&
+                                (userInfo.isSuperadmin ||
+                                  userInfo.isCustomerSuccess) && (
+                                  <Box
+                                    onMouseDown={(event) => {
+                                      event.preventDefault();
+                                      handleImpersonateUser(user.id);
+                                    }}
+                                    sx={{
+                                      ...menuItemStyle,
+                                      gap: { xs: "10px", sm: "14px" },
+                                    }}
+                                  >
+                                    <ArrowRightIcon size={20} />
+                                    Impersonate user
+                                  </Box>
+                                )}
                               {/* <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
@@ -1019,7 +1048,10 @@ export default function Page(): React.JSX.Element {
         userId={userToEditId}
       />
 
-      <AddEditSystemUser open={openAddUserModal} onClose={handleCloseAddUserModal} />
+      <AddEditSystemUser
+        open={openAddUserModal}
+        onClose={handleCloseAddUserModal}
+      />
     </Box>
   );
 }

@@ -5,7 +5,7 @@ import { useState } from "react";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
-import SearchInput from "@/components/dashboard/layout/search-input";
+import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import Button from "@mui/joy/Button";
 import CircularProgress from "@mui/joy/CircularProgress";
@@ -106,16 +106,8 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <Box
-        sx={{
-          position: { xs: "static", sm: "fixed" },
-          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
-          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
-          zIndex: 1000,
-        }}
-      >
-        <SearchInput onSearch={handleSearch} />
-      </Box>
+      <WrapperSearchInput onSearch={handleSearch} />
+
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

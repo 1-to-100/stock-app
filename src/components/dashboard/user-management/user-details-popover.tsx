@@ -1,30 +1,29 @@
 "use client";
 
 import * as React from "react";
+import {useEffect, useRef, useState} from "react";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Stack from "@mui/joy/Stack";
 import Box from "@mui/joy/Box";
 import Avatar from "@mui/joy/Avatar";
 import Button from "@mui/joy/Button";
-import { X as XIcon } from "@phosphor-icons/react/dist/ssr/X";
-import { DotsThreeVertical as DotsIcon } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
-import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
-import { ToggleLeft } from "@phosphor-icons/react/dist/ssr/ToggleLeft";
-import { Trash as TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import { Password as Password } from "@phosphor-icons/react/dist/ssr/Password";
-import { Warning as Warning } from "@phosphor-icons/react/dist/ssr/Warning";
+import {X as XIcon} from "@phosphor-icons/react/dist/ssr/X";
+import {DotsThreeVertical as DotsIcon} from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
+import {PencilSimple as PencilIcon} from "@phosphor-icons/react/dist/ssr/PencilSimple";
+import {Trash as TrashIcon} from "@phosphor-icons/react/dist/ssr/Trash";
+import {Warning as Warning} from "@phosphor-icons/react/dist/ssr/Warning";
 import DeleteDeactivateUserModal from "../modals/DeleteItemModal";
 import ResetPasswordUserModal from "../modals/ResetPasswordUserModal";
 import SuspendUserModal from "../modals/SuspendUserModal";
-import { useState, useEffect, useRef } from "react";
 import AddEditUser from "../modals/AddEditUser";
-import { Popper } from "@mui/base/Popper";
-import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
-import { useColorScheme } from "@mui/joy/styles";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUserById, updateUser } from "../../../lib/api/users";
-import { ApiUser } from "@/contexts/auth/types";
+import {Popper} from "@mui/base/Popper";
+import {ArrowRight as ArrowRightIcon} from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import {useColorScheme} from "@mui/joy/styles";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {getUserById, updateUser} from "../../../lib/api/users";
+import {useImpersonation} from "@/contexts/impersonation-context";
+import {useUserInfo} from "@/hooks/use-user-info";
 
 interface UserDetailsPopoverProps {
   open: boolean;
@@ -49,6 +48,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const { colorScheme } = useColorScheme();
   const isLightTheme = colorScheme === "light";
   const queryClient = useQueryClient();
+  const { setImpersonatedUserId } = useImpersonation();
+  const { userInfo } = useUserInfo();
 
   const { data: userData, isLoading: isUserLoading } = useQuery({
     queryKey: ["user", userId],
@@ -148,6 +149,15 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
     handleMenuClose();
   };
 
+  const handleImpersonateUser = () => {
+    if (userData) {
+      setImpersonatedUserId(userData.id);
+      handleMenuClose();
+      onClose();
+      window.location.reload();
+    }
+  };
+
   const menuItemStyle = {
     padding: { xs: "6px 12px", sm: "8px 16px" },
     fontSize: { xs: "14px", sm: "16px" },
@@ -243,10 +253,18 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                 {userData?.avatar ? (
                   <Avatar
                     src={userData.avatar}
-                    sx={{ width: { xs: 48, sm: 64 }, height: { xs: 48, sm: 64 } }}
+                    sx={{
+                      width: { xs: 48, sm: 64 },
+                      height: { xs: 48, sm: 64 },
+                    }}
                   />
                 ) : (
-                  <Avatar sx={{ width: { xs: 48, sm: 64 }, height: { xs: 48, sm: 64 } }} />
+                  <Avatar
+                    sx={{
+                      width: { xs: 48, sm: 64 },
+                      height: { xs: 48, sm: 64 },
+                    }}
+                  />
                 )}
                 <Stack alignItems={{ xs: "center", sm: "flex-start" }}>
                   <Typography
@@ -262,7 +280,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     }}
                     fontWeight="600"
                   >
-                    {userData?.firstName.slice(0, 20)} {userData?.lastName.slice(0, 20)}
+                    {userData?.firstName.slice(0, 20)}{" "}
+                    {userData?.lastName.slice(0, 20)}
                   </Typography>
                   <Typography
                     level="body-sm"
@@ -370,40 +389,20 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <PencilIcon fontSize="16px" style={iconStyle} />
               Edit
             </Box>
-            {/* <Box sx={menuItemStyle}>
-              <ArrowRightIcon fontSize="16px" style={iconStyle} />
-              Impersonate user
-            </Box>
-            <Box
-              onMouseDown={(event) => {
-                event.preventDefault();
-                handleDeactivate();
-              }}
-              sx={menuItemStyle}
-            >
-              <ToggleLeft fontSize="16px" style={iconStyle} />
-              Deactivate
-            </Box>
-            <Box
-              onMouseDown={(event) => {
-                event.preventDefault();
-                handleSuspend();
-              }}
-              sx={menuItemStyle}
-            >
-              <Warning fontSize="16px" style={iconStyle} />
-              Suspend
-            </Box>
-            <Box
-              onMouseDown={(event) => {
-                event.preventDefault();
-                handleResetPassword();
-              }}
-              sx={menuItemStyle}
-            >
-              <Password fontSize="16px" style={iconStyle} />
-              Reset password
-            </Box> */}
+            {userData?.status === "active" &&
+              userInfo &&
+              (userInfo.isSuperadmin || userInfo.isCustomerSuccess) && (
+                <Box
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    handleImpersonateUser();
+                  }}
+                  sx={menuItemStyle}
+                >
+                  <ArrowRightIcon fontSize="16px" style={iconStyle} />
+                  Impersonate user
+                </Box>
+              )}
             <Box
               onMouseDown={(event) => {
                 event.preventDefault();
@@ -441,7 +440,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   textOverflow: "ellipsis",
                 }}
               >
-                {userData?.firstName.slice(0, 30)} {userData?.lastName.slice(0, 30)}
+                {userData?.firstName.slice(0, 30)}{" "}
+                {userData?.lastName.slice(0, 30)}
               </Typography>
             </Stack>
 

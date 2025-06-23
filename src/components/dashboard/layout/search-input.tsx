@@ -4,10 +4,26 @@ import * as React from "react";
 import Input from "@mui/joy/Input";
 import Typography from "@mui/joy/Typography";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import Box from "@mui/joy/Box";
 
 interface SearchInputProps {
   onSearch: (value: string) => void;
   style?: React.CSSProperties;
+}
+
+export function WrapperSearchInput({ onSearch, style }: SearchInputProps) {
+  return (
+    <Box
+      sx={{
+        position: { xs: "static", sm: "fixed" },
+        top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
+        left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
+        zIndex: 1000,
+      }}
+    >
+      <SearchInput onSearch={onSearch} style={style} />
+    </Box>
+  );
 }
 
 export default function SearchInput({ onSearch, style }: SearchInputProps) {

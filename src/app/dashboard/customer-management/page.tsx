@@ -22,7 +22,7 @@ import AddEditCustomer from "@/components/dashboard/modals/AddEditCustomerModal"
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
-import SearchInput from "@/components/dashboard/layout/search-input";
+import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomersList, deleteCustomer } from "../../../lib/api/customers";
 import { Customer } from "@/contexts/auth/types";
@@ -333,16 +333,7 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <Box
-        sx={{
-          position: { xs: "static", sm: "fixed" },
-          top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
-          left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
-          zIndex: 1000,
-        }}
-      >
-        <SearchInput onSearch={handleSearch} />
-      </Box>
+      <WrapperSearchInput onSearch={handleSearch} />
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack

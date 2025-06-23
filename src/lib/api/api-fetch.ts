@@ -1,13 +1,15 @@
 import { getAuth } from "firebase/auth";
-import {AuthStrategy} from "@/lib/auth/strategy";
+import { AuthStrategy } from "@/lib/auth/strategy";
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
-import {config} from "@/config";
+import { config } from "@/config";
 
 interface CustomError extends Error {
   response?: { data: unknown };
 }
 
-export async function getAccessToken(strategy: keyof typeof AuthStrategy): Promise<string> {
+export async function getAccessToken(
+  strategy: keyof typeof AuthStrategy
+): Promise<string> {
   if (strategy === AuthStrategy.FIREBASE) {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -32,13 +34,24 @@ export async function getAccessToken(strategy: keyof typeof AuthStrategy): Promi
   throw new Error("Unsupported authentication strategy");
 }
 
+function getImpersonatedUserId(): number | null {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("impersonatedUserId");
+    return stored ? parseInt(stored, 10) : null;
+  }
+  return null;
+}
 
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const idToken = await getAccessToken(config.auth.strategy);
-  const customerId = typeof window !== 'undefined' ? localStorage.getItem('selectedCustomerId') : null;
+  const customerId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("selectedCustomerId")
+      : null;
+  const impersonatedUserId = getImpersonatedUserId();
 
   const response = await fetch(path, {
     ...options,
@@ -47,11 +60,16 @@ export async function apiFetch<T>(
       Authorization: `Bearer ${idToken}`,
       "Content-Type": "application/json",
       ...(customerId && { "x-customer-id": customerId }),
+      ...(impersonatedUserId && {
+        "x-impersonate-user-id": impersonatedUserId.toString(),
+      }),
     },
   });
 
   if (!response.ok) {
-    const error: CustomError = new Error(`HTTP error! status: ${response.status}`);
+    const error: CustomError = new Error(
+      `HTTP error! status: ${response.status}`
+    );
     try {
       error.response = { data: await response.json() };
     } catch {
