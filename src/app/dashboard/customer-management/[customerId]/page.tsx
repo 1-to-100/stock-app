@@ -1132,7 +1132,7 @@ const Customer: React.FC = () => {
                 >
                   {customerData?.name.slice(0, 45)}
                 </Typography>
-                {customerData && customerData.status && (
+                {/* {customerData && customerData.status && (
                   <Typography
                     level="body-sm"
                     sx={{
@@ -1159,7 +1159,7 @@ const Customer: React.FC = () => {
                     {customerData.status.charAt(0).toUpperCase() +
                       customerData.status.slice(1)}
                   </Typography>
-                )}
+                )} */}
               </Stack>
             </Box>
 
@@ -1192,14 +1192,14 @@ const Customer: React.FC = () => {
                 fontWeight="300"
                 sx={{ color: "#636B74", width: "100px" }}
               >
-                Manager
+                Customer administrator
               </Typography>
               <Typography
                 level="body-sm"
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {customerData?.name.slice(0, 45)}
+                {customerData?.owner?.firstName.slice(0, 45)} {customerData?.owner?.lastName.slice(0, 45)}
               </Typography>
             </Stack>
 
@@ -1215,7 +1215,7 @@ const Customer: React.FC = () => {
                 <Typography
                   level="body-sm"
                   fontWeight="300"
-                  sx={{ color: "var(--joy-palette-text-primary)" }}
+                  sx={{ color: "var(--joy-palette-text-primary)", whiteSpace: "wrap", wordBreak: "break-all" }}
                 >
                   {customerData?.email.slice(0, 45)}
                 </Typography>
@@ -1228,33 +1228,18 @@ const Customer: React.FC = () => {
                 fontWeight="300"
                 sx={{ color: "#636B74", width: "100px" }}
               >
-                Customer
+                Customer success manager
               </Typography>
               <Typography
                 level="body-sm"
                 fontWeight="300"
                 sx={{ color: "var(--joy-palette-text-primary)" }}
               >
-                {customerData?.name.slice(0, 45)}
+                {customerData?.customerSuccess?.name.slice(0, 45)} <br />
+                {customerData?.customerSuccess?.email.slice(0, 45)}
               </Typography>
             </Stack>
-
-            <Stack direction="row" spacing={2}>
-              <Typography
-                level="body-sm"
-                fontWeight="300"
-                sx={{ color: "#636B74", width: "100px" }}
-              >
-                Role
-              </Typography>
-              <Typography
-                level="body-sm"
-                fontWeight="300"
-                sx={{ color: "var(--joy-palette-text-primary)" }}
-              >
-                {customerData?.name.slice(0, 45)}
-              </Typography>
-            </Stack>
+            
 
             <Stack
               direction="row"

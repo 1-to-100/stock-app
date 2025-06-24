@@ -33,10 +33,10 @@ export function SideNav({ items }: SideNavProps): React.JSX.Element {
     ...group,
     items: group.items?.filter((item) => {
       if (userInfo?.isCustomerSuccess) {
-        return item.key !== "role" && item.key !== "system-users";
+        return item.key !== "role" && item.key !== "system-users" && item.key !== "notification-management";
       }
       if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
-        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users" && item.key !== "notification-management";
+        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
       }
       return true;
     }),

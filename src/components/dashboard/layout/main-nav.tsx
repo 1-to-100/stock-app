@@ -19,6 +19,7 @@ import { UserPopover } from "./user-popover/user-popover";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { CustomerSelect } from "./customer-select";
 import { useUnreadNotificationsChannel } from "@/hooks/use-notifications";
+import { useImpersonation } from "@/contexts/impersonation-context";
 
 export interface MainNavProps {
   items: NavItemConfig[];
@@ -30,6 +31,8 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const notificationsPopover = usePopover<HTMLButtonElement>();
   const userPopover = usePopover<HTMLButtonElement>();
   const { userInfo } = useUserInfo();
+  const { isImpersonating } = useImpersonation();
+  
   const handleNotification = React.useCallback(({ count }: { count: number }) => {
     setInvisibleBadge(count === 0);
   }, []);
@@ -46,6 +49,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
           pt: { lg: "var(--Layout-gap)" },
           top: 0,
           zIndex: "var(--MainNav-zIndex)",
+          mt: { xs: isImpersonating ? "20px" : 0, lg: 0 },
         }}
       >
         <Box

@@ -303,7 +303,7 @@ export default function AddEditCustomer({
           {customerId ? "Edit customer" : "Add customer"}
         </Typography>
         <Stack spacing={2}>
-          {customerId && (
+          {/* {customerId && (
             <Stack sx={{ flex: 1 }}>
               <Typography
                 level="body-sm"
@@ -338,7 +338,7 @@ export default function AddEditCustomer({
                   ))}
               </Select>
             </Stack>
-          )}
+          )} */}
           <Stack sx={{ flex: 1 }}>
             <Typography
               level="body-sm"
@@ -385,7 +385,7 @@ export default function AddEditCustomer({
                   fontWeight: 500,
                 }}
               >
-                Customer admin
+                Customer administrator
               </Typography>
               <Autocomplete
                 placeholder="Search users"

@@ -632,7 +632,7 @@ export default function Page(): React.JSX.Element {
                             >
                               {customer.name.slice(0, 85)}
                             </Typography>
-                            <Tooltip
+                            {/* <Tooltip
                               title={customer.status}
                               placement="top"
                               sx={{
@@ -657,7 +657,7 @@ export default function Page(): React.JSX.Element {
                                   display: "inline-block",
                                 }}
                               />
-                            </Tooltip>
+                            </Tooltip> */}
                           </Stack>
                         </td>
                         <td>

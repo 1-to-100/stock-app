@@ -57,7 +57,7 @@ const Filter = ({
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [selectedManagerIds, setSelectedManagerIds] = useState<number[]>(initialFilters?.customerSuccessId || []);
   const [selectedSubscriptionIds, setSelectedSubscriptionIds] = useState<number[]>(initialFilters?.subscriptionId || []);
-  const [activeCategory, setActiveCategory] = useState<string | null>("Status");
+  const [activeCategory, setActiveCategory] = useState<string | null>(users && users?.length > 0 ? "Status" : "Manager");
 
   const sheetRef = useRef<HTMLDivElement | null>(null);
 
@@ -312,7 +312,8 @@ const Filter = ({
                   paddingRight: { sm: "20px" },
                 }}
               >
-                <Box
+                {users && users?.length > 0 && (
+                  <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -346,6 +347,7 @@ const Filter = ({
                   </Typography>
                   <ArrowRightIcon fontSize="var(--Icon-fontSize)" />
                 </Box>
+                )}
                 {users && users?.length > 0 && (
                   <Box
                     sx={{
@@ -508,7 +510,7 @@ const Filter = ({
                     Select {activeCategory.toLowerCase()}
                   </Typography>
                   <Stack spacing={1}>
-                    {activeCategory === "Status" &&
+                    {activeCategory === "Status" && users && users?.length > 0 &&
                       statuses?.map((status) => (
                         <Box
                           key={status}
@@ -536,90 +538,123 @@ const Filter = ({
                           </Typography>
                         </Box>
                       ))}
-                    {activeCategory === "Customer" &&
-                      customersSelect?.map((customer) => (
-                        <Box
-                          key={customer.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedCustomerIds.includes(customer.id)}
-                            onChange={() => handleCustomerChange(customer.id)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {customer.name}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "Role" &&
-                      roles?.map((role) => (
-                        <Box
-                          key={role.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedRoleIds.includes(role.id)}
-                            onChange={() => handleRoleChange(role.id)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {role.name}
-                          </Typography>
-                        </Box>
-                      ))}
-                    {activeCategory === "Manager" &&
-                      managersSelect?.map((manager) => (
-                        <Box
-                          key={manager.id}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedManagerIds.includes(manager.id)}
-                            onChange={() => handleManagerChange(manager.id)}
-                            sx={{
-                              transform: { xs: "scale(0.9)", sm: "scale(1)" },
-                            }}
-                          />
-                          <Typography
-                            level="body-sm"
-                            sx={{
-                              fontSize: { xs: "12px", sm: "14px" },
-                              color: "var(--joy-palette-text-primary)",
-                            }}
-                          >
-                            {manager.name}
-                          </Typography>
-                        </Box>
-                      ))}
+                    {activeCategory === "Customer" && (
+                      <Box
+                        sx={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          pr: 1,
+                        }}
+                      >
+                        <Stack spacing={1}>
+                          {customersSelect?.map((customer) => (
+                            <Box
+                              key={customer.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1.5,
+                              }}
+                            >
+                              <Checkbox
+                                checked={selectedCustomerIds.includes(customer.id)}
+                                onChange={() => handleCustomerChange(customer.id)}
+                                sx={{
+                                  transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                                }}
+                              />
+                              <Typography
+                                level="body-sm"
+                                sx={{
+                                  fontSize: { xs: "12px", sm: "14px" },
+                                  color: "var(--joy-palette-text-primary)",
+                                }}
+                              >
+                                {customer.name}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                    {activeCategory === "Role" && (
+                      <Box
+                        sx={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          pr: 1,
+                        }}
+                      >
+                        <Stack spacing={1}>
+                          {roles?.map((role) => (
+                            <Box
+                              key={role.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1.5,
+                              }}
+                            >
+                              <Checkbox
+                                checked={selectedRoleIds.includes(role.id)}
+                                onChange={() => handleRoleChange(role.id)}
+                                sx={{
+                                  transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                                }}
+                              />
+                              <Typography
+                                level="body-sm"
+                                sx={{
+                                  fontSize: { xs: "12px", sm: "14px" },
+                                  color: "var(--joy-palette-text-primary)",
+                                }}
+                              >
+                                {role.name}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                    {activeCategory === "Manager" && (
+                      <Box
+                        sx={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          pr: 1,
+                        }}
+                      >
+                        <Stack spacing={1}>
+                          {managersSelect?.map((manager) => (
+                            <Box
+                              key={manager.id}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1.5,
+                              }}
+                            >
+                              <Checkbox
+                                checked={selectedManagerIds.includes(manager.id)}
+                                onChange={() => handleManagerChange(manager.id)}
+                                sx={{
+                                  transform: { xs: "scale(0.9)", sm: "scale(1)" },
+                                }}
+                              />
+                              <Typography
+                                level="body-sm"
+                                sx={{
+                                  fontSize: { xs: "12px", sm: "14px" },
+                                  color: "var(--joy-palette-text-primary)",
+                                }}
+                              >
+                                {manager.name}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
                     {activeCategory === "Subscription" &&
                       subscriptions?.map((subscription) => (
                         <Box

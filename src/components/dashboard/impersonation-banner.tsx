@@ -5,6 +5,7 @@ import Box from "@mui/joy/Box";
 import Alert from "@mui/joy/Alert";
 import Typography from "@mui/joy/Typography";
 import Link from "@mui/joy/Link";
+import Tooltip from "@mui/joy/Tooltip";
 import { SignOut as SignOutIcon } from "@phosphor-icons/react/dist/ssr/SignOut";
 import { useImpersonation } from "@/contexts/impersonation-context";
 import { useQuery } from "@tanstack/react-query";
@@ -71,7 +72,16 @@ export function ImpersonationBanner(): React.JSX.Element | null {
             },
           }}
         >
-          <SignOutIcon size={16} />
+          <Tooltip
+            title="Return to own account"
+            placement="bottom"
+            sx={{
+              background: "#DAD8FD",
+              color: "#3D37DD",
+            }}
+          >
+            <SignOutIcon size={16} />
+          </Tooltip>
         </Link>
       </Box>
     </Alert>
