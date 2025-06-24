@@ -110,7 +110,6 @@ export default function AddEditCustomer({
     queryFn: async () => {
       const params: GetUsersParams = {
         perPage: 1000,
-        hasCustomer: false,
       };
       return getUsers(params);
     },
@@ -396,7 +395,12 @@ export default function AddEditCustomer({
                 getOptionKey={(user: ApiUser) => user.id}
                 value={
                   users?.data?.find((user: ApiUser) => user.id === formData.ownerId) ||
-                  null
+                  (customerData?.owner ? {
+                    id: customerData.owner.id,
+                    firstName: customerData.owner.firstName,
+                    lastName: customerData.owner.lastName,
+                    email: ""
+                  } as ApiUser : null)
                 }
                 onChange={(event, newValue) => {
                   handleInputChange("ownerId", newValue ? newValue.id : null);

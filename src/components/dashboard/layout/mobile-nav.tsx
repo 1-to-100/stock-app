@@ -47,7 +47,7 @@ export function MobileNav({ items, onClose, open }: MobileNavProps): React.JSX.E
         return item.key !== "role" && item.key !== "system-users";
       }
       if (!userInfo?.isSuperadmin && !userInfo?.isCustomerSuccess) {
-        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users";
+        return item.key !== "role" && item.key !== "customer" && item.key !== "system-users"  && item.key !== "notification-management";
       }
       return true;
     }),
