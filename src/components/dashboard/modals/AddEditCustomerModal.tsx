@@ -388,7 +388,7 @@ export default function AddEditCustomer({
               </Typography>
               <Autocomplete
                 placeholder="Search users"
-                options={users?.data.sort((a, b) => a.firstName.localeCompare(b.firstName)) || []}
+                options={users?.data.sort((a, b) => a.firstName?.localeCompare(b.firstName)) || []}
                 getOptionLabel={(user: ApiUser) =>
                   `${user.firstName.slice(0, 25)} ${user.lastName.slice(0, 25)}`
                 }
