@@ -154,7 +154,13 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
       setImpersonatedUserId(userData.id);
       handleMenuClose();
       onClose();
-      window.location.reload();
+
+      const redirectTo = userData.isCustomerSuccess ? "/dashboard/user-management" : undefined;
+      if (redirectTo) {
+        window.location.href = redirectTo;
+      } else {
+        window.location.reload();
+      }
     }
   };
 
@@ -389,7 +395,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <PencilIcon fontSize="16px" style={iconStyle} />
               Edit
             </Box>
-            {userData?.status === "active" &&
+            {userData?.status === "active" && !userData.isSuperadmin &&
               userInfo &&
               (userInfo.isSuperadmin || userInfo.isCustomerSuccess) && (
                 <Box

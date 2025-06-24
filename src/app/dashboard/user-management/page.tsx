@@ -1065,7 +1065,7 @@ export default function Page(): React.JSX.Element {
                                     Resend invite
                                   </Box>
                                 )}
-                              {user.status == "active" &&
+                              {user.status == "active" && !user.isSuperadmin &&
                                 userInfo &&
                                 (userInfo.isSuperadmin ||
                                   userInfo.isCustomerSuccess) && (

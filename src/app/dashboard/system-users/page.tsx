@@ -38,6 +38,7 @@ import {ArrowRight as ArrowRightIcon} from "@phosphor-icons/react/dist/ssr/Arrow
 import {getRoles} from "@/lib/api/roles";
 import {getCustomers} from "@/lib/api/customers";
 import {getSystemUserById, getSystemUsers} from "@/lib/api/system-users";
+import {useRouter} from "next/navigation";
 
 interface HttpError extends Error {
   response?: {
@@ -50,6 +51,7 @@ const metadata = {
 } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
+  const router = useRouter()
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
@@ -318,10 +320,15 @@ export default function Page(): React.JSX.Element {
     handleMenuClose();
   };
 
-  const handleImpersonateUser = (userId: number) => {
+  const handleImpersonateUser = (userId: number, redirectTo?: string) => {
     setImpersonatedUserId(userId);
     handleMenuClose();
-    window.location.reload();
+
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleCloseEditModal = () => {
@@ -952,14 +959,17 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
-                              {user.status === "active" &&
+                              {user.status === "active" && !user.isSuperadmin &&
                                 userInfo &&
                                 (userInfo.isSuperadmin ||
                                   userInfo.isCustomerSuccess) && (
                                   <Box
                                     onMouseDown={(event) => {
                                       event.preventDefault();
-                                      handleImpersonateUser(user.id);
+                                      handleImpersonateUser(
+                                        user.id,
+                                        user.isCustomerSuccess ? "/dashboard/user-management" : undefined
+                                      );
                                     }}
                                     sx={{
                                       ...menuItemStyle,
