@@ -284,7 +284,7 @@ export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
             {errors.root ? (
               <Alert color="danger">{errors.root!.message}</Alert>
             ) : null}
-            <Button disabled={isPending || isLoading} type="submit">
+            <Button disabled={isPending} type="submit">
               {resetToken ? "Reset Password" : "Update Password"}
             </Button>
           </Stack>
