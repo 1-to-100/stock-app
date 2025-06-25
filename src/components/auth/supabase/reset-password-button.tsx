@@ -1,25 +1,30 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Alert from '@mui/joy/Alert';
-import Button from '@mui/joy/Button';
-import Stack from '@mui/joy/Stack';
-import Typography from '@mui/joy/Typography';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import RouterLink from 'next/link';
+import * as React from "react";
+import Alert from "@mui/joy/Alert";
+import Button from "@mui/joy/Button";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import RouterLink from "next/link";
 
-import { paths } from '@/paths';
-import { createClient as createSupabaseClient } from '@/lib/supabase/client';
-import { toast } from '@/components/core/toaster';
-import {resetPassword} from "@/lib/api/users";
+import { paths } from "@/paths";
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
+import { toast } from "@/components/core/toaster";
+import { resetPassword } from "@/lib/api/users";
 
 export interface ResetPasswordButtonProps {
   children: React.ReactNode;
   email: string;
 }
 
-export function ResetPasswordButton({ children, email }: ResetPasswordButtonProps): React.JSX.Element {
-  const [supabaseClient] = React.useState<SupabaseClient>(createSupabaseClient());
+export function ResetPasswordButton({
+  children,
+  email,
+}: ResetPasswordButtonProps): React.JSX.Element {
+  const [supabaseClient] = React.useState<SupabaseClient>(
+    createSupabaseClient()
+  );
 
   const [isPending, setIsPending] = React.useState<boolean>(false);
   const [submitError, setSubmitError] = React.useState<string>();
@@ -28,28 +33,22 @@ export function ResetPasswordButton({ children, email }: ResetPasswordButtonProp
     setIsPending(true);
     setSubmitError(undefined);
 
-    // const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
-    // redirectToUrl.searchParams.set('next', paths.auth.supabase.updatePassword);
-    //
-    // const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirectToUrl.href });
-    //
-    // if (error) {
-    //   setSubmitError(error.message);
-    //   setIsPending(false);
-    //   return;
-    // }
-
     try {
       const response = await resetPassword(email);
-      if(response.status === 'ok' && response.message) {
-        toast.success(response.message);
+      if (response.status === "ok" && response.message) {
+        toast.success("Recovery email sent successfully");
+      } else {
+        setSubmitError("Failed to send recovery email");
       }
     } catch (error) {
-      toast.error('Failed to send recovery email. Please try again later.');
+      const errorMessage =
+        (error as Error).message ||
+        "Failed to send recovery email. Please try again later.";
+      setSubmitError(errorMessage);
+    } finally {
+      setIsPending(false);
     }
-
-    setIsPending(false);
-  }, [supabaseClient, email]);
+  }, [email]);
 
   return (
     <Stack spacing={2}>
