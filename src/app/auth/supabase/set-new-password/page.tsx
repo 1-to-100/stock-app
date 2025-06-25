@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <SplitLayout>
       <CheckSessionInvite>
-        <UpdatePasswordForm title={'Set new password'}/>
+        <UpdatePasswordForm />
       </CheckSessionInvite>
     </SplitLayout>
   );
