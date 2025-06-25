@@ -85,7 +85,7 @@ export default function Page(): React.JSX.Element {
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { userInfo } = useUserInfo();
-  const { setImpersonatedUserId } = useImpersonation();
+  const { setImpersonatedUserId, isImpersonating } = useImpersonation();
 
   const rowsPerPage = 10;
 
@@ -959,7 +959,7 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
-                              {user.status === "active" && !user.isSuperadmin &&
+                              {user.status === "active" && !isImpersonating && !user.isSuperadmin &&
                                 userInfo &&
                                 (userInfo.isSuperadmin ||
                                   userInfo.isCustomerSuccess) && (

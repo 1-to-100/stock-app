@@ -97,7 +97,7 @@ export default function Page(): React.JSX.Element {
   const [supabaseClient] = React.useState<SupabaseClient>(
     createSupabaseClient()
   );
-  const { setImpersonatedUserId } = useImpersonation();
+  const { setImpersonatedUserId, isImpersonating } = useImpersonation();
 
   const rowsPerPage = 10;
 
@@ -1065,7 +1065,7 @@ export default function Page(): React.JSX.Element {
                                     Resend invite
                                   </Box>
                                 )}
-                              {user.status == "active" && !user.isSuperadmin &&
+                              {user.status == "active" && !isImpersonating && !user.isSuperadmin &&
                                 userInfo &&
                                 (userInfo.isSuperadmin ||
                                   userInfo.isCustomerSuccess) && (

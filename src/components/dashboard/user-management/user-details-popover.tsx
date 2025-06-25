@@ -48,7 +48,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
   const { colorScheme } = useColorScheme();
   const isLightTheme = colorScheme === "light";
   const queryClient = useQueryClient();
-  const { setImpersonatedUserId } = useImpersonation();
+  const { setImpersonatedUserId, isImpersonating } = useImpersonation();
   const { userInfo } = useUserInfo();
 
   const { data: userData, isLoading: isUserLoading } = useQuery({
@@ -395,7 +395,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
               <PencilIcon fontSize="16px" style={iconStyle} />
               Edit
             </Box>
-            {userData?.status === "active" && !userData.isSuperadmin &&
+            {userData?.status === "active" && !isImpersonating && !userData.isSuperadmin &&
               userInfo &&
               (userInfo.isSuperadmin || userInfo.isCustomerSuccess) && (
                 <Box
