@@ -2,7 +2,6 @@ import * as React from "react";
 import type { Metadata } from "next";
 
 import { config } from "@/config";
-import { GuestGuard } from "@/components/auth/guest-guard";
 import { SplitLayout } from "@/components/auth/split-layout";
 import { UpdatePasswordForm } from "@/components/auth/supabase/update-password-form";
 import { PageProps } from "@/types/app";
@@ -15,10 +14,12 @@ export default async function Page({ searchParams }: PageProps) {
   const { token, type } = await searchParams;
 
   return (
-    <GuestGuard>
-      <SplitLayout>
-        <UpdatePasswordForm resetToken={token && type === "recovery" ? token as string : undefined} />
-      </SplitLayout>
-    </GuestGuard>
+    <SplitLayout>
+      <UpdatePasswordForm
+        resetToken={
+          token && type === "recovery" ? (token as string) : undefined
+        }
+      />
+    </SplitLayout>
   );
 }

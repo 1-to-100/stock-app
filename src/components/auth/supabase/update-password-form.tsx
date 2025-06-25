@@ -23,6 +23,7 @@ import { paths } from "@/paths";
 import { DynamicLogo } from "@/components/core/logo";
 import { useCheckSessionInvite } from "@/components/auth/supabase/check-session-invite";
 import { config } from "@/config";
+import { useUser } from "@/hooks/use-user";
 
 const schema = zod
   .object({
@@ -61,12 +62,14 @@ export function UpdatePasswordForm({
   resetToken,
 }: UpdatePasswordFormProps) {
   const { message, supabaseClient } = useCheckSessionInvite();
+  const { user, isLoading } = useUser();
   const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [isProcessingToken, setIsProcessingToken] = useState<boolean>(false);
   const titleForm =
     title || (resetToken ? "Reset Password" : "Update Password");
 
@@ -79,6 +82,7 @@ export function UpdatePasswordForm({
 
   useEffect(() => {
     if (resetToken) {
+      setIsProcessingToken(true);
       const handleResetToken = async () => {
         try {
           const hash = window.location.hash || "#";
@@ -105,6 +109,8 @@ export function UpdatePasswordForm({
           }
         } catch (error) {
           setSessionError("Failed to process reset link. Please try again.");
+        } finally {
+          setIsProcessingToken(false);
         }
       };
 
@@ -138,6 +144,11 @@ export function UpdatePasswordForm({
           );
           window.location.href = redirectUrl.href;
         } else {
+          if (!user && !isLoading) {
+            router.replace(paths.auth.supabase.signIn);
+            return;
+          }
+
           const { error } = await supabaseClient.auth.updateUser({
             password: values.password,
           });
@@ -164,11 +175,40 @@ export function UpdatePasswordForm({
         setIsPending(false);
       }
     },
-    [supabaseClient, router, setError, resetToken]
+    [supabaseClient, router, setError, resetToken, user, isLoading]
   );
 
   if (message) {
     return null;
+  }
+
+  if (isProcessingToken) {
+    return (
+      <Stack spacing={5}>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box
+            component={RouterLink}
+            href={paths.home}
+            sx={{ display: "inline-block", fontSize: 0 }}
+          >
+            <DynamicLogo
+              colorDark="light"
+              colorLight="dark"
+              height={32}
+              width={154}
+            />
+          </Box>
+        </Box>
+        <Stack spacing={3}>
+          <Typography level="h3" textAlign="center">
+            Processing Reset Link...
+          </Typography>
+          <Typography textAlign="center">
+            Please wait while we verify your reset link.
+          </Typography>
+        </Stack>
+      </Stack>
+    );
   }
 
   if (sessionError) {
@@ -199,6 +239,32 @@ export function UpdatePasswordForm({
           >
             Request New Reset Link
           </Button>
+        </Stack>
+      </Stack>
+    );
+  }
+
+  if (!resetToken && isLoading) {
+    return (
+      <Stack spacing={5}>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box
+            component={RouterLink}
+            href={paths.home}
+            sx={{ display: "inline-block", fontSize: 0 }}
+          >
+            <DynamicLogo
+              colorDark="light"
+              colorLight="dark"
+              height={32}
+              width={154}
+            />
+          </Box>
+        </Box>
+        <Stack spacing={3}>
+          <Typography level="h3" textAlign="center">
+            Loading...
+          </Typography>
         </Stack>
       </Stack>
     );
@@ -281,7 +347,7 @@ export function UpdatePasswordForm({
               )}
             />
             {errors.root ? (
-              <Alert color="danger">{errors.root.message}</Alert>
+              <Alert color="danger">{errors.root!.message}</Alert>
             ) : null}
             <Button disabled={isPending} type="submit">
               {resetToken ? "Reset Password" : "Update Password"}
