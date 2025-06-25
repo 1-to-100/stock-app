@@ -20,6 +20,7 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { DynamicLogo } from '@/components/core/logo';
+import {resetPassword} from "@/lib/api/users";
 
 const schema = zod.object({ email: zod.string().min(1, { message: 'Email is required' }).email() });
 
@@ -45,21 +46,27 @@ export function ResetPasswordForm(): React.JSX.Element {
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
-      const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
-      redirectToUrl.searchParams.set('next', paths.auth.supabase.updatePassword);
-
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(values.email, {
-        redirectTo: redirectToUrl.href,
-      });
-
-      if (error) {
-        setError('root', { type: 'server', message: error.message });
-        setIsPending(false);
-        return;
+      const response = await resetPassword(values.email);
+      if(response.status === 'ok' && response.message) {
+        const searchParams = new URLSearchParams({ email: values.email });
+        router.push(`${paths.auth.supabase.recoveryLinkSent}?${searchParams.toString()}`);
       }
+      setIsPending(false);
+      // const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
+      // redirectToUrl.searchParams.set('next', paths.auth.supabase.updatePassword);
+      //
+      // const { error } = await supabaseClient.auth.resetPasswordForEmail(values.email, {
+      //   redirectTo: redirectToUrl.href,
+      // });
+      //
+      // if (error) {
+      //   setError('root', { type: 'server', message: error.message });
+      //   setIsPending(false);
+      //   return;
+      // }
 
-      const searchParams = new URLSearchParams({ email: values.email });
-      router.push(`${paths.auth.supabase.recoveryLinkSent}?${searchParams.toString()}`);
+      // const searchParams = new URLSearchParams({ email: values.email });
+      // router.push(`${paths.auth.supabase.recoveryLinkSent}?${searchParams.toString()}`);
     },
     [supabaseClient, router, setError]
   );

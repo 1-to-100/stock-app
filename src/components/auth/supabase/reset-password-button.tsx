@@ -11,6 +11,7 @@ import RouterLink from 'next/link';
 import { paths } from '@/paths';
 import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { toast } from '@/components/core/toaster';
+import {resetPassword} from "@/lib/api/users";
 
 export interface ResetPasswordButtonProps {
   children: React.ReactNode;
@@ -27,19 +28,27 @@ export function ResetPasswordButton({ children, email }: ResetPasswordButtonProp
     setIsPending(true);
     setSubmitError(undefined);
 
-    const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
-    redirectToUrl.searchParams.set('next', paths.auth.supabase.updatePassword);
+    // const redirectToUrl = new URL(paths.auth.supabase.callback.pkce, window.location.origin);
+    // redirectToUrl.searchParams.set('next', paths.auth.supabase.updatePassword);
+    //
+    // const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirectToUrl.href });
+    //
+    // if (error) {
+    //   setSubmitError(error.message);
+    //   setIsPending(false);
+    //   return;
+    // }
 
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirectToUrl.href });
-
-    if (error) {
-      setSubmitError(error.message);
-      setIsPending(false);
-      return;
+    try {
+      const response = await resetPassword(email);
+      if(response.status === 'ok' && response.message) {
+        toast.success(response.message);
+      }
+    } catch (error) {
+      toast.error('Failed to send recovery email. Please try again later.');
     }
 
     setIsPending(false);
-    toast.success('Recovery link sent');
   }, [supabaseClient, email]);
 
   return (

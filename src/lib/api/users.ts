@@ -85,6 +85,28 @@ export async function validateEmail(email: string): Promise<boolean> {
   return true;
 }
 
+export async function resetPassword(email: string): Promise<{status: string, message: string}> {
+  const response = await fetch(`${config.site.apiUrl}/auth/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const errorMessage = errorData.message
+      || `Failed to reset password: ${response.statusText}`
+      || 'An error occurred during password reset';
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<{status: string, message: string}>;
+}
+
 export async function registerUser(payload: RegisterUserPayload): Promise<ApiUser> {
   const response = await fetch(`${config.site.apiUrl}/register`, {
     method: "POST",
