@@ -29,6 +29,13 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     return type === 'invite';
   }, []);
 
+  const isUpdatePassword = React.useMemo(() => {
+    const { type } = Object.fromEntries(
+      new URLSearchParams(typeof window !== 'undefined' ? window.location.hash.slice(1) : '')
+    );
+    return type === 'recovery';
+  }, []);
+
   const [state, setState] = React.useState<{ user: User | null; error: string | null; isLoading: boolean }>({
     user: null,
     error: null,
@@ -94,7 +101,7 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
     const {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange((event, session) => {
-      if(isInvite) {
+      if(isInvite || isUpdatePassword) {
         return;
       }
 
