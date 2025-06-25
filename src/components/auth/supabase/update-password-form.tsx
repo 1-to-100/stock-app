@@ -53,14 +53,10 @@ type Values = zod.infer<typeof schema>;
 const defaultValues = { password: "", confirmPassword: "" } satisfies Values;
 
 interface UpdatePasswordFormProps {
-  title?: string;
   resetToken?: string;
 }
 
-export function UpdatePasswordForm({
-  title,
-  resetToken,
-}: UpdatePasswordFormProps) {
+export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
   const { message, supabaseClient } = useCheckSessionInvite();
   const { user, isLoading } = useUser();
   const router = useRouter();
@@ -69,9 +65,6 @@ export function UpdatePasswordForm({
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const [isProcessingToken, setIsProcessingToken] = useState<boolean>(false);
-  const titleForm =
-    title || (resetToken ? "Reset Password" : "Update Password");
 
   const {
     control,
@@ -82,7 +75,6 @@ export function UpdatePasswordForm({
 
   useEffect(() => {
     if (resetToken) {
-      setIsProcessingToken(true);
       const handleResetToken = async () => {
         try {
           const hash = window.location.hash || "#";
@@ -109,8 +101,6 @@ export function UpdatePasswordForm({
           }
         } catch (error) {
           setSessionError("Failed to process reset link. Please try again.");
-        } finally {
-          setIsProcessingToken(false);
         }
       };
 
@@ -182,35 +172,6 @@ export function UpdatePasswordForm({
     return null;
   }
 
-  if (isProcessingToken) {
-    return (
-      <Stack spacing={5}>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Box
-            component={RouterLink}
-            href={paths.home}
-            sx={{ display: "inline-block", fontSize: 0 }}
-          >
-            <DynamicLogo
-              colorDark="light"
-              colorLight="dark"
-              height={32}
-              width={154}
-            />
-          </Box>
-        </Box>
-        <Stack spacing={3}>
-          <Typography level="h3" textAlign="center">
-            Processing Reset Link...
-          </Typography>
-          <Typography textAlign="center">
-            Please wait while we verify your reset link.
-          </Typography>
-        </Stack>
-      </Stack>
-    );
-  }
-
   if (sessionError) {
     return (
       <Stack spacing={5}>
@@ -244,32 +205,6 @@ export function UpdatePasswordForm({
     );
   }
 
-  if (!resetToken && isLoading) {
-    return (
-      <Stack spacing={5}>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Box
-            component={RouterLink}
-            href={paths.home}
-            sx={{ display: "inline-block", fontSize: 0 }}
-          >
-            <DynamicLogo
-              colorDark="light"
-              colorLight="dark"
-              height={32}
-              width={154}
-            />
-          </Box>
-        </Box>
-        <Stack spacing={3}>
-          <Typography level="h3" textAlign="center">
-            Loading...
-          </Typography>
-        </Stack>
-      </Stack>
-    );
-  }
-
   return (
     <Stack spacing={5}>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -288,7 +223,7 @@ export function UpdatePasswordForm({
       </Box>
       <Stack spacing={3}>
         <Typography level="h3" textAlign="center">
-          {titleForm}
+          Update Password
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
@@ -349,7 +284,7 @@ export function UpdatePasswordForm({
             {errors.root ? (
               <Alert color="danger">{errors.root!.message}</Alert>
             ) : null}
-            <Button disabled={isPending} type="submit">
+            <Button disabled={isPending || isLoading} type="submit">
               {resetToken ? "Reset Password" : "Update Password"}
             </Button>
           </Stack>
