@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import RouterLink from "next/link";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Alert from "@mui/joy/Alert";
 import Box from "@mui/joy/Box";
@@ -105,7 +104,6 @@ export function UpdatePasswordForm({
   updateName = false,
 }: UpdatePasswordFormProps) {
   const { message, supabaseClient } = useCheckSessionInvite();
-  const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -126,7 +124,13 @@ export function UpdatePasswordForm({
       setIsPending(true);
 
       try {
-        const updateData: any = {
+        const updateData: {
+          password: string;
+          data?: {
+            firstName: string;
+            lastName: string;
+          };
+        } = {
           password: values.password,
         };
 
@@ -162,7 +166,7 @@ export function UpdatePasswordForm({
         setIsPending(false);
       }
     },
-    [supabaseClient, router, setError, updateName]
+    [supabaseClient, setError, updateName]
   );
 
   if (message) {
@@ -216,7 +220,7 @@ export function UpdatePasswordForm({
       </Box>
       <Stack spacing={3}>
         <Typography level="h3" textAlign="center">
-          {title || 'Update Password'}
+          {title || "Update Password"}
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
@@ -225,44 +229,52 @@ export function UpdatePasswordForm({
                 <Controller
                   control={control}
                   name="firstName"
-                  render={({ field }) => (
-                    <FormControl error={Boolean((errors as any).firstName)}>
-                      <FormLabel>First Name</FormLabel>
-                      <Input
-                        {...field}
-                        slotProps={{ input: { maxLength: 255 } }}
-                        onChange={(e) =>
-                          field.onChange(e.target.value.trimStart())
-                        }
-                      />
-                      {(errors as any).firstName ? (
-                        <FormHelperText>
-                          {(errors as any).firstName.message}
-                        </FormHelperText>
-                      ) : null}
-                    </FormControl>
-                  )}
+                  render={({ field }) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const firstNameError = (errors as any).firstName;
+                    return (
+                      <FormControl error={Boolean(firstNameError)}>
+                        <FormLabel>First Name</FormLabel>
+                        <Input
+                          {...field}
+                          slotProps={{ input: { maxLength: 255 } }}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.trimStart())
+                          }
+                        />
+                        {firstNameError ? (
+                          <FormHelperText>
+                            {firstNameError.message}
+                          </FormHelperText>
+                        ) : null}
+                      </FormControl>
+                    );
+                  }}
                 />
                 <Controller
                   control={control}
                   name="lastName"
-                  render={({ field }) => (
-                    <FormControl error={Boolean((errors as any).lastName)}>
-                      <FormLabel>Last Name</FormLabel>
-                      <Input
-                        {...field}
-                        slotProps={{ input: { maxLength: 255 } }}
-                        onChange={(e) =>
-                          field.onChange(e.target.value.trimStart())
-                        }
-                      />
-                      {(errors as any).lastName ? (
-                        <FormHelperText>
-                          {(errors as any).lastName.message}
-                        </FormHelperText>
-                      ) : null}
-                    </FormControl>
-                  )}
+                  render={({ field }) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const lastNameError = (errors as any).lastName;
+                    return (
+                      <FormControl error={Boolean(lastNameError)}>
+                        <FormLabel>Last Name</FormLabel>
+                        <Input
+                          {...field}
+                          slotProps={{ input: { maxLength: 255 } }}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.trimStart())
+                          }
+                        />
+                        {lastNameError ? (
+                          <FormHelperText>
+                            {lastNameError.message}
+                          </FormHelperText>
+                        ) : null}
+                      </FormControl>
+                    );
+                  }}
                 />
               </>
             )}
