@@ -24,7 +24,7 @@ import { DynamicLogo } from "@/components/core/logo";
 import { useCheckSessionInvite } from "@/components/auth/supabase/check-session-invite";
 import { config } from "@/config";
 
-const schema = zod
+const passwordSchema = zod
   .object({
     password: zod
       .string()
@@ -47,21 +47,72 @@ const schema = zod
     path: ["confirmPassword"],
   });
 
-type Values = zod.infer<typeof schema>;
+// Full schema with name fields
+const fullSchema = zod
+  .object({
+    password: zod
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long" })
+      .max(100, { message: "Password must be less than 100 characters" })
+      .regex(/^(?=.*[a-z])/, {
+        message: "Password must contain at least one lowercase letter",
+      })
+      .regex(/^(?=.*[A-Z])/, {
+        message: "Password must contain at least one uppercase letter",
+      })
+      .regex(/^(?=.*\d)/, {
+        message: "Password must contain at least one number",
+      })
+      .regex(/^[^\s]*$/, { message: "Password cannot contain spaces" }),
+    confirmPassword: zod.string(),
+    firstName: zod
+      .string()
+      .min(1, { message: "First name is required" })
+      .max(255, { message: "First name must be less than 255 characters" }),
+    lastName: zod
+      .string()
+      .min(1, { message: "Last name is required" })
+      .max(255, { message: "Last name must be less than 255 characters" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-const defaultValues = { password: "", confirmPassword: "" } satisfies Values;
+type PasswordValues = zod.infer<typeof passwordSchema>;
+type FullValues = zod.infer<typeof fullSchema>;
+type Values = PasswordValues | FullValues;
+
+const createDefaultValues = (updateName: boolean): Values => {
+  if (updateName) {
+    return {
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+    };
+  }
+  return { password: "", confirmPassword: "" };
+};
 
 interface UpdatePasswordFormProps {
   title?: string;
+  updateName?: boolean;
 }
 
-export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
+export function UpdatePasswordForm({
+  title,
+  updateName = false,
+}: UpdatePasswordFormProps) {
   const { message, supabaseClient } = useCheckSessionInvite();
   const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+
+  const schema = updateName ? fullSchema : passwordSchema;
+  const defaultValues = createDefaultValues(updateName);
 
   const {
     control,
@@ -75,9 +126,18 @@ export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
       setIsPending(true);
 
       try {
-        const { error } = await supabaseClient.auth.updateUser({
+        const updateData: any = {
           password: values.password,
-        });
+        };
+
+        if (updateName && "firstName" in values && "lastName" in values) {
+          updateData.data = {
+            firstName: values.firstName,
+            lastName: values.lastName,
+          };
+        }
+
+        const { error } = await supabaseClient.auth.updateUser(updateData);
 
         if (error) {
           setError("root", { type: "server", message: error.message });
@@ -91,7 +151,9 @@ export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
         );
         redirectUrl.searchParams.set(
           "message",
-          "Password updated successfully. Please sign in again."
+          updateName
+            ? "Password and profile updated successfully. Please sign in again."
+            : "Password updated successfully. Please sign in again."
         );
         await supabaseClient.auth.signOut();
         window.location.href = redirectUrl.href;
@@ -100,7 +162,7 @@ export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
         setIsPending(false);
       }
     },
-    [supabaseClient, router, setError]
+    [supabaseClient, router, setError, updateName]
   );
 
   if (message) {
@@ -158,6 +220,52 @@ export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
+            {updateName && (
+              <>
+                <Controller
+                  control={control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormControl error={Boolean((errors as any).firstName)}>
+                      <FormLabel>First Name</FormLabel>
+                      <Input
+                        {...field}
+                        slotProps={{ input: { maxLength: 255 } }}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.trimStart())
+                        }
+                      />
+                      {(errors as any).firstName ? (
+                        <FormHelperText>
+                          {(errors as any).firstName.message}
+                        </FormHelperText>
+                      ) : null}
+                    </FormControl>
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormControl error={Boolean((errors as any).lastName)}>
+                      <FormLabel>Last Name</FormLabel>
+                      <Input
+                        {...field}
+                        slotProps={{ input: { maxLength: 255 } }}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.trimStart())
+                        }
+                      />
+                      {(errors as any).lastName ? (
+                        <FormHelperText>
+                          {(errors as any).lastName.message}
+                        </FormHelperText>
+                      ) : null}
+                    </FormControl>
+                  )}
+                />
+              </>
+            )}
             <Controller
               control={control}
               name="password"
