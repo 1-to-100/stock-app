@@ -1,6 +1,11 @@
 import {ApiUser} from "@/contexts/auth/types";
 
 export const isUserOwner = (ownerUser?: ApiUser, user?: ApiUser): boolean => {
+
+  if(ownerUser?.customer?.ownerId === ownerUser?.id ) {
+    return true;
+  }
+
   if (!ownerUser || !user) return false;
 
   // Check if the ownerUser is a superadmin
