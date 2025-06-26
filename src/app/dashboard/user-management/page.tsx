@@ -36,7 +36,7 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import { useUserInfo } from "@/hooks/use-user-info";
 import InviteUserModal from "@/components/dashboard/modals/InviteUserModal";
-import { PaperPlaneRight } from "@phosphor-icons/react";
+import {PaperPlaneRight, TrashSimple} from "@phosphor-icons/react";
 import { toast } from "@/components/core/toaster";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
@@ -1081,6 +1081,23 @@ export default function Page(): React.JSX.Element {
                                   >
                                     <ArrowRightIcon size={20} />
                                     Impersonate user
+                                  </Box>
+                                )}
+                              {!user.isSuperadmin && !user.isCustomerSuccess && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("deleteUser")) && (
+                                  <Box
+                                    onMouseDown={(event) => {
+                                      event.preventDefault();
+                                      if(confirm('Are you sure you want to delete this user?')) {
+                                        // xxx
+                                      }
+                                    }}
+                                    sx={{
+                                      ...menuItemStyle,
+                                      gap: { xs: "10px", sm: "14px" },
+                                    }}
+                                  >
+                                    <TrashSimple size={20} />
+                                    Delete user
                                   </Box>
                                 )}
                               <Box
