@@ -85,27 +85,6 @@ export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
           return;
         }
 
-        // sync supabase user
-        const sessionSupabase = await supabaseClient.auth.getSession();
-        const session = sessionSupabase.data.session;
-        const user = session?.user;
-        if (!user) {
-          setError("root", {
-            type: "server",
-            message: "User session not found.",
-          });
-          setIsPending(false);
-          return;
-        }
-        const syncUserUrl = new URL(paths.auth.supabase.syncUser, config.site.apiUrl);
-        await fetch(syncUserUrl.href, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-        });
-
         const redirectUrl = new URL(
           paths.auth.supabase.signIn,
           config.site.url
