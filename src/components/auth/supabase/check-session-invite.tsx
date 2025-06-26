@@ -12,21 +12,36 @@ export const CheckSessionInvite = ({children}: { children: ReactNode }) => {
 
 export const useCheckSessionInvite = () => {
   const [supabaseClient] = useState(() => createSupabaseClient());
-  const [message, setMessage] = useState<string | null>('');
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const { access_token, refresh_token } = Object.fromEntries(
-      new URLSearchParams(window.location.hash.slice(1))
-    );
+    const handleToken = async () => {
+      try {
+        const { access_token, refresh_token } = Object.fromEntries(
+          new URLSearchParams(window.location.hash.slice(1))
+        );
 
-    if (!access_token || !refresh_token) {
-      setMessage('Invalid or expired invitation link. Please request a new invitation.');
-      return;
-    }
+        if (!access_token || !refresh_token) {
+          setMessage('Invalid or expired invitation link. Please request a new invitation.');
+          return;
+        }
 
-    supabaseClient.auth.setSession({ access_token, refresh_token }).then(({ data }) => {
-      setMessage(data?.session ? null : 'Invalid or expired invitation link. Please request a new invitation.');
-    });
+        const { error } = await supabaseClient.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (error) {
+          setMessage(
+            "Invalid or expired reset link. Please request a new password reset."
+          );
+        }
+      } catch (error) {
+        setMessage('Failed to process reset link. Please try again.')
+      }
+    };
+
+    handleToken();
   }, [supabaseClient]);
 
   return {message, supabaseClient};

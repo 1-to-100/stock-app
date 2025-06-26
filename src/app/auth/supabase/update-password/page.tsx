@@ -4,22 +4,18 @@ import type { Metadata } from "next";
 import { config } from "@/config";
 import { SplitLayout } from "@/components/auth/split-layout";
 import { UpdatePasswordForm } from "@/components/auth/supabase/update-password-form";
-import { PageProps } from "@/types/app";
+import { CheckSessionInvite } from "@/components/auth/supabase/check-session-invite";
 
 export const metadata = {
   title: `Update password | Supabase | Auth | ${config.site.name}`,
 } satisfies Metadata;
 
-export default async function Page({ searchParams }: PageProps) {
-  const { token, type } = await searchParams;
-
+export default async function Page() {
   return (
     <SplitLayout>
-      <UpdatePasswordForm
-        resetToken={
-          token && type === "recovery" ? (token as string) : undefined
-        }
-      />
+      <CheckSessionInvite>
+        <UpdatePasswordForm title="Update Password" />
+      </CheckSessionInvite>
     </SplitLayout>
   );
 }

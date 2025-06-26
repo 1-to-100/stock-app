@@ -23,7 +23,6 @@ import { paths } from "@/paths";
 import { DynamicLogo } from "@/components/core/logo";
 import { useCheckSessionInvite } from "@/components/auth/supabase/check-session-invite";
 import { config } from "@/config";
-import { useUser } from "@/hooks/use-user";
 
 const schema = zod
   .object({
@@ -53,18 +52,16 @@ type Values = zod.infer<typeof schema>;
 const defaultValues = { password: "", confirmPassword: "" } satisfies Values;
 
 interface UpdatePasswordFormProps {
-  resetToken?: string;
+  title?: string;
 }
 
-export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
+export function UpdatePasswordForm({title}: UpdatePasswordFormProps) {
   const { message, supabaseClient } = useCheckSessionInvite();
-  const { user, isLoading } = useUser();
   const router = useRouter();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
-  const [sessionError, setSessionError] = useState<string | null>(null);
 
   const {
     control,
@@ -73,106 +70,40 @@ export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
     formState: { errors },
   } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
 
-  useEffect(() => {
-    if (resetToken) {
-      const handleResetToken = async () => {
-        try {
-          const hash = window.location.hash || "#";
-          const hashParams = new URLSearchParams(hash.split("#")[1]);
-
-          const accessToken = hashParams.get("access_token");
-          const refreshToken = hashParams.get("refresh_token");
-
-          if (accessToken && refreshToken) {
-            const { error } = await supabaseClient.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-
-            if (error) {
-              setSessionError(
-                "Invalid or expired reset link. Please request a new password reset."
-              );
-            }
-          } else {
-            setSessionError(
-              "Invalid reset link. Please check your email and try again."
-            );
-          }
-        } catch (error) {
-          setSessionError("Failed to process reset link. Please try again.");
-        }
-      };
-
-      handleResetToken();
-    }
-  }, [resetToken, supabaseClient]);
-
   const onSubmit = useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
       try {
-        if (resetToken) {
-          const { error } = await supabaseClient.auth.updateUser({
-            password: values.password,
-          });
+        const { error } = await supabaseClient.auth.updateUser({
+          password: values.password,
+        });
 
-          if (error) {
-            setError("root", { type: "server", message: error.message });
-            setIsPending(false);
-            return;
-          }
-
-          const redirectUrl = new URL(
-            paths.auth.supabase.signIn,
-            config.site.url
-          );
-          redirectUrl.searchParams.set(
-            "message",
-            "Password reset successfully. Please sign in with your new password."
-          );
-          window.location.href = redirectUrl.href;
-        } else {
-          if (!user && !isLoading) {
-            router.replace(paths.auth.supabase.signIn);
-            return;
-          }
-
-          const { error } = await supabaseClient.auth.updateUser({
-            password: values.password,
-          });
-
-          if (error) {
-            setError("root", { type: "server", message: error.message });
-            setIsPending(false);
-            return;
-          }
-
-          await supabaseClient.auth.signOut();
-          const redirectUrl = new URL(
-            paths.auth.supabase.signIn,
-            config.site.url
-          );
-          redirectUrl.searchParams.set(
-            "message",
-            "Password updated successfully. Please sign in again."
-          );
-          window.location.href = redirectUrl.href;
+        if (error) {
+          setError("root", { type: "server", message: error.message });
+          setIsPending(false);
+          return;
         }
+
+        const redirectUrl = new URL(
+          paths.auth.supabase.signIn,
+          config.site.url
+        );
+        redirectUrl.searchParams.set(
+          "message",
+          "Password updated successfully. Please sign in again."
+        );
+        await supabaseClient.auth.signOut();
+        window.location.href = redirectUrl.href;
       } catch (error) {
         setError("root", { type: "server", message: (error as Error).message });
         setIsPending(false);
       }
     },
-    [supabaseClient, router, setError, resetToken, user, isLoading]
+    [supabaseClient, router, setError]
   );
 
   if (message) {
-    return null;
-  }
-
-  if (sessionError) {
     return (
       <Stack spacing={5}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -193,7 +124,7 @@ export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
           <Typography level="h3" textAlign="center">
             Reset Password Error
           </Typography>
-          <Alert color="danger">{sessionError}</Alert>
+          <Alert color="danger">{message}</Alert>
           <Button
             component={RouterLink}
             href={paths.auth.supabase.resetPassword}
@@ -223,7 +154,7 @@ export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
       </Box>
       <Stack spacing={3}>
         <Typography level="h3" textAlign="center">
-          Update Password
+          {title || 'Update Password'}
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
@@ -285,7 +216,7 @@ export function UpdatePasswordForm({resetToken}: UpdatePasswordFormProps) {
               <Alert color="danger">{errors.root!.message}</Alert>
             ) : null}
             <Button disabled={isPending} type="submit">
-              {resetToken ? "Reset Password" : "Update Password"}
+              {title || "Update Password"}
             </Button>
           </Stack>
         </form>
