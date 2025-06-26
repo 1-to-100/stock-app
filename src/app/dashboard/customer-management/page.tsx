@@ -705,16 +705,20 @@ export default function Page(): React.JSX.Element {
                               width: "fit-content",
                               color:
                                 customer.subscriptionName === "Premium"
-                                  ? colorScheme === 'dark' ? '#818CF8' : "#3D37DD"
+                                  ? colorScheme === 'dark' ? '#e8e8fc' : "#3D37DD"
                                   : customer.subscriptionName === "Enterprise"
-                                  ? colorScheme === 'dark' ? '#FDBA74' : "#4D2D00"
-                                  : colorScheme === 'dark' ? '#D1D5DB' : "#272930",
+                                  ? colorScheme === 'dark' ? '#ffe288' : "#4D2D00"
+                                  : customer.subscriptionName === "Basic"
+                                  ? colorScheme === 'dark' ? '#ffffff' : "#272930"
+                                  : colorScheme === 'dark' ? '#9e9e9e' : "#272930",
                               bgcolor:
                                 customer.subscriptionName === "Premium"
-                                  ? colorScheme === 'dark' ? 'rgba(79, 70, 229, 0.2)' : "#DAD8FD"
+                                  ? colorScheme === 'dark' ? '#221f7b' : "#DAD8FD"
                                   : customer.subscriptionName === "Enterprise"
-                                  ? colorScheme === 'dark' ? 'rgba(183, 76, 6, 0.2)' : "#FFF8C5"
-                                  : colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0",
+                                  ? colorScheme === 'dark' ? '#943a0c' : "#FFF8C5"
+                                  : customer.subscriptionName === "Basic"
+                                  ? colorScheme === 'dark' ? 'rgba(107, 114, 128, 0.2)' : "#EEEFF0"
+                                  : colorScheme === 'dark' ? 'none' : "none"
                             }}
                           >
                             {customer?.subscriptionName || "N/A"}

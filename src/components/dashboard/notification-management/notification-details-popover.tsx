@@ -18,6 +18,7 @@ import { getNotificationById, deleteNotification } from "@/lib/api/notifications
 import AddEditNotification from "../modals/AddEditNotification";
 import { ApiNotification } from "@/contexts/auth/types";
 import CircularProgress from "@mui/joy/CircularProgress";
+import { useColorScheme } from "@mui/joy/styles";
 
 interface NotificationDetailsPopoverProps {
   open: boolean;
@@ -37,6 +38,7 @@ const NotificationDetailsPopover = forwardRef<HTMLDivElement, NotificationDetail
   const [openEditModal, setOpenEditModal] = useState(false);
   const popperRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { colorScheme } = useColorScheme();
 
   const { data: notificationData, isLoading: isNotificationLoading } = useQuery({
     queryKey: ["notification", notificationId],
@@ -200,15 +202,27 @@ const NotificationDetailsPopover = forwardRef<HTMLDivElement, NotificationDetail
                 </Typography>
                 <Typography
                   level="body-sm"
-                  fontWeight="300"
                   component="div"
                   sx={{
-                    color: "var(--joy-palette-text-primary)",
                     fontSize: { xs: "12px", sm: "14px" },
                     '& img': {
                       width: '400px',
                       height: 'auto'
-                    }
+                    },
+                    p: {
+                      ...(colorScheme === "dark" && {
+                        "&[style*='color: black'], &[style*='color: #000'], &[style*='color: rgb(0, 0, 0)'], &[style*='color: rgba(0,0,0'], &[style*='color: rgb(11, 13, 14)']": {
+                          color: "var(--joy-palette-text-secondary) !important"
+                        }
+                      }),
+                    },
+                    span: {
+                      ...(colorScheme === "dark" && {
+                        "&[style*='color: black'], &[style*='color: #000'], &[style*='color: rgb(0, 0, 0)'], &[style*='color: rgba(0,0,0'], &[style*='color: rgb(11, 13, 14)']": {
+                          color: "var(--joy-palette-text-secondary) !important"
+                        }
+                      }),
+                    },
                   }}
                 >
                   <div dangerouslySetInnerHTML={{ __html: notificationData?.message || '' }} />

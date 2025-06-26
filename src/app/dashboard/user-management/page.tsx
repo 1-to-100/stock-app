@@ -492,7 +492,7 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
+      <WrapperSearchInput onSearch={handleSearch} isImpersonating={isImpersonating}/>
 
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack

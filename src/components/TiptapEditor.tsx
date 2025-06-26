@@ -13,6 +13,7 @@ import Superscript from "@tiptap/extension-superscript";
 import { Node, Extension, mergeAttributes } from "@tiptap/core";
 import { CommandProps, RawCommands } from "@tiptap/core";
 import React, { useRef, useState, useEffect } from "react";
+import { useColorScheme } from "@mui/joy/styles";
 import {
   TextB,
   TextItalic,
@@ -348,6 +349,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   isPreview,
   onTocChange,
 }) => {
+  const { colorScheme } = useColorScheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const colorButtonRef = useRef<HTMLButtonElement>(null);
@@ -1401,6 +1403,41 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           overflow-wrap: break-word;
           word-wrap: break-word;
           position: relative;
+          ${colorScheme === "dark" && `
+            p[style*='color: black'], p[style*='color: #000'], p[style*='color: rgb(0, 0, 0)'], p[style*='color: rgba(0,0,0'], p[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            span[style*='color: black'], span[style*='color: #000'], span[style*='color: rgb(0, 0, 0)'], span[style*='color: rgba(0,0,0'], span[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            div[style*='color: black'], div[style*='color: #000'], div[style*='color: rgb(0, 0, 0)'], div[style*='color: rgba(0,0,0'], div[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h1[style*='color: black'], h1[style*='color: #000'], h1[style*='color: rgb(0, 0, 0)'], h1[style*='color: rgba(0,0,0'], h1[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h2[style*='color: black'], h2[style*='color: #000'], h2[style*='color: rgb(0, 0, 0)'], h2[style*='color: rgba(0,0,0'], h2[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h3[style*='color: black'], h3[style*='color: #000'], h3[style*='color: rgb(0, 0, 0)'], h3[style*='color: rgba(0,0,0'], h3[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h4[style*='color: black'], h4[style*='color: #000'], h4[style*='color: rgb(0, 0, 0)'], h4[style*='color: rgba(0,0,0'], h4[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h5[style*='color: black'], h5[style*='color: #000'], h5[style*='color: rgb(0, 0, 0)'], h5[style*='color: rgba(0,0,0'], h5[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h6[style*='color: black'], h6[style*='color: #000'], h6[style*='color: rgb(0, 0, 0)'], h6[style*='color: rgba(0,0,0'], h6[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            li[style*='color: black'], li[style*='color: #000'], li[style*='color: rgb(0, 0, 0)'], li[style*='color: rgba(0,0,0'], li[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            blockquote[style*='color: black'], blockquote[style*='color: #000'], blockquote[style*='color: rgb(0, 0, 0)'], blockquote[style*='color: rgba(0,0,0'], blockquote[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+          `}
         }
         :global(.ProseMirror-focused) {
           outline: none;
@@ -1445,6 +1482,42 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           color: #222;
           font-size: 16px;
           margin-top: 8px;
+          ${colorScheme === "dark" && `
+            color: var(--joy-palette-text-primary);
+            p[style*='color: black'], p[style*='color: #000'], p[style*='color: rgb(0, 0, 0)'], p[style*='color: rgba(0,0,0'], p[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            span[style*='color: black'], span[style*='color: #000'], span[style*='color: rgb(0, 0, 0)'], span[style*='color: rgba(0,0,0'], span[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            div[style*='color: black'], div[style*='color: #000'], div[style*='color: rgb(0, 0, 0)'], div[style*='color: rgba(0,0,0'], div[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h1[style*='color: black'], h1[style*='color: #000'], h1[style*='color: rgb(0, 0, 0)'], h1[style*='color: rgba(0,0,0'], h1[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h2[style*='color: black'], h2[style*='color: #000'], h2[style*='color: rgb(0, 0, 0)'], h2[style*='color: rgba(0,0,0'], h2[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h3[style*='color: black'], h3[style*='color: #000'], h3[style*='color: rgb(0, 0, 0)'], h3[style*='color: rgba(0,0,0'], h3[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h4[style*='color: black'], h4[style*='color: #000'], h4[style*='color: rgb(0, 0, 0)'], h4[style*='color: rgba(0,0,0'], h4[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h5[style*='color: black'], h5[style*='color: #000'], h5[style*='color: rgb(0, 0, 0)'], h5[style*='color: rgba(0,0,0'], h5[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            h6[style*='color: black'], h6[style*='color: #000'], h6[style*='color: rgb(0, 0, 0)'], h6[style*='color: rgba(0,0,0'], h6[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            li[style*='color: black'], li[style*='color: #000'], li[style*='color: rgb(0, 0, 0)'], li[style*='color: rgba(0,0,0'], li[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+            blockquote[style*='color: black'], blockquote[style*='color: #000'], blockquote[style*='color: rgb(0, 0, 0)'], blockquote[style*='color: rgba(0,0,0'], blockquote[style*='color: rgb(11, 13, 14)'] {
+              color: var(--joy-palette-text-secondary) !important;
+            }
+          `}
         }
         :global(.tiptap-preview pre) {
           border: 1px solid var(--joy-palette-divider);
@@ -1456,14 +1529,6 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           white-space: pre-wrap;
           word-wrap: break-word;
           word-break: break-all;
-        }
-        .tiptap-preview {
-          min-height: 200px;
-          border-radius: 8px;
-          padding: 16px;
-          color: #222;
-          font-size: 16px;
-          margin-top: 8px;
         }
         :global(.ProseMirror a),
         :global(.tiptap-preview a) {

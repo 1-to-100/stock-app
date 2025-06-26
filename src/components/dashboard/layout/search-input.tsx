@@ -9,14 +9,15 @@ import Box from "@mui/joy/Box";
 interface SearchInputProps {
   onSearch: (value: string) => void;
   style?: React.CSSProperties;
+  isImpersonating?: boolean;
 }
 
-export function WrapperSearchInput({ onSearch, style }: SearchInputProps) {
+export function WrapperSearchInput({ onSearch, style, isImpersonating }: SearchInputProps) {
   return (
     <Box
       sx={{
         position: { xs: "static", sm: "fixed" },
-        top: { xs: "0", sm: "2%", md: "2%", lg: "4.6%" },
+        top: { xs: "0", sm: isImpersonating ? "4%" : "2%", md: isImpersonating ? "4%" : "2%", lg: "4.6%" },
         left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
         zIndex: 1000,
       }}

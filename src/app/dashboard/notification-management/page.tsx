@@ -683,6 +683,20 @@ export default function Page(): React.JSX.Element {
                                   maxWidth: "300px",
                                   height: "auto",
                                 },
+                                p: {
+                                  ...(colorScheme === "dark" && {
+                                    "&[style*='color: black'], &[style*='color: #000'], &[style*='color: rgb(0, 0, 0)'], &[style*='color: rgba(0,0,0'], &[style*='color: rgb(11, 13, 14)']": {
+                                      color: "var(--joy-palette-text-secondary) !important"
+                                    }
+                                  }),
+                                },
+                                span: {
+                                  ...(colorScheme === "dark" && {
+                                    "&[style*='color: black'], &[style*='color: #000'], &[style*='color: rgb(0, 0, 0)'], &[style*='color: rgba(0,0,0'], &[style*='color: rgb(11, 13, 14)']": {
+                                      color: "var(--joy-palette-text-secondary) !important"
+                                    }
+                                  }),
+                                },
                               }}
                             >
                               <div

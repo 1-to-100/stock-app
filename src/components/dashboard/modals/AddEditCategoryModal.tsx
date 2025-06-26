@@ -322,7 +322,7 @@ export default function AddEditCategory({
                   sx={{
                     p: 1,
                     borderTop: "1px solid #E5E7EB",
-                    bgcolor: "#F9FAFB",
+                    bgcolor: "var(--joy-palette-background-surface)",
                   }}
                 >
                   <Input

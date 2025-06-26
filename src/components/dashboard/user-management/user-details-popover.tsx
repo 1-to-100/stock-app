@@ -286,8 +286,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                     }}
                     fontWeight="600"
                   >
-                    {userData?.firstName.slice(0, 20)}{" "}
-                    {userData?.lastName.slice(0, 20)}
+                    {userData?.firstName?.slice(0, 20)}{" "}
+                    {userData?.lastName?.slice(0, 20)}
                   </Typography>
                   <Typography
                     level="body-sm"
@@ -446,8 +446,8 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   textOverflow: "ellipsis",
                 }}
               >
-                {userData?.firstName.slice(0, 30)}{" "}
-                {userData?.lastName.slice(0, 30)}
+                {userData?.firstName?.slice(0, 30)}{" "}
+                {userData?.lastName?.slice(0, 30)}
               </Typography>
             </Stack>
 
