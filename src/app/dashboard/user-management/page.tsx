@@ -45,7 +45,7 @@ import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/Arr
 import { useImpersonation } from "@/contexts/impersonation-context";
 import {getCustomers} from "@/lib/api/customers";
 import {getRoles} from "@/lib/api/roles";
-import {getUserById, getUsers, resendInviteUser} from "@/lib/api/users";
+import {deleteUser, getUserById, getUsers, resendInviteUser} from "@/lib/api/users";
 
 interface HttpError extends Error {
   response?: {
@@ -257,6 +257,13 @@ export default function Page(): React.JSX.Element {
   };
 
   const confirmDelete = () => {
+    if (rowsToDelete.length > 0) {
+      deleteUser(rowsToDelete[0]!).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+        toast.success('User deleted successfully');
+      });
+    }
+
     setOpenDeleteModal(false);
     setRowsToDelete([]);
     setSelectedRows([]);
@@ -1083,23 +1090,6 @@ export default function Page(): React.JSX.Element {
                                     Impersonate user
                                   </Box>
                                 )}
-                              {!user.isSuperadmin && !user.isCustomerSuccess && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("deleteUser")) && (
-                                  <Box
-                                    onMouseDown={(event) => {
-                                      event.preventDefault();
-                                      if(confirm('Are you sure you want to delete this user?')) {
-                                        // xxx
-                                      }
-                                    }}
-                                    sx={{
-                                      ...menuItemStyle,
-                                      gap: { xs: "10px", sm: "14px" },
-                                    }}
-                                  >
-                                    <TrashSimple size={20} />
-                                    Delete user
-                                  </Box>
-                                )}
                               <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();
@@ -1113,6 +1103,21 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
+                              {!user.isSuperadmin && !user.isCustomerSuccess && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("deleteUser")) && (
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    handleDeleteUser(user.id);
+                                  }}
+                                  sx={{
+                                    ...menuItemStyle,
+                                    gap: { xs: "10px", sm: "14px" },
+                                  }}
+                                >
+                                  <TrashSimple size={20} />
+                                  Delete user
+                                </Box>
+                              )}
                               {/* <Box
                                 onMouseDown={(event) => {
                                   event.preventDefault();

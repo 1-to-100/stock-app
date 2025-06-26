@@ -191,6 +191,12 @@ export async function editUserInfo(payload: EditUserInfoPayload): Promise<ApiUse
   });
 }
 
+export async function deleteUser(id: number): Promise<ApiUser> {
+  return apiFetch<ApiUser>(`${config.site.apiUrl}/users/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function getStatuses(): Promise<Status[]> {
   return apiFetch<Status[]>(`${config.site.apiUrl}/taxonomies/statuses`, {
     method: "GET",
