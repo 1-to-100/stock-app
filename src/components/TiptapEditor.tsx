@@ -1309,7 +1309,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         .color-picker {
           position: fixed;
           top: auto;
-          left: auto;
+          right: 32px;
           margin-top: 4px;
           display: grid;
           grid-template-columns: repeat(5, 24px);

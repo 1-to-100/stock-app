@@ -57,7 +57,7 @@ export default function SendNotifications({ open, onClose, selectedNotificationI
 
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users", 1],
-    queryFn: () => getUsers({ page: 1, perPage: 10000, statusId: ["active"] }),
+    queryFn: () => getUsers({ page: 1, perPage: 10000, statusId: ["active"], orderBy: "name", orderDirection: "asc" }),
   });
   const users = usersData?.data || [];
 

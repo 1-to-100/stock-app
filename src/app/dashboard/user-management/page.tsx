@@ -50,6 +50,9 @@ import {deleteUser, getUserById, getUsers, resendInviteUser} from "@/lib/api/use
 interface HttpError extends Error {
   response?: {
     status: number;
+    data: {
+      message: string;
+    };
   };
 }
 
@@ -256,14 +259,24 @@ export default function Page(): React.JSX.Element {
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (rowsToDelete.length > 0) {
-      deleteUser(rowsToDelete[0]!).then(() => {
+      try {
+        for (const userId of rowsToDelete) {
+          try {
+            setOpenDeleteModal(false);
+            await deleteUser(userId);
+            toast.success('User successfully deleted');
+          } catch (error) {
+            const httpError = error as HttpError;
+            toast.error(httpError.response?.data?.message);
+          }
+        }
         queryClient.invalidateQueries({ queryKey: ["users"] });
-        toast.success('User deleted successfully');
-      });
+      } catch (error) {
+        // toast.error('An error occurred while deleting users');
+      }
     }
-
     setOpenDeleteModal(false);
     setRowsToDelete([]);
     setSelectedRows([]);
@@ -1170,7 +1183,7 @@ export default function Page(): React.JSX.Element {
         onConfirm={confirmDelete}
         usersToDelete={usersToDelete}
         title="Delete user"
-        description="Are you sure you want to delete this user?"
+        description="This user will be permanently removed from the system. They will not be able to log in or register again with this email. Are you sure you want to continue?"
       />
 
       <DeleteDeactivateUserModal
