@@ -36,7 +36,7 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import { ColorPaletteProp, VariantProp } from "@mui/joy";
 import { useUserInfo } from "@/hooks/use-user-info";
 import InviteUserModal from "@/components/dashboard/modals/InviteUserModal";
-import {PaperPlaneRight, TrashSimple} from "@phosphor-icons/react";
+import {PaperPlaneRight, ToggleRight, TrashSimple} from "@phosphor-icons/react";
 import { toast } from "@/components/core/toaster";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
@@ -45,7 +45,7 @@ import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/Arr
 import { useImpersonation } from "@/contexts/impersonation-context";
 import {getCustomers} from "@/lib/api/customers";
 import {getRoles} from "@/lib/api/roles";
-import {deleteUser, getUserById, getUsers, resendInviteUser} from "@/lib/api/users";
+import {deleteUser, getUserById, getUsers, resendInviteUser, updateUser} from "@/lib/api/users";
 
 interface HttpError extends Error {
   response?: {
@@ -244,10 +244,27 @@ export default function Page(): React.JSX.Element {
     setOpenDeleteModal(true);
   }, []);
 
-  const handleDeactivate = (userId: number) => {
-    setRowsToDelete([userId]);
-    setIsDeactivating(true);
-    setOpenDeactivateModal(true);
+  const handleDeactivate = async (userId: number) => {
+    try {
+      await updateUser({ id: userId, status: 'inactive' });
+      toast.success('User deactivated successfully');
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    } catch (error) {
+      const httpError = error as HttpError;
+      toast.error(httpError.response?.data?.message || 'Failed to deactivate user');
+    }
+    handleMenuClose();
+  };
+
+  const handleActivate = async (userId: number) => {
+    try {
+      await updateUser({ id: userId, status: 'active' });
+      toast.success('User activated successfully');
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    } catch (error) {
+      const httpError = error as HttpError;
+      toast.error(httpError.response?.data?.message || 'Failed to activate user');
+    }
     handleMenuClose();
   };
 
@@ -1116,6 +1133,36 @@ export default function Page(): React.JSX.Element {
                                 <PencilIcon fontSize="20px" />
                                 Edit
                               </Box>
+                              {user?.status === 'active' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("editUser")) && (
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    handleDeactivate(user.id);
+                                  }}
+                                  sx={{
+                                    ...menuItemStyle,
+                                    gap: { xs: "10px", sm: "14px" },
+                                  }}
+                                >
+                                  <ToggleLeft fontSize="20px" />
+                                  Deactivate
+                                </Box>
+                              )}
+                              {user.status && user.status != 'active' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("editUser")) && (
+                                <Box
+                                  onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    handleActivate(user.id);
+                                  }}
+                                  sx={{
+                                    ...menuItemStyle,
+                                    gap: { xs: "10px", sm: "14px" },
+                                  }}
+                                >
+                                  <ToggleRight fontSize="20px" />
+                                  Activate
+                                </Box>
+                              )}
                               {!user.isSuperadmin && !user.isCustomerSuccess && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("deleteUser")) && (
                                 <Box
                                   onMouseDown={(event) => {
@@ -1131,32 +1178,6 @@ export default function Page(): React.JSX.Element {
                                   Delete user
                                 </Box>
                               )}
-                              {/* <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleDeleteUser(user.id);
-                                }}
-                                sx={{
-                                  ...menuItemStyle,
-                                  gap: { xs: "10px", sm: "14px" },
-                                }}
-                              >
-                                <TrashIcon fontSize="20px" />
-                                Delete
-                              </Box> */}
-                              {/* <Box
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleDeactivate(user.id);
-                                }}
-                                sx={{
-                                  ...menuItemStyle,
-                                  gap: { xs: "10px", sm: "14px" },
-                                }}
-                              >
-                                <ToggleLeft fontSize="20px" />
-                                Deactivate
-                              </Box> */}
                             </Popper>
                           </td>
                         </tr>
