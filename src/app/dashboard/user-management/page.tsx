@@ -245,15 +245,29 @@ export default function Page(): React.JSX.Element {
   }, []);
 
   const handleDeactivate = async (userId: number) => {
-    try {
-      await updateUser({ id: userId, status: 'inactive' });
-      toast.success('User deactivated successfully');
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    } catch (error) {
-      const httpError = error as HttpError;
-      toast.error(httpError.response?.data?.message || 'Failed to deactivate user');
+    setSelectedRows([userId]);
+    setOpenDeactivateModal(true)
+  };
+
+  const confirmDeactivate = async () => {
+    if(selectedRows.length > 0) {
+      try {
+        setOpenDeactivateModal(false);
+        for (const userId of selectedRows) {
+          await updateUser({ id: userId, status: 'suspended' });
+        }
+        toast.success('User deactivated successfully');
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      } catch (error) {
+        const httpError = error as HttpError;
+        toast.error(httpError.response?.data?.message || 'Failed to deactivate user');
+      }
+      handleMenuClose();
     }
-    handleMenuClose();
+
+    setOpenDeactivateModal(false);
+    setRowsToDelete([]);
+    setSelectedRows([]);
   };
 
   const handleActivate = async (userId: number) => {
@@ -295,12 +309,6 @@ export default function Page(): React.JSX.Element {
       }
     }
     setOpenDeleteModal(false);
-    setRowsToDelete([]);
-    setSelectedRows([]);
-  };
-
-  const confirmDeactivate = () => {
-    setOpenDeactivateModal(false);
     setRowsToDelete([]);
     setSelectedRows([]);
   };
@@ -1148,7 +1156,7 @@ export default function Page(): React.JSX.Element {
                                   Deactivate
                                 </Box>
                               )}
-                              {user.status && user.status != 'active' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("editUser")) && (
+                              {user.status && user.status == 'suspended' && (isUserOwner(userInfo, user) || userInfo?.permissions?.includes("editUser")) && (
                                 <Box
                                   onMouseDown={(event) => {
                                     event.preventDefault();

@@ -16,7 +16,7 @@ interface CreateUserPayload {
   customerId?: number;
   roleId?: number;
   managerId?: number;
-  status?: 'active' | 'inactive';
+  status?: 'active' | 'inactive' | 'suspended';
 }
 
 interface UpdateUserPayload extends Partial<CreateUserPayload> {
