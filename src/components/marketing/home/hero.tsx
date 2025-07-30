@@ -23,9 +23,9 @@ export function Hero(): React.JSX.Element {
           bgcolor: 'var(--joy-palette-neutral-950)',
           color: 'var(--joy-palette-common-white)',
           overflow: 'hidden',
-          pb: { xs: '180px', sm: '240px', md: '440px' },
+          pb: { xs: '180px', sm: '240px', md: '360px' },
           position: 'relative',
-          pt: { xs: '180px', md: '240px' },
+          pt: { xs: '180px', md: '340px' },
           zIndex: 1,
         }}
       >
@@ -57,7 +57,7 @@ export function Hero(): React.JSX.Element {
                 textAlign="center"
                 textColor="inherit"
               >
-                {config.site.name} Dashboard: Redefining SaaS Product Management
+                BasePlate: Redefining SaaS Product Management
               </Typography>
               <Typography
                 fontSize={{ xs: 'md', sm: 'lg', md: 'xl' }}
@@ -69,7 +69,7 @@ export function Hero(): React.JSX.Element {
                 and with a beautiful design.
               </Typography>
               <Stack direction="row" spacing={3} sx={{ justifyContent: 'center' }}>
-                <Button
+                {/* <Button
                   color="neutral"
                   component="a"
                   href={paths.purchase}
@@ -81,16 +81,16 @@ export function Hero(): React.JSX.Element {
                   target="_blank"
                 >
                   Purchase
-                </Button>
+                </Button> */}
                 <Button component={RouterLink} href={paths.dashboard.overview}>
-                  Live Demo
+                  Go to Application
                 </Button>
               </Stack>
             </Stack>
           </motion.div>
         </Container>
       </Box>
-      <Box
+      {/* <Box
         sx={{
           position: 'relative',
           mt: { xs: '-100px', sm: '-200px', md: '-300px', lg: '-324px' },
@@ -129,7 +129,7 @@ export function Hero(): React.JSX.Element {
             />
           </Box>
         </motion.div>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

@@ -11,7 +11,7 @@ import { Plans } from '@/components/marketing/home/plans';
 import { Reviews } from '@/components/marketing/home/reviews';
 
 export const metadata = {
-  title: `Redefining SaaS Product Management | ${config.site.name}`,
+  title: `BasePlate: Redefining SaaS Product Management | ${config.site.name}`,
   description: config.site.description,
 } satisfies Metadata;
 
@@ -19,12 +19,12 @@ export default function Page(): React.JSX.Element {
   return (
     <div>
       <Hero />
-      <Customers />
+      {/* <Customers />
       <Features />
       <GetStarted />
       <Reviews />
       <Plans />
-      <Faqs />
+      <Faqs /> */}
     </div>
   );
 }

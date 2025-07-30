@@ -36,7 +36,7 @@ export function MainNav(): React.JSX.Element {
             borderRadius: 'var(--joy-radius-xl)',
             boxShadow: 'var(--joy-shadow-sm)',
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr 1fr', md: '240px 1fr 240px' },
+            // gridTemplateColumns: { xs: '1fr 1fr', md: '240px 1fr 240px' },
             maxWidth: 'lg',
             minHeight: '56px',
             mx: 'auto',
@@ -45,24 +45,25 @@ export function MainNav(): React.JSX.Element {
             py: '8px',
           }}
         >
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+          {/* <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
             <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
               <DynamicLogo  colorDark="light" colorLight="dark" height={24} width={82} />
             </Box>
-          </Stack>
+          </Stack> */}
           <Stack
             direction="row"
             spacing={2}
-            sx={{ display: { xs: 'none', md: 'flex' }, flex: '1 1 auto', justifyContent: 'center' }}
+            sx={{ display: { xs: 'none', md: 'flex' },  justifyContent: 'center', gap: '20px' }}
           >
             <NavItem href={paths.home} pathname={pathname} title="Home" />
-            <NavItem external href={paths.docs} pathname={pathname} title="Documentation" />
-            <NavItem href={paths.dashboard.overview} pathname={pathname} title="Dashboard" />
+            <NavItem external href="https://1to100.com/baseplate/" pathname={pathname} title="Documentation" />
+            <NavItem external href="https://github.com/1-to-100/baseplate" pathname={pathname} title="Sources" />
+            <NavItem href={paths.dashboard.overview} pathname={pathname} title="Application" />
           </Stack>
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
-            <NoSsr>
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'flex-end', display: { md: 'none' } }}>
+            {/* <NoSsr>
               <ColorSchemeSwitch />
-            </NoSsr>
+            </NoSsr> */}
             <IconButton
               onClick={(): void => {
                 setOpenNav(true);
@@ -75,7 +76,7 @@ export function MainNav(): React.JSX.Element {
             >
               <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
             </IconButton>
-            <Button
+            {/* <Button
               component="a"
               href={paths.purchase}
               sx={{
@@ -87,7 +88,7 @@ export function MainNav(): React.JSX.Element {
               target="_blank"
             >
               Purchase
-            </Button>
+            </Button> */}
           </Stack>
         </Box>
       </Box>
