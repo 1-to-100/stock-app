@@ -1,0 +1,275 @@
+import type { Meta, StoryObj } from '@storybook/nextjs';
+import React from 'react';
+
+import { fn } from 'storybook/test';
+
+import { Select } from './Select';
+
+const meta = {
+  title: 'Components/Select',
+  component: Select,
+  parameters: {
+    layout: 'centered',
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    size: {
+      control: { type: 'select' },
+      options: ['sm', 'md', 'lg'],
+    },
+    variant: {
+      control: { type: 'select' },
+      options: ['outlined'],
+    },
+    color: {
+      control: { type: 'select' },
+      options: ['primary', 'neutral', 'danger', 'success', 'warning'],
+    },
+    disabled: {
+      control: 'boolean',
+    },
+    multiple: {
+      control: 'boolean',
+    },
+    required: {
+      control: 'boolean',
+    },
+  },
+  args: { 
+    onChange: fn(),
+    variant: 'outlined',
+  },
+} satisfies Meta<typeof Select>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const basicOptions = [
+  { value: 'option1', label: 'Option 1' },
+  { value: 'option2', label: 'Option 2' },
+  { value: 'option3', label: 'Option 3' },
+  { value: 'option4', label: 'Option 4' },
+  { value: 'option5', label: 'Option 5' },
+];
+
+const countryOptions = [
+  { value: 'us', label: 'United States' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'de', label: 'Germany' },
+  { value: 'fr', label: 'France' },
+  { value: 'au', label: 'Australia' },
+];
+
+const categoryOptions = [
+  { value: 'tech', label: 'Technology' },
+  { value: 'design', label: 'Design' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'support', label: 'Support' },
+];
+
+export const Default: Story = {
+  args: {
+    options: basicOptions,
+    placeholder: 'Select an option',
+  },
+};
+
+export const WithValue: Story = {
+  args: {
+    options: basicOptions,
+    value: 'option2',
+    placeholder: 'Select an option',
+  },
+};
+
+export const WithDefaultValue: Story = {
+  args: {
+    options: basicOptions,
+    defaultValue: 'option3',
+    placeholder: 'Select an option',
+  },
+};
+
+export const Countries: Story = {
+  args: {
+    options: countryOptions,
+    placeholder: 'Select a country',
+  },
+};
+
+export const Categories: Story = {
+  args: {
+    options: categoryOptions,
+    placeholder: 'Select a category',
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    options: basicOptions,
+    disabled: true,
+    value: 'option1',
+    placeholder: 'This select is disabled',
+  },
+};
+
+export const Required: Story = {
+  args: {
+    options: basicOptions,
+    required: true,
+    placeholder: 'This field is required',
+  },
+};
+
+export const Small: Story = {
+  args: {
+    size: 'sm',
+    options: basicOptions,
+    placeholder: 'Small select',
+  },
+};
+
+export const Large: Story = {
+  args: {
+    size: 'lg',
+    options: basicOptions,
+    placeholder: 'Large select',
+  },
+};
+
+export const Multiple: Story = {
+  args: {
+    multiple: true,
+    options: categoryOptions,
+    placeholder: 'Select multiple categories',
+    renderValue: (selected) => {
+      if (Array.isArray(selected) && selected.length > 0) {
+        return `Selected: ${selected.length} items`;
+      }
+      return 'Select multiple categories';
+    },
+  },
+};
+
+export const MultipleWithValue: Story = {
+  args: {
+    multiple: true,
+    options: categoryOptions,
+    value: ['tech', 'design'],
+    placeholder: 'Select multiple categories',
+    renderValue: (selected) => {
+      if (Array.isArray(selected) && selected.length > 0) {
+        return `Selected: ${selected.length} items`;
+      }
+      return 'Select multiple categories';
+    },
+  },
+};
+
+export const WithDisabledOptions: Story = {
+  args: {
+    options: [
+      { value: 'option1', label: 'Option 1' },
+      { value: 'option2', label: 'Option 2', disabled: true },
+      { value: 'option3', label: 'Option 3' },
+      { value: 'option4', label: 'Option 4', disabled: true },
+      { value: 'option5', label: 'Option 5' },
+    ],
+    placeholder: 'Select an option',
+  },
+};
+
+export const WithMaxOptions: Story = {
+  args: {
+    options: countryOptions,
+    maxOptions: 3,
+    placeholder: 'Select a country (max 3 shown)',
+  },
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'flex-start', minWidth: '300px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h4>Basic Select</h4>
+        <Select
+          options={basicOptions}
+          placeholder="Select an option"
+        />
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h4>Sizes</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Select
+            size="sm"
+            options={basicOptions}
+            placeholder="Small"
+          />
+          <Select
+            size="md"
+            options={basicOptions}
+            placeholder="Medium"
+          />
+          <Select
+            size="lg"
+            options={basicOptions}
+            placeholder="Large"
+          />
+        </div>
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h4>States</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Select
+            options={basicOptions}
+            placeholder="Normal"
+          />
+          <Select
+            options={basicOptions}
+            disabled
+            value="option1"
+            placeholder="Disabled"
+          />
+          <Select
+            options={basicOptions}
+            required
+            placeholder="Required"
+          />
+        </div>
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h4>Multiple Selection</h4>
+        <Select
+          multiple
+          options={categoryOptions}
+          placeholder="Select multiple categories"
+          renderValue={(selected) => {
+            if (Array.isArray(selected) && selected.length > 0) {
+              return `Selected: ${selected.length} items`;
+            }
+            return 'Select multiple categories';
+          }}
+        />
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h4>With Disabled Options</h4>
+        <Select
+          options={[
+            { value: 'option1', label: 'Option 1' },
+            { value: 'option2', label: 'Option 2', disabled: true },
+            { value: 'option3', label: 'Option 3' },
+            { value: 'option4', label: 'Option 4', disabled: true },
+            { value: 'option5', label: 'Option 5' },
+          ]}
+          placeholder="Select an option"
+        />
+      </div>
+    </div>
+  ),
+};

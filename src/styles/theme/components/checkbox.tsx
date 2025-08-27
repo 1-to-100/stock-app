@@ -14,7 +14,7 @@ export const JoyCheckbox = {
       ...(ownerState.checked && {
         '--variant-solidBg': 'linear-gradient(120deg, #282490 0%, #3F4DCF 100%)',
         '--variant-solidHoverBg': 'linear-gradient(120deg, #1E1A6F 0%, #3439B0 100%)',
-        '--Icon-color': theme.palette.common.white,
+        '--Icon-color': '#FFFFFF',
         background: 'var(--variant-solidBg)',
         height: '20px',
         width: '20px',
