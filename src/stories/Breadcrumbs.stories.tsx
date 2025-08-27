@@ -142,6 +142,12 @@ export const LastItemClickable: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    items: [
+      { label: 'Home', href: '/' },
+      { label: 'Page', href: '/page' },
+    ],
+  },
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'flex-start', minWidth: '400px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

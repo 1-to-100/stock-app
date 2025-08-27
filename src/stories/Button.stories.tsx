@@ -96,6 +96,9 @@ export const WithCustomBackground: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    label: 'Button',
+  },
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>

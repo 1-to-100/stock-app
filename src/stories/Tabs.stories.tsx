@@ -109,6 +109,12 @@ export const AuthTabs: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    tabs: [
+      { value: 'tab1', label: 'Tab 1', content: 'Content 1' },
+      { value: 'tab2', label: 'Tab 2', content: 'Content 2' },
+    ],
+  },
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'flex-start', minWidth: '400px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

@@ -136,6 +136,9 @@ export const WithEndDecorator: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    placeholder: 'Input',
+  },
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start', minWidth: '300px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

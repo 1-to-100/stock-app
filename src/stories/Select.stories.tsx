@@ -190,6 +190,10 @@ export const WithMaxOptions: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    options: basicOptions,
+    placeholder: 'Select an option',
+  },
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'flex-start', minWidth: '300px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
