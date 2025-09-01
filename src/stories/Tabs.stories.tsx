@@ -55,59 +55,6 @@ export const Small: Story = {
   },
 };
 
-export const Large: Story = {
-  args: {
-    size: 'lg',
-    tabs: [
-      { value: 'tab1', label: 'Large Tab 1', content: 'Large tab content 1' },
-      { value: 'tab2', label: 'Large Tab 2', content: 'Large tab content 2' },
-    ],
-  },
-};
-
-export const WithoutContent: Story = {
-  args: {
-    showContent: false,
-    tabs: [
-      { value: 'tab1', label: 'Tab 1' },
-      { value: 'tab2', label: 'Tab 2' },
-      { value: 'tab3', label: 'Tab 3' },
-    ],
-  },
-};
-
-export const WithDefaultValue: Story = {
-  args: {
-    defaultValue: 'tab2',
-    tabs: [
-      { value: 'tab1', label: 'Tab 1', content: 'Content for Tab 1' },
-      { value: 'tab2', label: 'Tab 2', content: 'Content for Tab 2 (default)' },
-      { value: 'tab3', label: 'Tab 3', content: 'Content for Tab 3' },
-    ],
-  },
-};
-
-export const ManyTabs: Story = {
-  args: {
-    tabs: [
-      { value: 'tab1', label: 'First Tab', content: 'First tab content' },
-      { value: 'tab2', label: 'Second Tab', content: 'Second tab content' },
-      { value: 'tab3', label: 'Third Tab', content: 'Third tab content' },
-      { value: 'tab4', label: 'Fourth Tab', content: 'Fourth tab content' },
-      { value: 'tab5', label: 'Fifth Tab', content: 'Fifth tab content' },
-    ],
-  },
-};
-
-export const AuthTabs: Story = {
-  args: {
-    tabs: [
-      { value: 'sign-in', label: 'Sign In', content: 'Sign in form content' },
-      { value: 'sign-up', label: 'Sign Up', content: 'Sign up form content' },
-    ],
-  },
-};
-
 export const AllVariants: Story = {
   args: {
     tabs: [
@@ -138,16 +85,6 @@ export const AllVariants: Story = {
               tabs={[
                 { value: 'small1', label: 'Small 1', content: 'Small tab 1' },
                 { value: 'small2', label: 'Small 2', content: 'Small tab 2' },
-              ]}
-            />
-          </div>
-          <div>
-            <strong>Large:</strong>
-            <Tabs
-              size="lg"
-              tabs={[
-                { value: 'large1', label: 'Large 1', content: 'Large tab 1' },
-                { value: 'large2', label: 'Large 2', content: 'Large tab 2' },
               ]}
             />
           </div>

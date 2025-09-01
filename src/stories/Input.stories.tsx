@@ -56,13 +56,6 @@ export const Default: Story = {
   },
 };
 
-export const WithValue: Story = {
-  args: {
-    value: 'Hello World',
-    placeholder: 'Enter your text here',
-  },
-};
-
 export const Email: Story = {
   args: {
     type: 'email',
@@ -100,40 +93,6 @@ export const Error: Story = {
   },
 };
 
-export const Required: Story = {
-  args: {
-    required: true,
-    placeholder: 'This field is required',
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: 'sm',
-    placeholder: 'Small input',
-  },
-};
-
-export const Large: Story = {
-  args: {
-    size: 'lg',
-    placeholder: 'Large input',
-  },
-};
-
-export const WithStartDecorator: Story = {
-  args: {
-    startDecorator: '🔍',
-    placeholder: 'Search with icon',
-  },
-};
-
-export const WithEndDecorator: Story = {
-  args: {
-    endDecorator: '✓',
-    placeholder: 'Input with end decorator',
-  },
-};
 
 export const AllVariants: Story = {
   args: {
@@ -152,32 +111,14 @@ export const AllVariants: Story = {
       </div>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <h4>Sizes</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Input size="sm" placeholder="Small" />
-          <Input size="md" placeholder="Medium" />
-          <Input size="lg" placeholder="Large" />
-        </div>
-      </div>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <h4>States</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <Input placeholder="Normal" />
           <Input disabled placeholder="Disabled" />
           <Input error placeholder="Error state" />
-          <Input required placeholder="Required" />
         </div>
       </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <h4>Decorators</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Input startDecorator="🔍" placeholder="With start decorator" />
-          <Input endDecorator="✓" placeholder="With end decorator" />
-          <Input startDecorator="📧" endDecorator="→" placeholder="With both decorators" />
-        </div>
-      </div>
     </div>
   ),
 };

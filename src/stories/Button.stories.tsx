@@ -67,27 +67,6 @@ export const Danger: Story = {
   },
 };
 
-export const Neutral: Story = {
-  args: {
-    label: 'Neutral Button',
-    color: 'neutral',
-  },
-};
-
-export const Large: Story = {
-  args: {
-    size: 'large',
-    label: 'Large Button',
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: 'small',
-    label: 'Small Button',
-  },
-};
-
 export const WithCustomBackground: Story = {
   args: {
     label: 'Custom Background',
@@ -108,13 +87,7 @@ export const AllVariants: Story = {
       </div>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <Button label="Danger" color="danger" />
-        <Button label="Neutral" color="neutral" />
         <Button label="Custom BG" backgroundColor="#FF6B6B" />
-      </div>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Button label="Small" size="small" />
-        <Button label="Medium" size="medium" />
-        <Button label="Large" size="large" />
       </div>
     </div>
   ),

@@ -76,33 +76,10 @@ export const Default: Story = {
   },
 };
 
-export const WithValue: Story = {
-  args: {
-    options: basicOptions,
-    value: 'option2',
-    placeholder: 'Select an option',
-  },
-};
-
-export const WithDefaultValue: Story = {
-  args: {
-    options: basicOptions,
-    defaultValue: 'option3',
-    placeholder: 'Select an option',
-  },
-};
-
 export const Countries: Story = {
   args: {
     options: countryOptions,
     placeholder: 'Select a country',
-  },
-};
-
-export const Categories: Story = {
-  args: {
-    options: categoryOptions,
-    placeholder: 'Select a category',
   },
 };
 
@@ -112,30 +89,6 @@ export const Disabled: Story = {
     disabled: true,
     value: 'option1',
     placeholder: 'This select is disabled',
-  },
-};
-
-export const Required: Story = {
-  args: {
-    options: basicOptions,
-    required: true,
-    placeholder: 'This field is required',
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: 'sm',
-    options: basicOptions,
-    placeholder: 'Small select',
-  },
-};
-
-export const Large: Story = {
-  args: {
-    size: 'lg',
-    options: basicOptions,
-    placeholder: 'Large select',
   },
 };
 
@@ -150,42 +103,6 @@ export const Multiple: Story = {
       }
       return 'Select multiple categories';
     },
-  },
-};
-
-export const MultipleWithValue: Story = {
-  args: {
-    multiple: true,
-    options: categoryOptions,
-    value: ['tech', 'design'],
-    placeholder: 'Select multiple categories',
-    renderValue: (selected) => {
-      if (Array.isArray(selected) && selected.length > 0) {
-        return `Selected: ${selected.length} items`;
-      }
-      return 'Select multiple categories';
-    },
-  },
-};
-
-export const WithDisabledOptions: Story = {
-  args: {
-    options: [
-      { value: 'option1', label: 'Option 1' },
-      { value: 'option2', label: 'Option 2', disabled: true },
-      { value: 'option3', label: 'Option 3' },
-      { value: 'option4', label: 'Option 4', disabled: true },
-      { value: 'option5', label: 'Option 5' },
-    ],
-    placeholder: 'Select an option',
-  },
-};
-
-export const WithMaxOptions: Story = {
-  args: {
-    options: countryOptions,
-    maxOptions: 3,
-    placeholder: 'Select a country (max 3 shown)',
   },
 };
 
@@ -237,11 +154,6 @@ export const AllVariants: Story = {
             disabled
             value="option1"
             placeholder="Disabled"
-          />
-          <Select
-            options={basicOptions}
-            required
-            placeholder="Required"
           />
         </div>
       </div>

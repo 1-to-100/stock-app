@@ -39,15 +39,12 @@ export interface InputProps extends Omit<JoyInputProps, 'variant' | 'color'> {
 /** Input component for user interaction */
 export const Input = ({
   placeholder,
-  value,
   type = 'text',
   disabled = false,
   error = false,
   size = 'md',
   variant = 'outlined',
   color = 'primary',
-  startDecorator,
-  endDecorator,
   onChange,
   onFocus,
   onBlur,
@@ -59,15 +56,12 @@ export const Input = ({
   return (
     <JoyInput
       placeholder={placeholder}
-      value={value}
       type={type}
       disabled={disabled}
       error={error}
       size={size}
       variant={variant}
       color={color}
-      startDecorator={startDecorator}
-      endDecorator={endDecorator}
       onChange={onChange}
       onFocus={onFocus}
       onBlur={onBlur}

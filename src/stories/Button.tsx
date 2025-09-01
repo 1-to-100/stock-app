@@ -58,32 +58,32 @@ export const Button = ({
           },
         }),
         ...(buttonVariant === 'outlined' && {
-          border: `2px solid ${buttonColor === 'primary' 
-            ? 'var(--joy-palette-primary-500)' 
-            : buttonColor === 'neutral'
-            ? 'var(--joy-palette-neutral-500)'
-            : 'var(--joy-palette-danger-500)'}`,
-          color: buttonColor === 'primary' 
-            ? 'var(--joy-palette-primary-500)' 
-            : buttonColor === 'neutral'
-            ? 'var(--joy-palette-neutral-500)'
-            : 'var(--joy-palette-danger-500)',
-          backgroundColor: 'transparent',
+          borderColor: "#E5E7EB",
+          borderRadius: "20px",
+          bgcolor: "var(--NavItem-active-background)",
+          color: "var(--joy-palette-text-primary)",
+          padding: "7px 14px",
+          "&:hover": {
+            background: "var(--joy-palette-background-mainBg)",
+          },
         }),
         ...(buttonVariant === 'plain' && {
-          color: buttonColor === 'primary' 
-            ? 'var(--joy-palette-primary-500)' 
-            : buttonColor === 'neutral'
-            ? 'var(--joy-palette-neutral-500)'
-            : 'var(--joy-palette-danger-500)',
-          backgroundColor: 'transparent',
-          '&:hover': {
-            backgroundColor: buttonColor === 'primary' 
-              ? 'var(--joy-palette-primary-50)' 
-              : buttonColor === 'neutral'
-              ? 'var(--joy-palette-neutral-50)'
-              : 'var(--joy-palette-danger-50)',
-          },
+          color: "var(--joy-palette-text-secondary)",
+        backgroundColor: 'transparent',
+        background: 'var(--joy-palette-background-primaryColor)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        padding: 0,
+        "&:hover": { 
+          backgroundColor: 'transparent', 
+          background: 'var(--joy-palette-background-primaryColor)',
+          opacity: '0.8',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        },
+        '& .MuiButton-startDecorator': {
+          color: 'var(--joy-palette-background-primaryColor)',
+        },
         }),
         ...(backgroundColor && { backgroundColor }),
       }}
