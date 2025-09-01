@@ -80,7 +80,7 @@ export const WithoutActions: Story = {
 
 export const SingleCard: Story = {
   args: {
-    data: [sampleData[0]],
+    data: sampleData.slice(0, 1),
     showActions: true,
   },
 };
