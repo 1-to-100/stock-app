@@ -69,7 +69,6 @@ const loginFormData: ModalData = {
 export const AddUser: Story = {
   args: {
     open: true,
-    onClose: () => {},
     data: userFormData,
     onSave: (formData) => console.log('Form data:', formData),
     isLoading: false,
@@ -79,7 +78,6 @@ export const AddUser: Story = {
 export const Login: Story = {
   args: {
     open: true,
-    onClose: () => {},
     data: loginFormData,
     onSave: (formData) => console.log('Form data:', formData),
     isLoading: false,
@@ -89,7 +87,6 @@ export const Login: Story = {
 export const Loading: Story = {
   args: {
     open: true,
-    onClose: () => {},
     data: userFormData,
     onSave: (formData) => console.log('Form data:', formData),
     isLoading: true,

@@ -61,13 +61,15 @@ export function ModalComponent({
     const newErrors: Record<string, string> = {};
     
     data.fields.forEach(field => {
-      if (field.required && !formData[field.name]?.trim()) {
+      const fieldValue = formData[field.name] || '';
+      
+      if (field.required && !fieldValue.trim()) {
         newErrors[field.name] = `${field.label} is required`;
       }
       
-      if (field.type === 'email' && formData[field.name]) {
+      if (field.type === 'email' && fieldValue) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData[field.name])) {
+        if (!emailRegex.test(fieldValue)) {
           newErrors[field.name] = 'Invalid email format';
         }
       }
