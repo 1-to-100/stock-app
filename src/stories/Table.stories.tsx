@@ -24,7 +24,7 @@ const meta: Meta<typeof TableComponent> = {
 export default meta;
 type Story = StoryObj<typeof TableComponent>;
 
-// Приклад даних для таблиці
+// Приклад даних для таблиці з оригінальною структурою
 const sampleData: TableData[] = [
   {
     id: '1',
@@ -159,10 +159,10 @@ export const Default: Story = {
 
 export const SmallData: Story = {
   args: {
-    data: sampleData.slice(0, 5),
-    itemsPerPage: 5,
-    showPagination: false,
-    title: 'Small Users Table',
+    data: sampleData.slice(0, 8),
+    itemsPerPage: 3,
+    showPagination: true,
+    title: 'Small Users Table with Pagination',
   },
 };
 
