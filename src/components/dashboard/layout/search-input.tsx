@@ -4,32 +4,16 @@ import * as React from "react";
 import Input from "@mui/joy/Input";
 import Typography from "@mui/joy/Typography";
 import { MagnifyingGlass as SearchIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
-import Box from "@mui/joy/Box";
+import { useSearch } from "@/contexts/search-context";
 
 interface SearchInputProps {
   onSearch: (value: string) => void;
   style?: React.CSSProperties;
-  isImpersonating?: boolean;
-}
-
-export function WrapperSearchInput({ onSearch, style, isImpersonating }: SearchInputProps) {
-  return (
-    <Box
-      sx={{
-        position: { xs: "static", sm: "fixed" },
-        top: { xs: "0", sm: isImpersonating ? "4%" : "2%", md: isImpersonating ? "4%" : "2%", lg: "4.6%" },
-        left: { xs: "0", sm: "60px", md: "60px", lg: "unset" },
-        zIndex: 1000,
-      }}
-    >
-      <SearchInput onSearch={onSearch} style={style} />
-    </Box>
-  );
 }
 
 export default function SearchInput({ onSearch, style }: SearchInputProps) {
-  const [searchValue, setSearchValue] = React.useState("");
   const [error, setError] = React.useState(false);
+  const { searchValue, setSearchValue } = useSearch();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -42,6 +26,14 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setSearchValue("");
+      onSearch("");
+      setError(false);
+    }
+  };
+
   return (
     <div>
       <Input
@@ -49,6 +41,7 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
         placeholder="Search"
         value={searchValue}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
         style={style}
         sx={{
           width: { xs: "100%", sm: "200px", md: "300px" },

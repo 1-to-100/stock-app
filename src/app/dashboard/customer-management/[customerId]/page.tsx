@@ -25,7 +25,7 @@ import {
 } from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { GridFour as GridFour } from "@phosphor-icons/react/dist/ssr/GridFour";
 import { Table as TableIcon } from "@phosphor-icons/react/dist/ssr/Table";
 
@@ -50,6 +50,7 @@ import { getUsers, getUserById } from "../../../../lib/api/users";
 import { getCustomerById } from "../../../../lib/api/customers";
 import Tooltip from "@mui/joy/Tooltip";
 import { ApiUser } from "@/contexts/auth/types";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import AddRoleModal from "@/components/dashboard/modals/AddRoleModal";
 import { useParams } from "next/navigation";
 import { DotsThreeVertical as DotsIcon } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
@@ -82,9 +83,9 @@ const Customer: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const params = useParams();
+  const { debouncedSearchValue } = useGlobalSearch();
   const customerId = params.customerId;
   const queryClient = useQueryClient();
 
@@ -127,7 +128,7 @@ const Customer: React.FC = () => {
     queryKey: [
       "users",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       customerId,
@@ -136,7 +137,7 @@ const Customer: React.FC = () => {
       const response = await getUsers({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         customerId: customerId ? [Number(customerId)] : undefined,
@@ -169,10 +170,6 @@ const Customer: React.FC = () => {
     };
   }, [anchorEl, addUserAnchorEl]);
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const togglePermission = (id: string) => {
     setExpandedPermissions((prev) =>
@@ -372,8 +369,6 @@ const Customer: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

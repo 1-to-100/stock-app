@@ -22,7 +22,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import AddEditNotification from "@/components/dashboard/modals/AddEditNotification";
 import Pagination from "@/components/dashboard/layout/pagination";
 import { Popper } from "@mui/base/Popper";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getNotificationTemplates,
@@ -36,6 +36,7 @@ import { paths } from "@/paths";
 import NotificationDetailsPopover from "@/components/dashboard/notification-management/notification-details-popover";
 import { useColorScheme } from "@mui/joy/styles";
 import { toast } from "@/components/core/toaster";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 
 interface HttpError extends Error {
   response?: {
@@ -49,6 +50,7 @@ const metadata = {
 
 export default function Page(): React.JSX.Element {
   const { colorScheme } = useColorScheme();
+  const { debouncedSearchValue } = useGlobalSearch();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [anchorEl, setAnchorPopper] = useState<null | HTMLElement>(null);
@@ -62,7 +64,6 @@ export default function Page(): React.JSX.Element {
   const [sortColumn, setSortColumn] = useState<keyof ApiNotification | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openSentNotificationsModal, setOpenSentNotificationsModal] = useState(false);
   const [addUserAnchorEl, setAddUserAnchorEl] = useState<null | HTMLElement>(null);
@@ -77,7 +78,7 @@ export default function Page(): React.JSX.Element {
     queryKey: [
       "notificationTemplates",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
     ],
@@ -85,7 +86,7 @@ export default function Page(): React.JSX.Element {
       const response = await getNotificationTemplates({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
       });
@@ -263,10 +264,6 @@ export default function Page(): React.JSX.Element {
     setSortDirection(newDirection);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const notificationsToDelete = rowsToDelete
     .map((userId) => {
@@ -377,8 +374,6 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

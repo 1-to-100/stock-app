@@ -20,6 +20,8 @@ import { useUserInfo } from "@/hooks/use-user-info";
 import { CustomerSelect } from "./customer-select";
 import { useUnreadNotificationsChannel } from "@/hooks/use-notifications";
 import { useImpersonation } from "@/contexts/impersonation-context";
+import { useSearch } from "@/contexts/search-context";
+import SearchInput from "./search-input";
 
 export interface MainNavProps {
   items: NavItemConfig[];
@@ -32,11 +34,16 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
   const userPopover = usePopover<HTMLButtonElement>();
   const { userInfo } = useUserInfo();
   const { isImpersonating } = useImpersonation();
+  const { setSearchValue } = useSearch();
   
   const handleNotification = React.useCallback(({ count }: { count: number }) => {
     setInvisibleBadge(count === 0);
   }, []);
   useUnreadNotificationsChannel(handleNotification);
+  
+  const handleSearch = React.useCallback((value: string) => {
+    setSearchValue(value);
+  }, [setSearchValue]);
 
   return (
     <React.Fragment>
@@ -59,26 +66,15 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
               lg: "var(--Content-radius) var(--Content-radius) 0 0",
             },
             display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             flex: "1 1 auto",
             minHeight: "var(--MainNav-height, 72px)",
             px: { xs: 2, lg: 3 },
           }}
         >
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ alignItems: "center", flex: "1 1 auto" }}
-          >
-            <IconButton
-              color="neutral"
-              onClick={(): void => {
-                setOpenNav(true);
-              }}
-              sx={{ display: { lg: "none" } }}
-              variant="plain"
-            >
-              <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
-            </IconButton>
+          <Stack direction="row" sx={{ alignItems: "left" }}>
+            <SearchInput onSearch={handleSearch} />
           </Stack>
           <Stack
             direction="row"

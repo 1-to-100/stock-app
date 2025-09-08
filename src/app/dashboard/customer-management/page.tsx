@@ -22,7 +22,7 @@ import AddEditCustomer from "@/components/dashboard/modals/AddEditCustomerModal"
 import Pagination from "@/components/dashboard/layout/pagination";
 import Filter from "@/components/dashboard/filter";
 import { Popper } from "@mui/base/Popper";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomersList, deleteCustomer } from "../../../lib/api/customers";
 import { Customer } from "@/contexts/auth/types";
@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { useUserInfo } from "@/hooks/use-user-info";
 import { useColorScheme } from '@mui/joy/styles';
+import { useGlobalSearch } from "@/hooks/use-global-search";
 
 interface HttpError extends Error {
   response?: {
@@ -55,7 +56,6 @@ export default function Page(): React.JSX.Element {
   const [sortColumn, setSortColumn] = useState<keyof Customer | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [filters, setFilters] = useState<{
     customerSuccessId: number[];
     subscriptionId: number[];
@@ -69,6 +69,7 @@ export default function Page(): React.JSX.Element {
 
   const { userInfo } = useUserInfo();
   const { colorScheme } = useColorScheme();
+  const { debouncedSearchValue } = useGlobalSearch();
 
   const router = useRouter();
   const rowsPerPage = 10;
@@ -77,7 +78,7 @@ export default function Page(): React.JSX.Element {
     queryKey: [
       "customers",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       filters.customerSuccessId,
@@ -88,7 +89,7 @@ export default function Page(): React.JSX.Element {
       const response = await getCustomersList({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         managerId: filters.customerSuccessId.length > 0 ? filters.customerSuccessId : undefined,
@@ -252,10 +253,6 @@ export default function Page(): React.JSX.Element {
     setSortDirection(newDirection);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const customersToDelete = rowsToDelete
     .map((customerId) => {
@@ -333,8 +330,6 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

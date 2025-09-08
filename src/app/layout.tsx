@@ -9,6 +9,7 @@ import { getSettings as getPersistedSettings } from "@/lib/settings/get-settings
 import { UserProvider } from "@/contexts/auth/user-context";
 import { ImpersonationProvider } from "@/contexts/impersonation-context";
 import { SettingsProvider } from "@/contexts/settings";
+import { SearchProvider } from "@/contexts/search-context";
 import { Analytics } from "@/components/core/analytics";
 import { LocalizationProvider } from "@/components/core/localization-provider";
 import { SettingsButton } from "@/components/core/settings/settings-button";
@@ -40,15 +41,17 @@ export default async function Layout({
           <LocalizationProvider>
             <UserProvider>
               <ImpersonationProvider>
-                <SettingsProvider settings={settings}>
-                  <ThemeProvider>
-                    <QueryProvider>
-                      {children}
-                      <SettingsButton />
-                      <Toaster position="bottom-right" />
-                    </QueryProvider>
-                  </ThemeProvider>
-                </SettingsProvider>
+                <SearchProvider>
+                  <SettingsProvider settings={settings}>
+                    <ThemeProvider>
+                      <QueryProvider>
+                        {children}
+                        <SettingsButton />
+                        <Toaster position="bottom-right" />
+                      </QueryProvider>
+                    </ThemeProvider>
+                  </SettingsProvider>
+                </SearchProvider>
               </ImpersonationProvider>
             </UserProvider>
           </LocalizationProvider>

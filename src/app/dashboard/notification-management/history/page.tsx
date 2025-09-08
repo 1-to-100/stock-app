@@ -10,9 +10,10 @@ import { ArrowsDownUp as SortIcon } from "@phosphor-icons/react/dist/ssr/ArrowsD
 import { config } from "@/config";
 import { useState } from "react";
 import Pagination from "@/components/dashboard/layout/pagination";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { useQuery } from "@tanstack/react-query";
 import { getNotificationsHistory } from "@/lib/api/notifications";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import CircularProgress from "@mui/joy/CircularProgress";
 import NotificationFilter from "@/components/dashboard/notification-management/notification-filter";
 import { ApiNotification } from "@/contexts/auth/types";
@@ -24,10 +25,10 @@ const metadata = {
 
 export default function Page(): React.JSX.Element {
   const { colorScheme } = useColorScheme();
+  const { debouncedSearchValue } = useGlobalSearch();
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [filters, setFilters] = useState<{
     type: string[];
     channel: string[];
@@ -47,7 +48,7 @@ export default function Page(): React.JSX.Element {
     queryKey: [
       "notifications",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       filters.type,
@@ -61,7 +62,7 @@ export default function Page(): React.JSX.Element {
         perPage: rowsPerPage,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection || undefined,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         type: filters.type.length > 0 ? filters.type[0] : undefined,
         channel: filters.channel.length > 0 ? filters.channel : undefined,
         customer: filters.customer.length > 0 ? filters.customer[0] : undefined,
@@ -124,16 +125,10 @@ export default function Page(): React.JSX.Element {
     setSortDirection(newDirection);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
  
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

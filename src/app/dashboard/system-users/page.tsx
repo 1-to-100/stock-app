@@ -26,9 +26,10 @@ import DeleteDeactivateUserModal from "@/components/dashboard/modals/DeleteItemM
 import UserDetailsPopover from "@/components/dashboard/user-management/user-details-popover";
 import Pagination from "@/components/dashboard/layout/pagination";
 import {Popper} from "@mui/base/Popper";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import {useQuery} from "@tanstack/react-query";
 import {ApiUser, SystemUser} from "@/contexts/auth/types";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import CircularProgress from "@mui/joy/CircularProgress";
 import {ColorPaletteProp, VariantProp} from "@mui/joy";
 import AddEditSystemUser from "@/components/dashboard/modals/AddEditSystemUser";
@@ -71,7 +72,6 @@ export default function Page(): React.JSX.Element {
   const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [filters, setFilters] = useState<{
     statusId: string[];
     customerId: number[];
@@ -86,6 +86,7 @@ export default function Page(): React.JSX.Element {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { userInfo } = useUserInfo();
   const { setImpersonatedUserId, isImpersonating } = useImpersonation();
+  const { debouncedSearchValue } = useGlobalSearch();
 
   const rowsPerPage = 10;
 
@@ -126,7 +127,7 @@ export default function Page(): React.JSX.Element {
     queryKey: [
       "users",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       filters.statusId,
@@ -138,7 +139,7 @@ export default function Page(): React.JSX.Element {
       const response = await getSystemUsers({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         statusId: filters.statusId.length > 0 ? filters.statusId : undefined,
@@ -362,10 +363,6 @@ export default function Page(): React.JSX.Element {
     setSortDirection(newDirection);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const usersToDelete = rowsToDelete
     .map((userId) => {
@@ -444,8 +441,6 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

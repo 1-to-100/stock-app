@@ -25,7 +25,7 @@ import {
 } from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { GridFour as GridFour } from "@phosphor-icons/react/dist/ssr/GridFour";
 import { Table as TableIcon } from "@phosphor-icons/react/dist/ssr/Table";
 import { CaretUp as CaretUp } from "@phosphor-icons/react/dist/ssr/CaretUp";
@@ -51,6 +51,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUsers, getUserById } from "../../../../lib/api/users";
 import { getRoles, ModulePermission } from "../../../../lib/api/roles";
 import { getCustomers } from "../../../../lib/api/customers";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import { getRoleById } from "../../../../lib/api/roles";
 import Tooltip from "@mui/joy/Tooltip";
 import { ApiUser } from "@/contexts/auth/types";
@@ -98,9 +99,9 @@ const SystemAdminSettings: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<keyof ApiUser | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const queryClient = useQueryClient();
+  const { debouncedSearchValue } = useGlobalSearch();
   const params = useParams();
   const roleId = params.roleId;
 
@@ -157,7 +158,7 @@ const SystemAdminSettings: React.FC = () => {
     queryKey: [
       "users",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       roleId,
@@ -167,7 +168,7 @@ const SystemAdminSettings: React.FC = () => {
       const response = await getUsers({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         roleId: roleId ? [Number(roleId)] : undefined,
@@ -215,10 +216,6 @@ const SystemAdminSettings: React.FC = () => {
     };
   }, [anchorEl, addUserAnchorEl]);
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const togglePermission = (id: string) => {
     setExpandedPermissions((prev) =>
@@ -420,8 +417,6 @@ const SystemAdminSettings: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

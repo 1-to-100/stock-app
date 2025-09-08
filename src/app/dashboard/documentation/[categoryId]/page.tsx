@@ -21,7 +21,7 @@ import {
 } from "@mui/joy";
 import { BreadcrumbsItem } from "@/components/core/breadcrumbs-item";
 import { BreadcrumbsSeparator } from "@/components/core/breadcrumbs-separator";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { Popper } from "@mui/base/Popper";
 import { DotsThreeVertical } from "@phosphor-icons/react/dist/ssr/DotsThreeVertical";
 import { PencilSimple as PencilIcon } from "@phosphor-icons/react/dist/ssr/PencilSimple";
@@ -40,6 +40,7 @@ import { deleteArticle, editArticle, getArticlesList } from "@/lib/api/articles"
 import { useRouter } from "next/navigation";
 import {toast} from '@/components/core/toaster';
 import { useColorScheme } from '@mui/joy/styles';
+import { useGlobalSearch } from "@/hooks/use-global-search";
 
 const RouterLink = Link;
 
@@ -68,8 +69,8 @@ const CategoryInfo: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<keyof Article | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const { colorScheme } = useColorScheme();
+  const { debouncedSearchValue } = useGlobalSearch();
 
   const queryClient = useQueryClient();
   const params = useParams();
@@ -98,7 +99,7 @@ const CategoryInfo: React.FC = () => {
     queryKey: [
       "articles",
       currentPage,
-      searchTerm,
+      debouncedSearchValue,
       sortColumn,
       sortDirection,
       categoryId,
@@ -107,7 +108,7 @@ const CategoryInfo: React.FC = () => {
       const response = await getArticlesList({
         page: currentPage,
         perPage: rowsPerPage,
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
         orderBy: sortColumn || undefined,
         orderDirection: sortDirection,
         categoryId: categoryId ? [Number(categoryId)] : undefined,
@@ -139,10 +140,6 @@ const CategoryInfo: React.FC = () => {
     };
   }, [anchorEl, addUserAnchorEl]);
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-    setCurrentPage(1);
-  };
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -328,8 +325,6 @@ const CategoryInfo: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

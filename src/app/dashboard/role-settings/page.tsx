@@ -7,9 +7,10 @@ import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import RoleSettings from "@/components/dashboard/role-settings/role-settings";
 import UserPersonas from "@/components/dashboard/role-settings/user-personas";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { getRolesList } from "../../../lib/api/roles";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import Button from "@mui/joy/Button";
 import AddRoleModal from "../../../components/dashboard/modals/AddRoleModal";
 import CircularProgress from "@mui/joy/CircularProgress";
@@ -28,19 +29,19 @@ interface HttpError extends Error {
 export default function Page(): React.JSX.Element {
   const [error, setError] = useState<HttpError | null>(null);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { userInfo } = useUserInfo();
+  const { debouncedSearchValue } = useGlobalSearch();
 
 
   const { data, isLoading, error: rolesError, refetch } = useQuery({
     queryKey: [
       "roles",
-      searchTerm,
+      debouncedSearchValue,
     ],
     queryFn: async () => {
       const response = await getRolesList({
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
       });
       return response;
     },
@@ -58,9 +59,6 @@ export default function Page(): React.JSX.Element {
     setOpenAddRoleModal(false);
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-  };
 
   if (error || !userInfo?.isSuperadmin) {
     const httpError = error as HttpError;
@@ -101,8 +99,6 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}

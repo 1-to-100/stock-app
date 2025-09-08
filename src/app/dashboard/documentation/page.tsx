@@ -5,9 +5,10 @@ import { useState } from "react";
 import Box from "@mui/joy/Box";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
-import SearchInput, {WrapperSearchInput} from "@/components/dashboard/layout/search-input";
+import SearchInput from "@/components/dashboard/layout/search-input";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import Button from "@mui/joy/Button";
+import { useGlobalSearch } from "@/hooks/use-global-search";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useUserInfo } from "@/hooks/use-user-info";
 import EmptyCategoriesList from "@/components/dashboard/documentation/empty-categories-list";
@@ -30,16 +31,16 @@ export default function Page(): React.JSX.Element {
   const { userInfo } = useUserInfo();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
+  const { debouncedSearchValue } = useGlobalSearch();
 
   const { data, isLoading, error } = useQuery<Category[]>({
     queryKey: [
       "categories",
-      searchTerm,
+      debouncedSearchValue,
     ],
     queryFn: async () => {
       const response = await getCategoriesList({
-        search: searchTerm || undefined,
+        search: debouncedSearchValue || undefined,
       });
       return Array.isArray(response) ? response : response.data;
     },
@@ -59,9 +60,6 @@ export default function Page(): React.JSX.Element {
     queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
 
-  const handleSearch = (searchTerm: string) => {
-    setSearchTerm(searchTerm);
-  };
 
   const handleAddArticle = () => {
     router.push("/dashboard/documentation/add");
@@ -106,8 +104,6 @@ export default function Page(): React.JSX.Element {
 
   return (
     <Box sx={{ p: { xs: 2, sm: "var(--Content-padding)" } }}>
-      <WrapperSearchInput onSearch={handleSearch} />
-
       <Stack spacing={{ xs: 2, sm: 3 }} sx={{ mt: { xs: 6, sm: 0 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
