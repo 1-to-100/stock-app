@@ -24,6 +24,7 @@ import { CognitoSignOut } from "./cognito-sign-out";
 import { CustomSignOut } from "./custom-sign-out";
 import { FirebaseSignOut } from "./firebase-sign-out";
 import { SupabaseSignOut } from "./supabase-sign-out";
+import { Divider } from "@mui/material";
 
 export interface UserPopoverProps {
   anchorEl?: HTMLElement | null;
@@ -60,7 +61,7 @@ export function UserPopover({
           <List
             sx={{
               "--List-padding": 0,
-              bgcolor: "var(--joy-palette-background-level1)",
+              // bgcolor: "var(--joy-palette-background-level1)",
               borderRadius: "var(--joy-radius-sm)",
               overflow: "hidden",
               fontSize: "var(--joy-fontSize-md)",
@@ -78,7 +79,7 @@ export function UserPopover({
               onClick={onClose}
             >
               <ListItemDecorator>
-                <UserIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                <UserIcon fontSize="var(--Icon-fontSize)" weight="bold" style={{ color: "var(--joy-palette-text-secondary)" }} />
               </ListItemDecorator>
               <ListItemContent>Profile</ListItemContent>
             </ListItemButton>
@@ -88,7 +89,7 @@ export function UserPopover({
               onClick={onClose}
             >
               <ListItemDecorator>
-                <GearSixIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+                <GearSixIcon fontSize="var(--Icon-fontSize)" weight="bold" style={{ color: "var(--joy-palette-text-secondary)" }}/>
               </ListItemDecorator>
               <ListItemContent>Settings</ListItemContent>
             </ListItemButton>
@@ -98,6 +99,8 @@ export function UserPopover({
               </ListItemDecorator>
               <ListItemContent>Billing</ListItemContent>
             </ListItemButton> */}
+
+            <Divider />
             {config.auth.strategy === AuthStrategy.CUSTOM ? (
               <CustomSignOut />
             ) : null}

@@ -19,6 +19,12 @@ declare module '@mui/joy/styles' {
     mainBg: string;
     navActiveBg: string;
     primaryColor: string;
+    secondaryBtn: string;
+  }
+
+  interface PaletteText {
+    secondaryBtn: string;
+    tableHeader: string;
   }
 }
 

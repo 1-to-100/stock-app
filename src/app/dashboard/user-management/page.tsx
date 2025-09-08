@@ -183,7 +183,7 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
-  useEffect(() => {}, [popoverAnchorEl, selectedUser]);
+  // useEffect(() => {}, [popoverAnchorEl, selectedUser]);
 
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
@@ -543,6 +543,7 @@ export default function Page(): React.JSX.Element {
               fontSize={{ xs: "xl2", sm: "xl3" }}
               level="h1"
               sx={{ wordBreak: "break-word" }}
+              fontWeight="600"
             >
               User Management
             </Typography>
@@ -619,7 +620,7 @@ export default function Page(): React.JSX.Element {
                   variant="solid"
                   color="primary"
                   onClick={handleAddUserClick}
-                  endDecorator={<CaretDown fontSize="var(--Icon-fontSize)" />}
+                  startDecorator={<PlusIcon fontSize="var(--Icon-fontSize)" />}
                   sx={{
                     width: { xs: "100%", sm: "auto" },
                     py: { xs: 1, sm: 0.75 },
@@ -639,6 +640,7 @@ export default function Page(): React.JSX.Element {
                     zIndex: 1300,
                     border: "1px solid var(--joy-palette-divider)",
                   }}
+                  className="custom-popper-top"
                 >
                   <Box
                     onMouseDown={(event) => {
@@ -1195,12 +1197,14 @@ export default function Page(): React.JSX.Element {
                 </Table>
               </Box>
 
-              <Pagination
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                disabled={!hasResults}
-              />
+              {users.length > 9 && (
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                  disabled={!hasResults}
+                />
+              )}
             </Box>
           </>
         )}

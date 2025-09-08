@@ -223,9 +223,6 @@ export default function AddEditCustomer({
       newErrors.email = emailError;
     }
 
-    if (!formData.customerSuccessId) {
-      newErrors.customerSuccessId = "Manager is required";
-    }
 
     if (!formData.subscriptionId) {
       newErrors.subscriptionId = "Subscription is required";

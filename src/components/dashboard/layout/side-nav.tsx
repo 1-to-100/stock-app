@@ -339,9 +339,7 @@ function NavItem({
             ...(active && {
               bgcolor: "var(--NavItem-active-background)",
               borderRadius: "30px",
-              border: "1px solid var(--joy-palette-divider)",
               color: "var(--joy-palette-text-primary)",
-              boxShadow: "var(--joy-shadow-sm)",
             }),
             ...(open && { color: "var(--NavItem-open-color)" }),
           }}

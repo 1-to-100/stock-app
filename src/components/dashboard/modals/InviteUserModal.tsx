@@ -246,10 +246,6 @@ export default function InviteUser({
             value={selectedRole}
             onChange={(event, newValue) => setSelectedRole(newValue as string)}
             placeholder="Select role"
-            sx={{
-              bgcolor: "var(--joy-palette-background-level1)",
-              "&:hover": { bgcolor: "var(--joy-palette-background-level1)" },
-            }}
           >
             {roles?.map((role) => (
               <Option key={role.id} value={role.name}>
@@ -271,10 +267,6 @@ export default function InviteUser({
               setSelectedCustomer(newValue as string)
             }
             placeholder="Select customer"
-            sx={{
-              bgcolor: "var(--joy-palette-background-level1)",
-              "&:hover": { bgcolor: "var(--joy-palette-background-level1)" },
-            }}
           >
             {customers &&
               customers?.map((customer) => (

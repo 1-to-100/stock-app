@@ -42,7 +42,7 @@ export function CustomSignOut(): React.JSX.Element {
   return (
     <ListItemButton onClick={handleSignOut}>
       <ListItemDecorator>
-        <SignOutIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+        <SignOutIcon fontSize="var(--Icon-fontSize)" weight="bold" style={{ color: "var(--joy-palette-text-secondary)" }}/>
       </ListItemDecorator>
       <ListItemContent>Sign Out</ListItemContent>
     </ListItemButton>

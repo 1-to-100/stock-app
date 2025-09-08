@@ -60,7 +60,7 @@ export default function SearchInput({ onSearch, style }: SearchInputProps) {
             background: "var(--joy-palette-background-mainBg)",
           },
           "& .MuiInput-input": {
-            padding: '0px 16px',
+            padding: '0px 0px',
             fontSize: "14px",
             color: "var(--joy-palette-neutral-out)",
           },

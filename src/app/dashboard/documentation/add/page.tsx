@@ -7,7 +7,11 @@ import { paths } from "@/paths";
 import { Breadcrumbs, Button, Select, Option, Checkbox, Input } from "@mui/joy";
 import { Box, Stack } from "@mui/system";
 import { Eye as EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { getCategoriesList, getSubcategories, GetCategoriesListResponse } from "@/lib/api/categories";
+import {
+  getCategoriesList,
+  getSubcategories,
+  GetCategoriesListResponse,
+} from "@/lib/api/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import TiptapEditor from "@/components/TiptapEditor";
@@ -32,7 +36,9 @@ const AddArticlePage = () => {
     enabled: true,
   });
 
-  const { data: categoriesResponse, isLoading: isCategoriesLoading } = useQuery<Category[]>({
+  const { data: categoriesResponse, isLoading: isCategoriesLoading } = useQuery<
+    Category[]
+  >({
     queryKey: ["categories"],
     queryFn: async () => {
       const response = await getCategoriesList();
@@ -200,7 +206,7 @@ const AddArticlePage = () => {
           </Stack>
         </Stack>
       </Stack>
-      <Stack sx={{ mt: { xs: 3, sm: 2 } }}>
+      <Stack sx={{ mt: { xs: 3, sm: 0 } }}>
         <Breadcrumbs separator={<BreadcrumbsSeparator />}>
           <BreadcrumbsItem
             href={paths.dashboard.documentation.list}
@@ -214,25 +220,30 @@ const AddArticlePage = () => {
       </Stack>
 
       {toc.length > 0 && isPreview && (
-        <Box sx={{ mt: 4, display: { xs: 'block', sm: 'none' } }}>
+        <Box sx={{ mt: 4, display: { xs: "block", sm: "none" } }}>
           <Typography
-            sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+            sx={{
+              fontWeight: 300,
+              color: "var(--joy-palette-text-secondary)",
+              mb: 1,
+              fontSize: 14,
+            }}
           >
             On this article
           </Typography>
-          <Select
-            value={activeTocId || ""}
-            placeholder="Select a section"
-          >
+          <Select value={activeTocId || ""} placeholder="Select a section">
             {toc.map((item) => (
-              <Option 
-                key={item.id} 
-                value={item.id} 
+              <Option
+                key={item.id}
+                value={item.id}
                 onClick={() => {
                   const el = document.getElementById(item.id);
                   if (el) {
                     const yOffset = -100;
-                    const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    const y =
+                      el.getBoundingClientRect().top +
+                      window.pageYOffset +
+                      yOffset;
                     window.scrollTo({ top: y, behavior: "smooth" });
                     setActiveTocId(item.id);
                   }
@@ -263,31 +274,9 @@ const AddArticlePage = () => {
             },
             pr: { xs: 0, sm: 3 },
             pt: 1,
+            mt: 1,
           }}
         >
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              level="body-sm"
-              sx={{
-                fontSize: "14px",
-                color: "var(--joy-palette-text-primary)",
-                mb: 0.5,
-                fontWeight: 500,
-              }}
-            >
-              Title
-            </Typography>
-            <Input
-              type="text"
-              placeholder="Enter article title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              sx={{
-                borderRadius: "6px",
-                fontSize: "14px",
-              }}
-            />
-          </Box>
           <TiptapEditor
             isPreview={isPreview}
             onChange={setContent}
@@ -343,6 +332,30 @@ const AddArticlePage = () => {
                 >
                   Article details
                 </Typography>
+
+                <Stack sx={{ flex: 1 }}>
+                  <Typography
+                    level="body-sm"
+                    sx={{
+                      fontSize: "14px",
+                      color: "var(--joy-palette-text-primary)",
+                      mb: 0.5,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Title
+                  </Typography>
+                  <Input
+                    type="text"
+                    placeholder="Enter article title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    sx={{
+                      borderRadius: "6px",
+                      fontSize: "14px",
+                    }}
+                  />
+                </Stack>
                 <Stack sx={{ flex: 1 }}>
                   <Typography
                     level="body-sm"
@@ -367,10 +380,10 @@ const AddArticlePage = () => {
                     }}
                   >
                     {categories.map((option: Category) => (
-                        <Option key={option.id} value={option.id}>
-                          {option.name}
-                        </Option>
-                      ))}
+                      <Option key={option.id} value={option.id}>
+                        {option.name}
+                      </Option>
+                    ))}
                   </Select>
                 </Stack>
                 <Stack sx={{ flex: 1, mt: 2 }}>
@@ -523,19 +536,24 @@ const AddArticlePage = () => {
 
           {isPreview && toc.length > 0 && (
             <Box
-            sx={{
-              mt: 3,
-              p: 2,
-              borderRadius: "8px",
-              border: "1px solid #eee",
-              position: "sticky",
-              top: "150px",
-              transition: "all 0.3s ease",
-              display: { xs: 'none', sm: 'block' }
-            }}
+              sx={{
+                mt: 3,
+                p: 2,
+                borderRadius: "8px",
+                border: "1px solid #eee",
+                position: "sticky",
+                top: "150px",
+                transition: "all 0.3s ease",
+                display: { xs: "none", sm: "block" },
+              }}
             >
               <Typography
-                sx={{ fontWeight: 300, color: "var(--joy-palette-text-secondary)", mb: 1, fontSize: 14 }}
+                sx={{
+                  fontWeight: 300,
+                  color: "var(--joy-palette-text-secondary)",
+                  mb: 1,
+                  fontSize: 14,
+                }}
               >
                 On this article
               </Typography>

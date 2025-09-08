@@ -17,7 +17,7 @@ import IconButton from "@mui/joy/IconButton";
 import Avatar from "@mui/joy/Avatar";
 import Switch from "@mui/joy/Switch";
 import FormHelperText from "@mui/joy/FormHelperText";
-import { Upload as UploadIcon } from "@phosphor-icons/react/dist/ssr/Upload";
+import { UploadSimple as UploadIcon } from "@phosphor-icons/react/dist/ssr/UploadSimple";
 import { Trash as Trash } from "@phosphor-icons/react/dist/ssr/Trash";
 import { Box } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
@@ -412,14 +412,14 @@ export default function AddEditUser({
                   <IconButton
                     component="label"
                     sx={{
-                      bgcolor: "#E5E7EB",
+                      bgcolor: "#E9EFF8",
                       borderRadius: "50%",
                       width: { xs: 48, sm: 64 },
                       height: { xs: 48, sm: 64 },
                       color: "#4F46E5",
                     }}
                   >
-                    <UploadIcon style={{ fontSize: "16px" }} />
+                    <UploadIcon style={{ fontSize: "16px" }} weight="bold" />
                     <input
                       type="file"
                       accept="image/png, image/jpeg, image/gif"
@@ -431,28 +431,38 @@ export default function AddEditUser({
                 <Typography
                   level="body-sm"
                   sx={{
-                    fontSize: { xs: "10px", sm: "12px" },
-                    color: "#6B7280",
+                    fontSize: { xs: "12px", sm: "14px" },
+                    fontWeight: 500,
+                    color: "var(--joy-palette-text-primary)",
                     lineHeight: "16px",
                     textAlign: { xs: "left", sm: "left" },
                   }}
                 >
                   Upload Avatar
                   <br />
-                  Joyful supports PNGs, JPEGs and GIFs under 3MB
+                  <span
+                    style={{
+                      color: "var(--joy-palette-text-secondary)",
+                      fontSize: "12px",
+                      fontWeight: 300,
+                    }}
+                  >
+                    Joyful supports PNGs, JPEGs and GIFs under 3MB
+                  </span>
                 </Typography>
               </Box>
-              <IconButton
-                onClick={() => setShowDeleteConfirmation(true)}
-                disabled={!avatarPreview}
-                sx={{
-                  bgcolor: "transparent",
-                  color: "#6B7280",
-                  "&:hover": { bgcolor: "transparent" },
-                }}
-              >
-                <Trash fontSize="20px" />
-              </IconButton>
+              {avatarPreview && (
+                <IconButton
+                  onClick={() => setShowDeleteConfirmation(true)}
+                  sx={{
+                    bgcolor: "transparent",
+                    color: "#6B7280",
+                    "&:hover": { bgcolor: "transparent" },
+                  }}
+                >
+                  <Trash fontSize="20px" />
+                </IconButton>
+              )}
             </Stack>
 
             {showDeleteConfirmation && (
@@ -699,7 +709,7 @@ export default function AddEditUser({
             direction={{ xs: "column", sm: "row" }}
             spacing={{ xs: 1.5, sm: 2 }}
           >
-            <Stack sx={{ flex: 1 }}>
+            <Stack sx={{ flex: 0.49 }}>
               <Typography
                 level="body-sm"
                 sx={{

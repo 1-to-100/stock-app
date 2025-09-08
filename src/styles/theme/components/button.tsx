@@ -66,11 +66,10 @@ export const JoyButton = {
       ...(ownerState.variant === 'outlined' && {
           borderColor: "#E5E7EB",
           borderRadius: "20px",
-          bgcolor: "var(--NavItem-active-background)",
-          color: "var(--joy-palette-text-primary)",
+          color: "var(--joy-palette-text-secondaryBtn)",
           padding: "7px 14px",
           "&:hover": {
-            background: "var(--joy-palette-background-mainBg)",
+            background: "transparent",
           },
       }),
     }),

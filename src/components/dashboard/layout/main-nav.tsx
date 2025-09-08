@@ -127,7 +127,7 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
                 justifyContent: "center",
               }}
             >
-              <Typography fontWeight="lg" textColor="inherit">
+              <Typography fontWeight="lg" textColor="inherit" sx={{ color: "var(--joy-palette-text-primary)" }}>
                 {userInfo?.firstName?.slice(0, 10)} {userInfo?.lastName?.slice(0, 10)}
               </Typography>
               <Typography level="body-xs" textColor="neutral.500">

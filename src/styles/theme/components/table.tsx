@@ -28,7 +28,7 @@ export const JoyTable = {
         padding: '10px',
         alignItems: 'center',
         verticalAlign: 'middle',
-        color: 'var(--joy-palette-text-primary)',
+        color: 'var(--joy-palette-text-tableHeader)',
         fontWeight: 300,
       },
       '& tbody tr:hover': {

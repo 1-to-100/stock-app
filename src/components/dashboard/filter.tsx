@@ -9,7 +9,7 @@ import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
 import Checkbox from "@mui/joy/Checkbox";
 import { Funnel as FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
-import { ArrowRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { CaretRight as ArrowRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
 import { X as X } from "@phosphor-icons/react/dist/ssr/X";
 import { ApiUser, Customer } from "@/contexts/auth/types";
 import { useQuery } from "@tanstack/react-query";
@@ -236,7 +236,7 @@ const Filter = ({
           totalFiltersApplied > 0 ? (
             <X fontSize="var(--Icon-fontSize)" onClick={handleReset} />
           ) : (
-            <FunnelIcon fontSize="var(--Icon-fontSize)" />
+            <FunnelIcon fontSize="var(--Icon-fontSize)" color="var(--joy-palette-text-secondary)" />
           )
         }
         onClick={handleOpen}
@@ -244,7 +244,7 @@ const Filter = ({
           borderColor:
             totalFiltersApplied > 0
               ? "transparent"
-              : "var(--joy-palette-divider)",
+              : "transparent",
           borderRadius: "20px",
           background:
             totalFiltersApplied > 0
@@ -257,6 +257,9 @@ const Filter = ({
           padding: { xs: "6px 12px", sm: "7px 14px" },
           fontSize: { xs: "12px", sm: "14px" },
           width: { xs: "100%", sm: "auto" },
+          "&:hover": {
+            background: "#DDDEE0",
+          },
         }}
       >
         {totalFiltersApplied > 0
@@ -308,8 +311,7 @@ const Filter = ({
               <Stack
                 spacing={1}
                 sx={{
-                  borderRight: { sm: "1px solid var(--joy-palette-divider)" },
-                  paddingRight: { sm: "20px" },
+                  paddingRight: { sm: "5px" },
                 }}
               >
                 {users && users?.length > 0 && (
@@ -321,13 +323,9 @@ const Filter = ({
                     p: { xs: "4px 8px", sm: "6px 12px" },
                     bgcolor:
                       activeCategory === "Status"
-                        ? "var(--joy-palette-background-mainBg)"
+                        ? "#EEEFF0"
                         : "transparent",
                     borderRadius: "4px",
-                    border:
-                      activeCategory === "Status"
-                        ? "1px solid var(--joy-palette-divider)"
-                        : "none",
                     cursor: "pointer",
                   }}
                   onClick={() => handleCategoryClick("Status")}
@@ -357,13 +355,9 @@ const Filter = ({
                       p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Customer"
-                          ? "var(--joy-palette-background-mainBg)"
+                          ? "#EEEFF0"
                           : "transparent",
                       borderRadius: "4px",
-                      border:
-                        activeCategory === "Customer"
-                          ? "1px solid var(--joy-palette-divider)"
-                          : "none",
                       cursor: "pointer",
                     }}
                     onClick={() => handleCategoryClick("Customer")}
@@ -393,13 +387,9 @@ const Filter = ({
                       p: { xs: "4px 8px", sm: "6px 12px" },
                       bgcolor:
                         activeCategory === "Role"
-                          ? "var(--joy-palette-background-mainBg)"
+                          ? "#EEEFF0"
                           : "transparent",
                       borderRadius: "4px",
-                      border:
-                        activeCategory === "Role"
-                          ? "1px solid var(--joy-palette-divider)"
-                          : "none",
                       cursor: "pointer",
                     }}
                     onClick={() => handleCategoryClick("Role")}
@@ -495,7 +485,7 @@ const Filter = ({
               </Stack>
             </Box>
 
-            <Box sx={{ width: { xs: "100%", sm: "42%" }, pl: { sm: 1 } }}>
+            <Box sx={{ width: { xs: "100%", sm: "42%" }, pl: { sm: '20px' }, borderLeft: { sm: "1px solid var(--joy-palette-divider)" }, }}>
               {activeCategory && (
                 <>
                   <Typography
@@ -718,6 +708,7 @@ const Filter = ({
               sx={{
                 width: { xs: "100%", sm: "auto" },
                 justifyContent: { xs: "space-between", sm: "flex-end" },
+                alignItems: { xs: "center", sm: "center" },
               }}
             >
               <Button
@@ -726,6 +717,7 @@ const Filter = ({
                 sx={{
                   fontSize: { xs: "12px", sm: "14px" },
                   width: { xs: "48%", sm: "auto" },
+                  height: { xs: "32px", sm: "40px" },
                 }}
               >
                 Cancel
@@ -734,7 +726,7 @@ const Filter = ({
                 variant="solid"
                 onClick={handleApply}
                 sx={{
-                  borderRadius: "20px",
+                  borderRadius: "25px",
                   bgcolor: "#4F46E5",
                   color: "#FFFFFF",
                   fontSize: { xs: "12px", sm: "14px" },
@@ -743,6 +735,7 @@ const Filter = ({
                   py: 1,
                   "&:hover": { bgcolor: "#4338CA" },
                   width: { xs: "48%", sm: "auto" },
+                  height: { xs: "32px", sm: "45px" },
                 }}
               >
                 Apply

@@ -45,25 +45,28 @@ export default function Pagination({
  
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const maxPagesToShow = window.innerWidth < 600 ? 3 : 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-  
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    
+    // If total pages is 7 or less, show all pages
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
     }
-   
-    for (let i = startPage; i <= endPage; i++) {
+    
+    // Show first 3 pages
+    for (let i = 1; i <= 3; i++) {
       pages.push(i);
     }
-   
-    if (startPage > 1) {
-      pages.unshift("...");
-      pages.unshift(1);
-    }
-    if (endPage < totalPages) {
+    
+    // Add ellipsis if there's a gap
+    if (totalPages > 6) {
       pages.push("...");
-      pages.push(totalPages);
+    }
+    
+    // Show last 3 pages
+    for (let i = totalPages - 2; i <= totalPages; i++) {
+      pages.push(i);
     }
 
     return pages;
@@ -124,14 +127,19 @@ export default function Pagination({
         typeof page === "number" ? (
           <Button
             key={index}
-            variant={currentPage === page ? "solid" : "outlined"}
+            variant="outlined"
             onClick={() => handlePageClick(page)}
             disabled={disabled}
             sx={{
               borderRadius: "50%",
               minWidth: { xs: "32px", sm: "40px" },
               height: { xs: "32px", sm: "40px" },
-              fontSize: { xs: "12px", sm: "14px" }
+              fontSize: { xs: "12px", sm: "14px" },
+              backgroundColor: currentPage === page ? "transparent" : "transparent",
+              borderColor: currentPage === page ? "var(--joy-palette-primary-500)" : "#EEEFF0",
+              borderWidth: currentPage === page ? "2px" : "1px",
+              color: currentPage === page ? "var(--joy-palette-text-primary" : "var(--joy-palette-text-primary)",
+              fontWeight: currentPage === page ? "600" : "400"
             }}
           >
             {page}
@@ -167,7 +175,7 @@ export default function Pagination({
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
-          borderColor: "gray",
+          borderColor: "#EEEFF0",
           fontSize: { xs: "12px", sm: "14px" }
         }}
       >
@@ -188,7 +196,7 @@ export default function Pagination({
           alignItems: "center",
           gap: "4px",
           color: currentPage === totalPages ? "var(--joy-palette-text-secondary)" : "var(--joy-palette-text-primary)",
-          borderColor: "gray",
+          borderColor: "#EEEFF0",
           fontSize: { xs: "12px", sm: "14px" }
         }}
       >

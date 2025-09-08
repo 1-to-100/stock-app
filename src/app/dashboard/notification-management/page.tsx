@@ -122,7 +122,7 @@ export default function Page(): React.JSX.Element {
     };
   }, [anchorEl]);
 
-  useEffect(() => {}, [popoverAnchorEl, selectedNotification]);
+  // useEffect(() => {}, [popoverAnchorEl, selectedNotification]);
 
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedRows((prev) =>
@@ -741,7 +741,7 @@ export default function Page(): React.JSX.Element {
                                   : colorScheme === "dark"
                                   ? "#9CA3AF"
                                   : "#6B7280",
-                                borderRadius: "10px",
+                                borderRadius: "12px",
                                 padding: "2px 8px",
                                 display: "inline-block",
                               }}
@@ -803,7 +803,7 @@ export default function Page(): React.JSX.Element {
                                     : colorScheme === "dark"
                                     ? "#818CF8"
                                     : "#4F46E5",
-                                borderRadius: "10px",
+                                borderRadius: "12px",
                                 padding: "2px 8px",
                                 display: "inline-block",
                               }}
@@ -899,12 +899,14 @@ export default function Page(): React.JSX.Element {
                 </Table>
               </Box>
 
-              <Pagination
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                disabled={!hasResults}
-              />
+              {notifications.length > 9 && (
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                  disabled={!hasResults}
+                />
+              )}
             </Box>
           </>
         )}

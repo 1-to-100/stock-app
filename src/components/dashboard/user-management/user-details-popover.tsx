@@ -189,7 +189,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
       <Sheet
         sx={{
           position: { xs: "fixed", sm: "absolute" },
-          top: { xs: "10%", sm: "20.3%" },
+          top: { xs: "10%", sm: "18.8%" },
           right: { xs: "5%", sm: "1.5%" },
           width: { xs: "90%", sm: 400, md: 500 },
           maxWidth: "100%",
@@ -197,6 +197,7 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
           boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
           overflow: "auto",
           maxHeight: { xs: "80vh", sm: "70vh" },
+          minHeight: { xs: "80vh", sm: "76vh" },
           zIndex: 1300,
           border: "1px solid var(--joy-palette-divider)",
         }}
@@ -256,22 +257,18 @@ const UserDetailsPopover: React.FC<UserDetailsPopoverProps> = ({
                   flexDirection: { xs: "row", sm: "row" },
                 }}
               >
-                {userData?.avatar ? (
-                  <Avatar
-                    src={userData.avatar}
-                    sx={{
-                      width: { xs: 48, sm: 64 },
-                      height: { xs: 48, sm: 64 },
-                    }}
-                  />
-                ) : (
-                  <Avatar
-                    sx={{
-                      width: { xs: 48, sm: 64 },
-                      height: { xs: 48, sm: 64 },
-                    }}
-                  />
-                )}
+                <Avatar
+                  src={userData?.avatar}
+                  sx={{
+                    width: { xs: 48, sm: 64 },
+                    height: { xs: 48, sm: 64 },
+                    fontWeight: "bold",
+                    fontSize: "32px",
+                  }}
+                >
+                  {(userData?.firstName?.trim()?.charAt(0) || '').toUpperCase()}
+                  {(userData?.lastName?.trim()?.charAt(0) || '').toUpperCase()}
+                </Avatar>
                 <Stack alignItems={{ xs: "center", sm: "flex-start" }}>
                   <Typography
                     level="body-lg"

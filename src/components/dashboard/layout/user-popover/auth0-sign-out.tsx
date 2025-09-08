@@ -10,7 +10,7 @@ export function Auth0SignOut(): React.JSX.Element {
   return (
     <ListItemButton component="a" href={paths.auth.auth0.signOut}>
       <ListItemDecorator>
-        <SignOutIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+        <SignOutIcon fontSize="var(--Icon-fontSize)" weight="bold" style={{ color: "var(--joy-palette-text-secondary)" }}/>
       </ListItemDecorator>
       <ListItemContent>Sign Out</ListItemContent>
     </ListItemButton>
