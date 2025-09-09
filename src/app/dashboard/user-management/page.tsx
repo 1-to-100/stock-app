@@ -974,7 +974,7 @@ export default function Page(): React.JSX.Element {
                                       "&:hover": { bgcolor: "transparent" },
                                     }}
                                   >
-                                    <CopyIcon fontSize="var(--Icon-fontSize)" />
+                                    <CopyIcon fontSize="var(--Icon-fontSize)" color="var(--joy-palette-text-secondary)"/>
                                   </IconButton>
                                 </Tooltip>
                               )}

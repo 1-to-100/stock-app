@@ -25,6 +25,8 @@ import { Headphones as Headphones } from '@phosphor-icons/react/dist/ssr/Headpho
 import { Bell as BellIcon } from '@phosphor-icons/react/dist/ssr/Bell';
 import { UserList as UserListIcon } from '@phosphor-icons/react/dist/ssr/UserList';
 import { UserGear as UserGearIcon } from '@phosphor-icons/react/dist/ssr/UserGear';
+import { BagSimple as BagSimpleIcon } from '@phosphor-icons/react/dist/ssr/BagSimple';
+import { UserFocus as UserFocusIcon } from '@phosphor-icons/react/dist/ssr/UserFocus';
 
 export const icons = {
   'chart-pie': ChartPieIcon,
@@ -43,6 +45,8 @@ export const icons = {
   'bell': BellIcon,
   'user-list': UserListIcon,
   'user-gear': UserGearIcon,
+  'bag-simple': BagSimpleIcon,
+  'user-focus': UserFocusIcon,
   buildings: BuildingsIcon,
   file: FileIcon,
   house: HouseIcon,

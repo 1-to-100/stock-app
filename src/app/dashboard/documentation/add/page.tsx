@@ -172,7 +172,7 @@ const AddArticlePage = () => {
                 py: { xs: 1, sm: 0.75 },
               }}
               variant="outlined"
-              color="primary"
+              color="neutral"
               onClick={togglePreview}
             >
               {!isPreview ? (
@@ -187,7 +187,7 @@ const AddArticlePage = () => {
                 py: { xs: 1, sm: 0.75 },
               }}
               variant="outlined"
-              color="primary"
+              color="neutral"
               onClick={handleSaveDraft}
             >
               Save as a draft

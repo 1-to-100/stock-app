@@ -27,7 +27,7 @@ export const JoyButton = {
       }),
 
       ...(ownerState.color === 'neutral' && {
-        backgroundColor: '#646872',
+        backgroundColor: 'var(--joy-palette-background-secondaryBtn)',
         border: '1px solid #E5E7EB',
         padding: '2px 10px',
   

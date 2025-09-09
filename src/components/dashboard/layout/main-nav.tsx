@@ -73,8 +73,26 @@ export function MainNav({ items }: MainNavProps): React.JSX.Element {
             px: { xs: 2, lg: 3 },
           }}
         >
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ alignItems: "center", flex: "1 1 auto" }}
+          >
+            <IconButton
+              color="neutral"
+              onClick={(): void => {
+                setOpenNav(true);
+              }}
+              sx={{ display: { lg: "none" } }}
+              variant="plain"
+            >
+              <ListIcon fontSize="var(--Icon-fontSize)" weight="bold" />
+            </IconButton>
+          </Stack>
           <Stack direction="row" sx={{ alignItems: "left" }}>
             <SearchInput onSearch={handleSearch} />
+          </Stack>
           </Stack>
           <Stack
             direction="row"
