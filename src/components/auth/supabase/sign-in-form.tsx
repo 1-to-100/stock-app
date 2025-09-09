@@ -143,6 +143,24 @@ export function SignInForm(): React.JSX.Element {
       >
         Welcome to Baseplate <br/> admin panel
       </Box>
+      <Tabs value="sign-in" variant="custom">
+        <TabList>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.supabase.signIn}
+            value="sign-in"
+          >
+            Sign In
+          </Tab>
+          <Tab
+            component={RouterLink}
+            href={paths.auth.supabase.signUp}
+            value="sign-up"
+          >
+            Sign Up
+          </Tab>
+        </TabList>
+      </Tabs>
       <Stack spacing={3}>
         <Stack spacing={2}>
           {oAuthProviders.map(
@@ -167,24 +185,7 @@ export function SignInForm(): React.JSX.Element {
         </Stack>
         <Divider>or</Divider>
       </Stack>
-      <Tabs value="sign-in" variant="custom">
-        <TabList>
-          <Tab
-            component={RouterLink}
-            href={paths.auth.supabase.signIn}
-            value="sign-in"
-          >
-            Sign In
-          </Tab>
-          <Tab
-            component={RouterLink}
-            href={paths.auth.supabase.signUp}
-            value="sign-up"
-          >
-            Sign Up
-          </Tab>
-        </TabList>
-      </Tabs>
+      
       <Stack spacing={3}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
