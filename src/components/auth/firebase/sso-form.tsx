@@ -131,7 +131,7 @@ export function SSOForm(): React.JSX.Element {
           lineHeight: "32px",
         }}
       >
-        Welcome to StockApp <br /> admin panel
+        Welcome to Baseplate <br /> admin panel
       </Box>
       <Stack spacing={3}>
         <Stack spacing={2}>

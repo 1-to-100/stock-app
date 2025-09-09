@@ -113,7 +113,7 @@ export function SignInForm(): React.JSX.Element {
           <DynamicLogo colorDark="light" colorLight="dark" height={24} width={150} />
         </Box>
       </Box>
-      <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}  >Welcome to StockApp <br /> admin panel</Box>
+      <Box sx={{textAlign: 'center', fontSize: '30px', color: 'var(--joy-palette-text-primary)', fontWeight: '600', lineHeight: '32px', marginBottom: '42px'}}  >Welcome to Baseplate <br /> admin panel</Box>
       <Tabs value="sign-in" variant="custom">
         <TabList>
           <Tab component={RouterLink} href={paths.auth.custom.signIn} value="sign-in">

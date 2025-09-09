@@ -33,7 +33,7 @@ export interface Config {
 
 export const config = {
   site: {
-    name: 'StockApp',
+    name: 'Baseplate',
     description: '',
     colorScheme: 'light',
     themeColor: '#090a0b',
